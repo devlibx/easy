@@ -25,6 +25,9 @@ public class StringObjectMap extends HashMap<String, Object> {
         return (T) get(key);
     }
 
+    /**
+     * @return get value as int - it will be type casted if required
+     */
     public Integer getInt(String key) {
         Object value = get(key);
         if (value == null) {
@@ -39,6 +42,9 @@ public class StringObjectMap extends HashMap<String, Object> {
         throw new RuntimeException("Value with key " + key + " is not a integer");
     }
 
+    /**
+     * @return get value as long - it will be type casted if required
+     */
     public Long getLong(String key) {
         Object value = get(key);
         if (value == null) {
@@ -53,6 +59,9 @@ public class StringObjectMap extends HashMap<String, Object> {
         throw new RuntimeException("Value with key " + key + " is not a long");
     }
 
+    /**
+     * @return get value as float - it will be type casted if required
+     */
     public Float getFloat(String key) {
         Object value = get(key);
         if (value == null) {
@@ -67,6 +76,9 @@ public class StringObjectMap extends HashMap<String, Object> {
         throw new RuntimeException("Value with key " + key + " is not a float");
     }
 
+    /**
+     * @return get value as double - it will be type casted if required
+     */
     public Double getDouble(String key) {
         Object value = get(key);
         if (value == null) {
@@ -81,6 +93,9 @@ public class StringObjectMap extends HashMap<String, Object> {
         throw new RuntimeException("Value with key " + key + " is not a double");
     }
 
+    /**
+     * @return get value as boolean - it will be type casted if required
+     */
     public Boolean getBoolean(String key) {
         Object value = get(key);
         if (value == null) {
@@ -93,6 +108,9 @@ public class StringObjectMap extends HashMap<String, Object> {
         throw new RuntimeException("Value with key " + key + " is not a boolean");
     }
 
+    /**
+     * @return get value as string - it will be type casted if required
+     */
     public String getString(String key) {
         Object value = get(key);
         if (value == null) {
@@ -104,6 +122,9 @@ public class StringObjectMap extends HashMap<String, Object> {
         }
     }
 
+    /**
+     * @return get value as uuid - it will be type casted if required
+     */
     public UUID getUUID(String key) {
         Object value = get(key);
         if (value == null) {
@@ -116,17 +137,26 @@ public class StringObjectMap extends HashMap<String, Object> {
         throw new RuntimeException("Value with key " + key + " is not a uuid");
     }
 
+    /**
+     * Convenience method to add more than one key value pair
+     */
     public void put(String key, Object value, String key1, Object value1) {
         put(key, value);
         put(key1, value1);
     }
 
+    /**
+     * Convenience method to add more than one key value pair
+     */
     public void put(String key, Object value, String key1, Object value1, String key2, Object value2) {
         put(key, value);
         put(key1, value1);
         put(key2, value2);
     }
 
+    /**
+     * Convenience method to add more than one key value pair
+     */
     public void put(String key, Object value, String key1, Object value1, String key2, Object value2,
                     String key3, Object value3) {
         put(key, value);
@@ -135,6 +165,9 @@ public class StringObjectMap extends HashMap<String, Object> {
         put(key3, value3);
     }
 
+    /**
+     * Convenience method to add more than one key value pair
+     */
     public void put(String key, Object value, String key1, Object value1, String key2, Object value2,
                     String key3, Object value3, String key4, Object value4) {
         put(key, value);
@@ -144,6 +177,18 @@ public class StringObjectMap extends HashMap<String, Object> {
         put(key3, value4);
     }
 
+    /**
+     * Convenience method to get values from keys (recursively)
+     */
+    public <T> T get(String key1, String key2, Class<T> cls) {
+        StringObjectMap subMap = getStringObjectMap(key1);
+        if (subMap == null) return null;
+        return subMap.get(key2, cls);
+    }
+
+    /**
+     * Convenience method to get values from keys (recursively)
+     */
     public <T> T get(String key1, String key2, String key3, Class<T> cls) {
         StringObjectMap subMap = getStringObjectMap(key1);
         if (subMap == null) return null;
@@ -151,6 +196,9 @@ public class StringObjectMap extends HashMap<String, Object> {
         return subMap1 == null ? null : subMap1.get(key3, cls);
     }
 
+    /**
+     * Convenience method to get values from keys (recursively)
+     */
     public <T> T get(String key1, String key2, String key3, String key4, Class<T> cls) {
         StringObjectMap subMap = getStringObjectMap(key1);
         if (subMap == null) return null;
@@ -160,6 +208,9 @@ public class StringObjectMap extends HashMap<String, Object> {
         return subMap2 == null ? null : subMap2.get(key4, cls);
     }
 
+    /**
+     * Convenience method to get get value as StringObjectMap
+     */
     public StringObjectMap getStringObjectMap(String key) {
         Object value = get(key);
         if (value == null) {
@@ -174,5 +225,4 @@ public class StringObjectMap extends HashMap<String, Object> {
             return null;
         }
     }
-
 }
