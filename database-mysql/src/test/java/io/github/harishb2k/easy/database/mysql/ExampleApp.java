@@ -14,6 +14,8 @@ import org.junit.Assert;
 import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.MySQLContainer;
 
+import java.util.concurrent.CountDownLatch;
+
 @SuppressWarnings("rawtypes")
 @Slf4j
 public abstract class ExampleApp extends TestCase {
@@ -38,9 +40,9 @@ public abstract class ExampleApp extends TestCase {
     public static void stopMySQL() {
         if (container != null) {
             try {
+                injector.getInstance(DataSourceFactory.class).shutdown();
                 container.stop();
-                Thread.sleep(1000);
-            } catch (InterruptedException ignored) {
+            } catch (Exception ignored) {
             }
         }
     }
@@ -59,9 +61,10 @@ public abstract class ExampleApp extends TestCase {
         // Setup DB - datasource
         DbConfig dbConfig = new DbConfig();
         dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
-        dbConfig.setJdbcUrl(container.getJdbcUrl() + "?logger=Slf4JLogger&profileSQL=true&profileSQL=true");
+        dbConfig.setJdbcUrl(container.getJdbcUrl());
         dbConfig.setUsername("test");
         dbConfig.setPassword("test");
+        dbConfig.setShowSql(true);
         injector.getInstance(DataSourceFactory.class).register(dbConfig.buildHikariDataSource());
 
         // Start DB
@@ -87,6 +90,7 @@ public abstract class ExampleApp extends TestCase {
         );
         Assert.assertFalse(executeResult);
 
+
         // Step 2 - Insert to DB
         Long id = mysqlHelper.persist(
                 "",
@@ -97,6 +101,28 @@ public abstract class ExampleApp extends TestCase {
         );
         Assert.assertNotNull(id);
         Assert.assertTrue(id > 0);
+
+        // Try insert in threads
+        int count = 20;
+        CountDownLatch countDownLatch = new CountDownLatch(count);
+        for (int i = 0; i < count && false; i++) {
+            new Thread(() -> {
+                Long _id = mysqlHelper.persist(
+                        "",
+                        "INSERT INTO ta(a) VALUES(?)",
+                        preparedStatement -> {
+                            preparedStatement.setString(1, "HI");
+                        }
+                );
+                countDownLatch.countDown();
+                Assert.assertNotNull(_id);
+                Assert.assertTrue(_id > 0);
+            }).start();
+        }
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException ignored) {
+        }
 
         // Step 2 - Read from DB
         String result = mysqlHelper.findOne(

@@ -15,6 +15,7 @@ public class DbConfig {
     private long leakDetectionThreshold;
     private boolean useLocalSessionState;
     private boolean useUsageAdvisor;
+    private boolean showSql;
 
     public HikariDataSource buildHikariDataSource() {
         HikariDataSource dataSource = new HikariDataSource();
@@ -28,6 +29,14 @@ public class DbConfig {
         dataSource.setLeakDetectionThreshold(leakDetectionThreshold);
         dataSource.addDataSourceProperty("useLocalSessionState", useLocalSessionState);
         dataSource.addDataSourceProperty("useUsageAdvisor", useUsageAdvisor);
+
+        // Used for logging/debugging
+        if (showSql) {
+            dataSource.addDataSourceProperty("logger", "Slf4JLogger");
+            dataSource.addDataSourceProperty("profilerEventHandler", "io.github.harishb2k.easy.database.mysql.debug.DoNotUseProfilerEventHandler");
+            dataSource.addDataSourceProperty("profileSQL", true);
+        }
+
         return dataSource;
     }
 }
