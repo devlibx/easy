@@ -39,6 +39,7 @@
         <jooq.version>3.11.5</jooq.version>
         <netty.verison>4.1.33.Final</netty.verison>
         <curator.version>4.1.0</curator.version>
+        <joda.version>2.10.4</joda.version>
     </properties>
 
     <dependencyManagement>
@@ -52,6 +53,11 @@
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
                 <version>${guice.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>joda-time</groupId>
+                <artifactId>joda-time</artifactId>
+                <version>${joda.version}</version>
             </dependency>
 
             <!-- Jackson -->
