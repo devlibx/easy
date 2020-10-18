@@ -9,6 +9,8 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>helper</module>
+        <module>database</module>
+        <module>database-mysql</module>
     </modules>
     <name>easy</name>
     <url>https://github.com/harishb2k/easy</url>

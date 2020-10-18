@@ -4,3 +4,5 @@
 *.ipr
 helper/target
 target
+database/target
+database-mysql/target
