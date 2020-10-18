@@ -29,6 +29,7 @@
         <grpc.version>1.13.1</grpc.version>
         <protobuf.version>3.5.1</protobuf.version>
         <mysql.connector.version>6.0.6</mysql.connector.version>
+        <mysql.version>5.1.26</mysql.version>
         <scylla.connector.version>3.5.0</scylla.connector.version>
         <guice.version>4.1.0</guice.version>
         <lombok.version>1.18.16</lombok.version>
@@ -60,6 +61,18 @@
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>${joda.version}</version>
+            </dependency>
+
+            <!-- MySQL -->
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.zaxxer</groupId>
+                <artifactId>HikariCP</artifactId>
+                <version>${hikari.version}</version>
             </dependency>
 
             <!-- Jackson -->
