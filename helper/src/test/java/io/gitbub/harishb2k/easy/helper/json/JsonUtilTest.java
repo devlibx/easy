@@ -1,8 +1,8 @@
 package io.gitbub.harishb2k.easy.helper.json;
 
-import io.gitbub.harishb2k.easy.helper.json.JsonUtil;
+import io.gitbub.harishb2k.easy.helper.map.StringObjectMapTest.TestClass;
+import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import junit.framework.TestCase;
-import lombok.Data;
 
 public class JsonUtilTest extends TestCase {
 
@@ -10,17 +10,8 @@ public class JsonUtilTest extends TestCase {
         TestClass testClass = new TestClass();
         testClass.setStr("some string");
         testClass.setAnInt(11);
-
+        StringHelper stringHelper = new StringHelper();
         JsonUtil jsonUtil = new JsonUtil();
-        String result = jsonUtil.writeString(testClass);
-        assertNotNull(result);
-        assertFalse(result.isEmpty());
-        assertEquals(testClass, jsonUtil.readObject(result, TestClass.class));
-    }
-
-    @Data
-    private static class TestClass {
-        private String str;
-        private int anInt;
+        assertEquals(testClass, jsonUtil.readObject(stringHelper.stringify(testClass), TestClass.class));
     }
 }

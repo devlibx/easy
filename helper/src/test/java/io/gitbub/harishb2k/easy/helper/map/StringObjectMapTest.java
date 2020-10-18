@@ -1,6 +1,8 @@
 package io.gitbub.harishb2k.easy.helper.map;
 
+import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import junit.framework.TestCase;
+import lombok.Data;
 
 import java.util.UUID;
 
@@ -20,5 +22,20 @@ public class StringObjectMapTest extends TestCase {
         assertEquals(Boolean.TRUE, map.getBoolean("bool_key"));
         assertEquals(100L, map.getLong("long_key").longValue());
         assertEquals(u, map.getUUID("uuid_key"));
+    }
+
+    public void testWriteSting() {
+        TestClass testClass = new TestClass();
+        testClass.setStr("some string");
+        testClass.setAnInt(11);
+        StringHelper stringHelper = new StringHelper();
+        assertNotNull(stringHelper.stringify(testClass));
+        assertFalse(stringHelper.stringify(testClass).isEmpty());
+    }
+
+    @Data
+    public static class TestClass {
+        private String str;
+        private int anInt;
     }
 }

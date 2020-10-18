@@ -2,15 +2,16 @@ package io.gitbub.harishb2k.easy.helper.json;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import lombok.Getter;
 
 import java.io.IOException;
 
 public class JsonUtil {
+    @Getter
     private final ObjectMapper objectMapper;
 
     public JsonUtil() {
@@ -20,23 +21,11 @@ public class JsonUtil {
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
     }
 
+    /**
+     * Make custom JsonUtil with provided ObjectMapper
+     */
     public JsonUtil(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-    }
-
-    /**
-     * Method to convert object to JSON string.
-     *
-     * @param value - value to convert
-     * @return JSON string for the object
-     * @throws RuntimeException error on some issue
-     */
-    public String writeString(Object value) throws RuntimeException {
-        try {
-            return objectMapper.writeValueAsString(value);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     /**
