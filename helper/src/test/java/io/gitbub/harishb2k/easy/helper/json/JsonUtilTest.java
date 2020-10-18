@@ -1,5 +1,6 @@
-package io.gitbub.harishb2k.easy.helper;
+package io.gitbub.harishb2k.easy.helper.json;
 
+import io.gitbub.harishb2k.easy.helper.json.JsonUtil;
 import junit.framework.TestCase;
 import lombok.Data;
 

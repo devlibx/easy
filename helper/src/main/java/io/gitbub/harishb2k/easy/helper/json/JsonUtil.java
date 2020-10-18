@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper;
+package io.gitbub.harishb2k.easy.helper.json;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
