@@ -4,6 +4,7 @@ import junit.framework.TestCase;
 import lombok.Data;
 
 public class JsonUtilTest extends TestCase {
+
     public void testWriteString() {
         TestClass testClass = new TestClass();
         testClass.setStr("some string");
