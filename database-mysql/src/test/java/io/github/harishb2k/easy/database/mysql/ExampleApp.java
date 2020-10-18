@@ -9,11 +9,13 @@ import io.github.harishb2k.easy.database.IDatabaseService;
 import io.github.harishb2k.easy.database.mysql.config.DbConfig;
 import io.github.harishb2k.easy.database.mysql.module.DatabaseMySQLModule;
 import junit.framework.TestCase;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.MySQLContainer;
 
 @SuppressWarnings("rawtypes")
+@Slf4j
 public abstract class ExampleApp extends TestCase {
     private static String jdbcUrl;
     private static MySQLContainer container;
@@ -35,7 +37,11 @@ public abstract class ExampleApp extends TestCase {
 
     public static void stopMySQL() {
         if (container != null) {
-            container.stop();
+            try {
+                container.stop();
+                Thread.sleep(1000);
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 
@@ -53,7 +59,7 @@ public abstract class ExampleApp extends TestCase {
         // Setup DB - datasource
         DbConfig dbConfig = new DbConfig();
         dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
-        dbConfig.setJdbcUrl(container.getJdbcUrl());
+        dbConfig.setJdbcUrl(container.getJdbcUrl() + "?logger=Slf4JLogger&profileSQL=true&profileSQL=true");
         dbConfig.setUsername("test");
         dbConfig.setPassword("test");
         injector.getInstance(DataSourceFactory.class).register(dbConfig.buildHikariDataSource());
@@ -102,6 +108,7 @@ public abstract class ExampleApp extends TestCase {
                 String.class
         ).orElse("");
         Assert.assertEquals("HI", result);
+        log.debug("Result from MySQL Select: {}", result);
 
         // Close MySQL
         stopMySQL();
