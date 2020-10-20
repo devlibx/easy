@@ -2,6 +2,14 @@ Helper Module
 ===
 
 Convert Java object to JSON string
+```xml
+<!-- POM Dependency -->
+<dependency>
+  <groupId>io.github.harishb2k.easy</groupId>
+  <artifactId>helper</artifactId>
+  <version>0.0.6</version>
+</dependency>
+```
 ```shell script
 
 // A pojo object to stringify
@@ -28,7 +36,14 @@ database-mysql module provides support for easy MySQL helper.
 ```shell script
 See "io.github.harishb2k.easy.database.mysql.ExampleApp" example
 ``` 
-
+```xml
+<!-- POM Dependency -->
+<dependency>
+  <groupId>io.github.harishb2k.easy</groupId>
+  <artifactId>database-mysql</artifactId>
+  <version>0.0.6</version>
+</dependency>
+```
 You must setup IMysqlHelper before using it. A sample setup is als given below.
 ```shell script
 // Insert to DB
