@@ -56,14 +56,6 @@ String result = mysqlHelper.findOne(
 Setup to use this MySQL helper:
 
 ```shell script
-// Setup module
-injector = Guice.createInjector(new AbstractModule() {
-    @Override
-    protected void configure() {
-        bind(IMetrics.class).to(IMetrics.NoOpMetrics.class);
-    }
-}, new DatabaseMySQLModule());
-ApplicationContext.setInjector(injector);
 
 // Setup DB - datasource
 DbConfig dbConfig = new DbConfig();
@@ -71,9 +63,18 @@ dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
 dbConfig.setJdbcUrl("YOUR JDBC URL");
 dbConfig.setUsername("username");
 dbConfig.setPassword("password");
+MySqlConfigs mySqlConfigs = new MySqlConfigs();
+mySqlConfigs.addConfig(dbConfig);
 
-// Add default datasource to factory 
-injector.getInstance(DataSourceFactory.class).register(dbConfig.buildHikariDataSource());
+// Setup module
+injector = Guice.createInjector(new AbstractModule() {
+    @Override
+    protected void configure() {
+        bind(IMetrics.class).to(IMetrics.NoOpMetrics.class);
+        bind(MySqlConfigs.class).toInstance(mySqlConfigs);
+    }
+}, new DatabaseMySQLModule());
+ApplicationContext.setInjector(injector);
 
 // Start DB
 IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);

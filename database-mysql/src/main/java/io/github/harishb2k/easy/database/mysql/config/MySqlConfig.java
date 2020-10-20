@@ -4,7 +4,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import lombok.Data;
 
 @Data
-public class DbConfig {
+public class MySqlConfig {
     private boolean isAutoCommit;
     private String driverClassName;
     private String jdbcUrl;

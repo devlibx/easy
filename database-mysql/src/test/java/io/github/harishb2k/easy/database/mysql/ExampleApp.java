@@ -6,7 +6,8 @@ import com.google.inject.Injector;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
 import io.github.harishb2k.easy.database.IDatabaseService;
-import io.github.harishb2k.easy.database.mysql.config.DbConfig;
+import io.github.harishb2k.easy.database.mysql.config.MySqlConfig;
+import io.github.harishb2k.easy.database.mysql.config.MySqlConfigs;
 import io.github.harishb2k.easy.database.mysql.module.DatabaseMySQLModule;
 import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ public abstract class ExampleApp extends TestCase {
     public static void stopMySQL() {
         if (container != null) {
             try {
-                injector.getInstance(DataSourceFactory.class).shutdown();
+                injector.getInstance(IDatabaseService.class).stopDatabase();
                 container.stop();
             } catch (Exception ignored) {
             }
@@ -49,28 +50,29 @@ public abstract class ExampleApp extends TestCase {
 
     public static void setupGuice() {
 
+        // Setup DB - datasource
+        MySqlConfig dbConfig = new MySqlConfig();
+        dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
+        dbConfig.setJdbcUrl(container.getJdbcUrl());
+        dbConfig.setUsername("test");
+        dbConfig.setPassword("test");
+        dbConfig.setShowSql(false);
+        MySqlConfigs mySqlConfigs = new MySqlConfigs();
+        mySqlConfigs.addConfig(dbConfig);
+
         // Setup module
         injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(IMetrics.class).to(IMetrics.NoOpMetrics.class);
+                bind(MySqlConfigs.class).toInstance(mySqlConfigs);
             }
         }, new DatabaseMySQLModule());
         ApplicationContext.setInjector(injector);
 
-        // Setup DB - datasource
-        DbConfig dbConfig = new DbConfig();
-        dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
-        dbConfig.setJdbcUrl(container.getJdbcUrl());
-        dbConfig.setUsername("test");
-        dbConfig.setPassword("test");
-        dbConfig.setShowSql(true);
-        injector.getInstance(DataSourceFactory.class).register(dbConfig.buildHikariDataSource());
-
         // Start DB
         IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
         databaseService.startDatabase();
-
     }
 
     public static void main(String[] args) {
@@ -103,9 +105,9 @@ public abstract class ExampleApp extends TestCase {
         Assert.assertTrue(id > 0);
 
         // Try insert in threads
-        int count = 20;
+        int count = 0;
         CountDownLatch countDownLatch = new CountDownLatch(count);
-        for (int i = 0; i < count && false; i++) {
+        for (int i = 0; i < count; i++) {
             new Thread(() -> {
                 Long _id = mysqlHelper.persist(
                         "",
@@ -120,7 +122,9 @@ public abstract class ExampleApp extends TestCase {
             }).start();
         }
         try {
-            countDownLatch.await();
+            if (count > 0) {
+                countDownLatch.await();
+            }
         } catch (InterruptedException ignored) {
         }
 
