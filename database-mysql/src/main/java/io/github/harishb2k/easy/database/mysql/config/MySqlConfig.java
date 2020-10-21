@@ -1,9 +1,11 @@
 package io.github.harishb2k.easy.database.mysql.config;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.zaxxer.hikari.HikariDataSource;
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MySqlConfig {
     private boolean isAutoCommit;
     private String driverClassName;
