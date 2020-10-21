@@ -12,8 +12,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
@@ -22,15 +24,18 @@ import static java.sql.Statement.RETURN_GENERATED_KEYS;
 public class MySqlHelper implements IMysqlHelper {
     private final DataSource dataSource;
     private final IMetrics metrics;
+    private final Set<String> metricsRegistered;
 
     @Inject
     public MySqlHelper(DataSource dataSource, IMetrics metrics) {
         this.dataSource = dataSource;
         this.metrics = metrics;
+        this.metricsRegistered = new HashSet<>();
     }
 
     @Override
     public boolean execute(String metricsName, String sql, IStatementBuilder statementBuilder) {
+        safeRegisterMetric(metricsName);
         try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statementBuilder.prepare(statement);
             return metrics.time(metricsName, statement::execute);
@@ -41,6 +46,7 @@ public class MySqlHelper implements IMysqlHelper {
 
     @Override
     public Long persist(String metricsName, String sql, IStatementBuilder statementBuilder) {
+        safeRegisterMetric(metricsName);
         return (Long) persist(metricsName, sql, statementBuilder, resultSet -> {
             try {
                 return resultSet.getLong(1);
@@ -52,6 +58,7 @@ public class MySqlHelper implements IMysqlHelper {
 
     @Override
     public <T> T persist(String metricsName, String sql, IStatementBuilder statementBuilder, Function<ResultSet, T> keyFunction) {
+        safeRegisterMetric(metricsName);
         try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(sql, RETURN_GENERATED_KEYS)) {
             statementBuilder.prepare(statement);
             metrics.time(metricsName, statement::execute);
@@ -67,10 +74,11 @@ public class MySqlHelper implements IMysqlHelper {
     }
 
     @Override
-    public <T> Optional<T> findOne(String metric, String sql, IStatementBuilder statementBuilder, IRowMapper<T> rowMapper, Class<T> cls) {
+    public <T> Optional<T> findOne(String metricsName, String sql, IStatementBuilder statementBuilder, IRowMapper<T> rowMapper, Class<T> cls) {
+        safeRegisterMetric(metricsName);
         try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statementBuilder.prepare(statement);
-            return metrics.time(metric, () -> {
+            return metrics.time(metricsName, () -> {
                 try (ResultSet rs = statement.executeQuery()) {
                     return rs.next() ? Optional.of(rowMapper.map(rs)) : Optional.empty();
                 }
@@ -81,10 +89,11 @@ public class MySqlHelper implements IMysqlHelper {
     }
 
     @Override
-    public <T> Optional<List<T>> findAll(String metric, String sql, IStatementBuilder statementBuilder, IRowMapper<T> rowMapper, Class<T> cls) {
+    public <T> Optional<List<T>> findAll(String metricsName, String sql, IStatementBuilder statementBuilder, IRowMapper<T> rowMapper, Class<T> cls) {
+        safeRegisterMetric(metricsName);
         try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
             statementBuilder.prepare(statement);
-            return metrics.time(metric, () -> {
+            return metrics.time(metricsName, () -> {
                 try (ResultSet rs = statement.executeQuery()) {
                     return rowMapper.rows(rs);
                 }
@@ -92,5 +101,11 @@ public class MySqlHelper implements IMysqlHelper {
         } catch (Exception e) {
             throw new FindException(sql, e);
         }
+    }
+
+    private void safeRegisterMetric(String name) {
+        if (metricsRegistered.contains(name)) return;
+        metrics.registerTimer(name, name + " Help");
+        metricsRegistered.add(name);
     }
 }
