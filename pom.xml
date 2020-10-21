@@ -5,7 +5,7 @@
     <groupId>io.github.harishb2k.easy</groupId>
     <artifactId>easy</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.8-SNAPSHOT</version>
+    <version>0.0.8</version>
     <modules>
         <module>helper</module>
         <module>database</module>
@@ -20,7 +20,7 @@
         <connection>scm:git:https://github.com/harishb2k/easy.git</connection>
         <developerConnection>scm:git:https://github.com/harishb2k/easy.git</developerConnection>
         <url>https://github.com/harishb2k/easy/tree/master</url>
-        <tag>HEAD</tag>
+        <tag>0.0.8</tag>
     </scm>
 
     <properties>
