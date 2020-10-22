@@ -45,6 +45,17 @@ public class MySqlHelper implements IMysqlHelper {
     }
 
     @Override
+    public boolean executeUpdate(String metricsName, String sql, IStatementBuilder statementBuilder) {
+        safeRegisterMetric(metricsName);
+        try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(sql)) {
+            statementBuilder.prepare(statement);
+            return metrics.time(metricsName, () -> statement.executeUpdate() > 0);
+        } catch (Exception e) {
+            throw new ExecuteException(sql, e);
+        }
+    }
+
+    @Override
     public Long persist(String metricsName, String sql, IStatementBuilder statementBuilder) {
         safeRegisterMetric(metricsName);
         return (Long) persist(metricsName, sql, statementBuilder, resultSet -> {

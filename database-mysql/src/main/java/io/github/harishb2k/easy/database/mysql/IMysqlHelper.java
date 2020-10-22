@@ -12,7 +12,7 @@ import java.util.function.Function;
 public interface IMysqlHelper {
 
     /**
-     * Execute a SQL
+     * Execute a SQL (Do not use it for UPDATE query - use executeUpdate)
      * <p>
      * NOTE - a "CREATE TABLE" using this returns false (as per the Java Doc of PreparedStatement)
      *
@@ -22,6 +22,16 @@ public interface IMysqlHelper {
      * @return true if success otherwise false
      */
     boolean execute(String metric, String sql, IStatementBuilder statementBuilder);
+
+    /**
+     * Execute a SQL
+     *
+     * @param metric           metric name to log this execution
+     * @param sql              SQL to execute
+     * @param statementBuilder callback hook to set param in SQL statement
+     * @return true if success otherwise false
+     */
+    boolean executeUpdate(String metric, String sql, IStatementBuilder statementBuilder);
 
     /**
      * Persist a record
