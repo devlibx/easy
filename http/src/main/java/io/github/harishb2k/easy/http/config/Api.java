@@ -68,25 +68,4 @@ public class Api {
      * e.g. If your timeout is 1000 and this value is 0.1 then we will set socket timeout = (1000 + 1000 * 0.1 = 1100)
      */
     private float timeoutDeltaFactor = 0.0f;
-
-    /**
-     * A http request needs to get a connection from pool. This timeout specifies how long this
-     * connection request should wait.
-     * <p>
-     * Default = 100ms
-     * <p>
-     * Why we get this type of timeout -> if we have small connection pool and all connections are
-     * busy then we will get this timeout.
-     */
-    private int connectionRequestTimeout = 100;
-
-    /**
-     * A http request needs to connect to a server first. This timeout specifies how long this
-     * connection creation should take. Beyond this time it will fail with timeout.
-     * <p>
-     * Default = 100ms
-     * <p>
-     * Why we get this type of timeout -> when we connect to server, it may be busy or server may be down.
-     */
-    private int connectTimeout = 100;
 }

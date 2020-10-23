@@ -159,8 +159,8 @@ public class SyncRequestProcessor implements IRequestProcessor {
             socketTimeoutToBeUsed = (int) (socketTimeoutToBeUsed + (api.getTimeoutDeltaFactor() * socketTimeoutToBeUsed));
         }
         return RequestConfig.custom()
-                .setConnectTimeout(api.getConnectTimeout())
-                .setConnectionRequestTimeout(api.getConnectionRequestTimeout())
+                .setConnectTimeout(server.getConnectTimeout())
+                .setConnectionRequestTimeout(server.getConnectionRequestTimeout())
                 .setSocketTimeout(socketTimeoutToBeUsed)
                 .build();
     }

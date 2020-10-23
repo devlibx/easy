@@ -6,6 +6,7 @@ import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
 import io.github.harishb2k.easy.http.ResponseObject;
 import io.github.harishb2k.easy.http.config.Config;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
 import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
@@ -56,6 +57,25 @@ public class EasyHttp {
         });
     }
 
+    public static <T> T callSync(String server,
+                                 String api,
+                                 Map<String, Object> pathParam,
+                                 MultivaluedMap<String, Object> queryParam,
+                                 Map<String, Object> headers,
+                                 Object body,
+                                 Class<T> cls
+    ) {
+        return call(
+                server,
+                api,
+                pathParam,
+                queryParam,
+                headers,
+                body,
+                cls
+        ).blockingFirst();
+    }
+
     public static <T> Observable<T> call(String server,
                                          String api,
                                          Map<String, Object> pathParam,
@@ -90,5 +110,13 @@ public class EasyHttp {
                     T objectToReturn = JsonUtils.readObject(bodyString, cls);
                     return Observable.just(objectToReturn);
                 });
+    }
+
+    public static EasyHttpRequestException convertException(Throwable throwable) {
+        if (throwable instanceof EasyHttpRequestException) {
+            return (EasyHttpRequestException) throwable;
+        } else {
+            return new EasyHttpRequestException(throwable);
+        }
     }
 }

@@ -1,11 +1,30 @@
 package io.gitbub.harishb2k.easy.helper.json;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 
 import java.util.Map;
 
 public class JsonUtils {
     private static final JsonUtil jsonUtil = new JsonUtil();
+
+    private static final JsonUtil camelCaseJsonUtil;
+
+    static {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setPropertyNamingStrategy(PropertyNamingStrategy.LOWER_CAMEL_CASE);
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        camelCaseJsonUtil = new JsonUtil(objectMapper);
+    }
+
+    public static JsonUtil getCamelCase() {
+        return camelCaseJsonUtil;
+    }
 
     /**
      * Read a object from string

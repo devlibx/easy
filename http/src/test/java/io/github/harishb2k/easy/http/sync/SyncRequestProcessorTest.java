@@ -1,5 +1,6 @@
 package io.github.harishb2k.easy.http.sync;
 
+import io.gitbub.harishb2k.easy.helper.file.FileHelper;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import io.github.harishb2k.easy.http.IRequestProcessor;
@@ -8,7 +9,6 @@ import io.github.harishb2k.easy.http.ResponseObject;
 import io.github.harishb2k.easy.http.config.Api;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.config.Server;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
@@ -89,11 +89,12 @@ public class SyncRequestProcessorTest extends TestCase {
 
     public static void testWithYaml() {
         Yaml yaml = new Yaml();
+
         InputStream inputStream = SyncRequestProcessorTest.class
                 .getClassLoader()
                 .getResourceAsStream("sync_processor_config.yaml");
         Map<String, Object> obj = yaml.load(inputStream);
-        Config config = JsonUtils.readObject(new StringHelper().stringify(obj), Config.class);
+        Config config = JsonUtils.getCamelCase().readObject(new StringHelper().stringify(obj), Config.class);
 
         Map<String, Object> qp = new HashMap<>();
         qp.put("id", 1);
@@ -119,6 +120,24 @@ public class SyncRequestProcessorTest extends TestCase {
                 System.out.println(throwable);
             }
         });
+
+
+        try {
+            System.out.println("\n\n\n Calling Sync");
+            Map resultSync = EasyHttp.callSync(
+                    "jsonplaceholder",
+                    "getPosts",
+                    qp,
+                    null,
+                    null,
+                    null,
+                    Map.class
+            );
+            System.out.println(resultSync);
+        } catch (EasyHttpRequestException e) {
+            System.out.println(e.getResponseAsString());
+            System.out.println(e);
+        }
     }
 
     public static void main(String[] args) {

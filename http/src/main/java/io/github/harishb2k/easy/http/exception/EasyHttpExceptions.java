@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import javax.ws.rs.core.Response;
 import java.util.Map;
 
 public interface EasyHttpExceptions {
@@ -17,6 +18,13 @@ public interface EasyHttpExceptions {
         private final int statusCode;
         private final byte[] body;
         private final ResponseObject response;
+
+        public EasyHttpRequestException(Throwable throwable) {
+            super(throwable);
+            statusCode = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
+            body = null;
+            response = null;
+        }
 
         public EasyHttpRequestException(ResponseObject response) {
             super(String.format("statusCode=%d", response.getStatusCode()));

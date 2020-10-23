@@ -3,9 +3,13 @@ servers:
     host: jsonplaceholder.typicode.com
     port: 443
     https: true
+    connectTimeout: 1000
+    connectionRequestTimeout: 1000
 
 apis:
   getPosts:
     method: POST
     path: /posts/${id}
     server: jsonplaceholder
+    timeout: 1000
+
