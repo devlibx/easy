@@ -12,6 +12,7 @@
         <module>database-mysql</module>
         <module>dropwizard-app</module>
         <module>metrics-prometheus</module>
+        <module>http</module>
     </modules>
     <name>easy</name>
     <url>https://github.com/harishb2k/easy</url>
@@ -45,6 +46,7 @@
         <curator.version>4.1.0</curator.version>
         <joda.version>2.10.4</joda.version>
         <slf4j.version>1.7.5</slf4j.version>
+        <javax.ws.rs-api.version>2.0.1</javax.ws.rs-api.version>
     </properties>
 
     <dependencyManagement>
@@ -69,6 +71,11 @@
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-core</artifactId>
                 <version>${dropwizard.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>javax.ws.rs-api</artifactId>
+                <version>${javax.ws.rs-api.version}</version>
             </dependency>
 
             <!-- MySQL -->
