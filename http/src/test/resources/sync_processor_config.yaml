@@ -8,7 +8,7 @@ servers:
 
 apis:
   getPosts:
-    method: POST
+    method: GET
     path: /posts/${id}
     server: jsonplaceholder
     timeout: 1000

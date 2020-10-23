@@ -95,3 +95,49 @@ ApplicationContext.setInjector(injector);
 IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
 databaseService.startDatabase();
 ```
+
+Http Module
+===
+
+```yaml
+servers:
+  jsonplaceholder:
+    host: jsonplaceholder.typicode.com
+    port: 443
+    https: true
+    connectTimeout: 1000
+    connectionRequestTimeout: 1000
+
+apis:
+  getPosts:
+    method: POST
+    path: /posts/${id}
+    server: jsonplaceholder
+    timeout: 1000
+```
+
+```java
+public class Example {
+    public static void main(String[] args) {
+        Config config = YamlUtils.readYamlCamelCase("sync_processor_config.yaml", Config.class);
+        
+        Map<String, Object> qp = new HashMap<>();
+        qp.put("id", 1);
+        try {
+            Map resultSync = EasyHttp.callSync(
+                    "jsonplaceholder",  // Name of the service
+                    "getPosts",         // Name of the API
+                    qp,                 // Path Params
+                    null,               // Query Params
+                    null,               // Header
+                    null,               // Request Body
+                    Map.class           // Response Class
+            );
+            System.out.println(resultSync);
+        } catch (EasyHttpRequestException e) {
+            System.out.println(e.getResponseAsString());
+            System.out.println(e);
+        }
+    }
+}
+```

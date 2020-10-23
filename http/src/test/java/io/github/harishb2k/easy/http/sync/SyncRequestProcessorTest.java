@@ -1,8 +1,6 @@
 package io.github.harishb2k.easy.http.sync;
 
-import io.gitbub.harishb2k.easy.helper.file.FileHelper;
-import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
-import io.gitbub.harishb2k.easy.helper.string.StringHelper;
+import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
 import io.github.harishb2k.easy.http.ResponseObject;
@@ -18,12 +16,11 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.junit.Ignore;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("All")
 @Ignore
 public class SyncRequestProcessorTest extends TestCase {
 
@@ -88,13 +85,7 @@ public class SyncRequestProcessorTest extends TestCase {
     }
 
     public static void testWithYaml() {
-        Yaml yaml = new Yaml();
-
-        InputStream inputStream = SyncRequestProcessorTest.class
-                .getClassLoader()
-                .getResourceAsStream("sync_processor_config.yaml");
-        Map<String, Object> obj = yaml.load(inputStream);
-        Config config = JsonUtils.getCamelCase().readObject(new StringHelper().stringify(obj), Config.class);
+        Config config = YamlUtils.readYamlCamelCase("sync_processor_config.yaml", Config.class);
 
         Map<String, Object> qp = new HashMap<>();
         qp.put("id", 1);
@@ -120,18 +111,17 @@ public class SyncRequestProcessorTest extends TestCase {
                 System.out.println(throwable);
             }
         });
-
+        System.out.println("\n\n\n Calling Sync");
 
         try {
-            System.out.println("\n\n\n Calling Sync");
             Map resultSync = EasyHttp.callSync(
-                    "jsonplaceholder",
-                    "getPosts",
-                    qp,
-                    null,
-                    null,
-                    null,
-                    Map.class
+                    "jsonplaceholder",  // Name of the service
+                    "getPosts",         // Name of the API
+                    qp,                 // Path Params
+                    null,               // Query Params
+                    null,               // Header
+                    null,               // Request Body
+                    Map.class           // Response Class
             );
             System.out.println(resultSync);
         } catch (EasyHttpRequestException e) {
