@@ -18,7 +18,7 @@ import java.util.Map;
 public class RequestObject {
     private String server;
     private String api;
-    private String method = "GET";
+    private String method;
     private Map<String, Object> headers;
     private Map<String, Object> pathParam;
     private MultivaluedMap<String, Object> queryParam;

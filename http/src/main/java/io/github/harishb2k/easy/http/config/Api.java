@@ -34,6 +34,8 @@ public class Api {
      */
     private String server;
 
+    private String method;
+
     /**
      * Type of this API (valid type = HTTP | HTTPS )
      */

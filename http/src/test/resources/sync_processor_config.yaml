@@ -1,0 +1,11 @@
+servers:
+  jsonplaceholder:
+    host: jsonplaceholder.typicode.com
+    port: 443
+    https: true
+
+apis:
+  getPosts:
+    method: POST
+    path: /posts/${id}
+    server: jsonplaceholder

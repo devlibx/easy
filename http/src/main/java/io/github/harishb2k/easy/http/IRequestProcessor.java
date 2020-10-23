@@ -1,5 +1,7 @@
 package io.github.harishb2k.easy.http;
 
+import io.reactivex.Observable;
+
 public interface IRequestProcessor {
 
     /**
@@ -8,7 +10,7 @@ public interface IRequestProcessor {
      * @param requestObject request information
      * @return response of http call
      */
-    ResponseObject process(RequestObject requestObject);
+    Observable<ResponseObject> process(RequestObject requestObject);
 
     /**
      * Cleanup

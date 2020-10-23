@@ -1,6 +1,7 @@
 package io.github.harishb2k.easy.http.sync;
 
 import com.google.common.base.Strings;
+import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.Safe;
 import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import io.github.harishb2k.easy.http.IRequestProcessor;
@@ -10,6 +11,7 @@ import io.github.harishb2k.easy.http.config.Api;
 import io.github.harishb2k.easy.http.config.Server;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
+import io.reactivex.Observable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.http.NameValuePair;
@@ -42,10 +44,10 @@ public class SyncRequestProcessor implements IRequestProcessor {
     private IHttpResponseProcessor httpResponseProcessor = new DefaultHttpResponseProcessor();
 
     @Inject
-    public SyncRequestProcessor(ServerRegistry serverRegistry, ApiRegistry apiRegistry, StringHelper stringHelper) {
+    public SyncRequestProcessor(ServerRegistry serverRegistry, ApiRegistry apiRegistry) {
         this.serverRegistry = serverRegistry;
         this.apiRegistry = apiRegistry;
-        this.stringHelper = stringHelper;
+        this.stringHelper = ApplicationContext.getOptionalInstance(StringHelper.class).orElse(new StringHelper());
     }
 
     @Override
@@ -55,19 +57,35 @@ public class SyncRequestProcessor implements IRequestProcessor {
     }
 
     @Override
-    public ResponseObject process(RequestObject requestObject) {
+    public Observable<ResponseObject> process(RequestObject requestObject) {
         final Api api = apiRegistry.getOptional(requestObject.getApi()).orElseThrow(() -> new RuntimeException("Could not find api=" + requestObject.getApi()));
         final Server server = serverRegistry.getOptional(api.getServer()).orElseThrow(() -> new RuntimeException("Could not find server=" + api.getServer()));
+
+        // Set correct type of method in request from API
+        if (Strings.isNullOrEmpty(requestObject.getMethod())) {
+            requestObject.setMethod(api.getMethod());
+        }
+
         try {
-            return internalProcess(server, api, requestObject);
+            ResponseObject responseObject = internalProcess(server, api, requestObject);
+            if (responseObject != null) {
+                return Observable.just(responseObject);
+            } else {
+                return Observable.empty();
+            }
         } catch (Exception e) {
             if (!Strings.isNullOrEmpty(api.getFallbackApiName())) {
                 log.info("Going to fallback: server={}, api={}, fallbackApi={}", server.getName(), api.getName(), api.getFallbackApiName());
                 final Api fallbackApi = apiRegistry.getOptional(api.getFallbackApiName()).orElseThrow(() -> new RuntimeException("Could not find fallback api=" + api.getFallbackApiName()));
                 final Server fallbackServer = serverRegistry.getOptional(fallbackApi.getServer()).orElseThrow(() -> new RuntimeException("Could not find fallback server=" + fallbackApi.getServer()));
-                return internalProcess(fallbackServer, fallbackApi, requestObject);
+                ResponseObject responseObject = internalProcess(fallbackServer, fallbackApi, requestObject);
+                if (responseObject != null) {
+                    return Observable.just(responseObject);
+                } else {
+                    return Observable.empty();
+                }
             } else {
-                throw e;
+                return Observable.error(e);
             }
         }
     }

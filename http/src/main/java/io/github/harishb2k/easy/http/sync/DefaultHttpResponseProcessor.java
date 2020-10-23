@@ -38,7 +38,12 @@ public class DefaultHttpResponseProcessor implements IHttpResponseProcessor {
             }
             return ResponseObject.builder().success(true).body(body).statusCode(statusCode).build();
         } else {
-            return ResponseObject.builder().statusCode(statusCode).build();
+            try {
+                body = response.getEntity() != null ? EntityUtils.toByteArray(response.getEntity()) : null;
+                return ResponseObject.builder().body(body).statusCode(statusCode).build();
+            } catch (Exception ignored) {
+                return ResponseObject.builder().statusCode(statusCode).build();
+            }
         }
     }
 

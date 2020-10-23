@@ -29,4 +29,9 @@ public class ResponseObject {
         if (body == null) return null;
         return JsonUtils.convertAsMap(new String(body));
     }
+
+    public String getBodyAsString() {
+        if (body == null) return null;
+        return new String(body);
+    }
 }

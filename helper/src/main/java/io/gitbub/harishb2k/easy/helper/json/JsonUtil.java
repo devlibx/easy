@@ -11,6 +11,7 @@ import lombok.Getter;
 import java.io.IOException;
 import java.util.Map;
 
+@SuppressWarnings("unchecked")
 public class JsonUtil {
     @Getter
     private final ObjectMapper objectMapper;
@@ -34,6 +35,11 @@ public class JsonUtil {
      */
     public <T> T readObject(String str, Class<T> cls) {
         try {
+            if (str == null) return null;
+
+            if (cls.isAssignableFrom(String.class)) {
+                return (T) str;
+            }
             return objectMapper.readValue(str, cls);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -45,6 +51,11 @@ public class JsonUtil {
      */
     public <T> T readObject(String str, JavaType cls) {
         try {
+            if (str == null) return null;
+
+            if (cls.getClass().isAssignableFrom(String.class)) {
+                return (T) str;
+            }
             return objectMapper.readValue(str, cls);
         } catch (IOException e) {
             throw new RuntimeException(e);
