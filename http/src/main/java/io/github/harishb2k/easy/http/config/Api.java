@@ -5,16 +5,24 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Api {
 
+    public static final List<Integer> DEFAULT_ACCEPTABLE_CODES = Collections.unmodifiableList(Arrays.asList(200, 201));
+
     /**
      * Name of this API
      */
     private String name;
+
+    private String fallbackApiName;
 
     /**
      * Name of the server to be used for this request
@@ -25,6 +33,8 @@ public class Api {
      * Type of this API (valid type = HTTP | HTTPS )
      */
     private String type = "HTTP";
+
+    private List<Integer> acceptableCodes = DEFAULT_ACCEPTABLE_CODES;
 
     /**
      * API path

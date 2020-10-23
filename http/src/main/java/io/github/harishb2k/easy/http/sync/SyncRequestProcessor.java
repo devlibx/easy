@@ -1,6 +1,7 @@
 package io.github.harishb2k.easy.http.sync;
 
 import com.google.common.base.Strings;
+import io.gitbub.harishb2k.easy.helper.Safe;
 import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
@@ -47,12 +48,32 @@ public class SyncRequestProcessor implements IRequestProcessor {
         this.stringHelper = stringHelper;
     }
 
-    @SuppressWarnings("Convert2MethodRef")
+    @Override
+    public void shutdown() {
+        Safe.safe(apiRegistry::shutdown);
+        Safe.safe(serverRegistry::shutdown);
+    }
+
     @Override
     public ResponseObject process(RequestObject requestObject) {
         final Api api = apiRegistry.getOptional(requestObject.getApi()).orElseThrow(() -> new RuntimeException("Could not find api=" + requestObject.getApi()));
         final Server server = serverRegistry.getOptional(api.getServer()).orElseThrow(() -> new RuntimeException("Could not find server=" + api.getServer()));
+        try {
+            return internalProcess(server, api, requestObject);
+        } catch (Exception e) {
+            if (!Strings.isNullOrEmpty(api.getFallbackApiName())) {
+                log.info("Going to fallback: server={}, api={}, fallbackApi={}", server.getName(), api.getName(), api.getFallbackApiName());
+                final Api fallbackApi = apiRegistry.getOptional(api.getFallbackApiName()).orElseThrow(() -> new RuntimeException("Could not find fallback api=" + api.getFallbackApiName()));
+                final Server fallbackServer = serverRegistry.getOptional(fallbackApi.getServer()).orElseThrow(() -> new RuntimeException("Could not find fallback server=" + fallbackApi.getServer()));
+                return internalProcess(fallbackServer, fallbackApi, requestObject);
+            } else {
+                throw e;
+            }
+        }
+    }
 
+    @SuppressWarnings("Convert2MethodRef")
+    private ResponseObject internalProcess(Server server, Api api, RequestObject requestObject) {
         switch (requestObject.getMethod()) {
             case "GET":
                 return internalProcess(server, api, requestObject, uri -> {
@@ -102,12 +123,15 @@ public class SyncRequestProcessor implements IRequestProcessor {
         try (CloseableHttpResponse response = client.execute(requestBase)) {
             responseObject = httpResponseProcessor.process(serverRegistry.get(api.getServer()), api, response);
         } catch (Exception e) {
+            log.error("Unknown issue: request={}", requestObject, e);
             responseObject = httpResponseProcessor.processException(server, api, e);
         }
 
         log.debug("Request={} Response={}", requestObject, responseObject.convertAsMap());
-       //  System.out.println(responseObject.convertAsMap());
-        System.out.println("---");
+
+        // Throw correct exception if required
+        httpResponseProcessor.processResponseForException(responseObject);
+
         return responseObject;
     }
 

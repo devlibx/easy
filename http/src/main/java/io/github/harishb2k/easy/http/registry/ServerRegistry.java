@@ -25,4 +25,10 @@ public class ServerRegistry {
     public Optional<Server> getOptional(String server) {
         return Optional.ofNullable(serverMap.get(server));
     }
+
+    /**
+     * Shutdown builder
+     */
+    public void shutdown() {
+    }
 }

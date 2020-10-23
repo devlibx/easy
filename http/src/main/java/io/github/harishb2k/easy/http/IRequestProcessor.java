@@ -10,4 +10,8 @@ public interface IRequestProcessor {
      */
     ResponseObject process(RequestObject requestObject);
 
+    /**
+     * Cleanup
+     */
+    void shutdown();
 }

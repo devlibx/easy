@@ -1,5 +1,6 @@
 package io.github.harishb2k.easy.http;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,13 @@ import java.util.Map;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ResponseObject {
     private byte[] body;
+    private int statusCode;
+
+    @JsonIgnore
+    private boolean success;
+
+    @JsonIgnore
+    private Throwable exception;
 
     public Map<String, Object> convertAsMap() {
         if (body == null) return null;

@@ -56,15 +56,15 @@ public class SyncHttpRequestExample {
                 new StringHelper()
         );
 
-
         RequestObject requestObject = new RequestObject();
         requestObject.setServer("s1");
         requestObject.setApi("a1");
         Map<String, Object> qp = new HashMap<>();
         qp.put("id", 1);
         requestObject.setPathParam(qp);
-
         ResponseObject responseObject = requestProcessor.process(requestObject);
-        System.out.println(requestObject);
+
+        requestProcessor.shutdown();
+        System.exit(0);
     }
 }

@@ -1,11 +1,12 @@
 package io.github.harishb2k.easy.http.registry;
 
 import com.google.inject.Inject;
+import io.gitbub.harishb2k.easy.helper.Safe;
 import io.github.harishb2k.easy.http.config.Api;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.config.Server;
-import io.github.harishb2k.easy.http.registry.helper.HttpClientBuilder;
-import io.github.harishb2k.easy.http.registry.helper.IClientBuilder;
+import io.github.harishb2k.easy.http.helper.HttpClientBuilder;
+import io.github.harishb2k.easy.http.helper.IClientBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.HashMap;
@@ -37,5 +38,12 @@ public class ApiRegistry {
             return (T) httpClientBuilder.buildClient(server, api, CloseableHttpClient.class);
         }
         throw new RuntimeException("Request not supported");
+    }
+
+    /**
+     * Shutdown builder
+     */
+    public void shutdown() {
+        Safe.safe(() -> httpClientBuilder.shutdown());
     }
 }

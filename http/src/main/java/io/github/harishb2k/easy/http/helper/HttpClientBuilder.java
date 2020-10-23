@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.http.registry.helper;
+package io.github.harishb2k.easy.http.helper;
 
 import io.gitbub.harishb2k.easy.helper.Safe;
 import io.github.harishb2k.easy.http.config.Api;
@@ -47,7 +47,7 @@ public class HttpClientBuilder implements IClientBuilder {
     }
 
     @Override
-    public void close() {
+    public void shutdown() {
         Safe.safe(executorService::shutdown);
         Safe.safe(() -> {
             httpClientMap.forEach((key, closeableHttpClient) -> {
