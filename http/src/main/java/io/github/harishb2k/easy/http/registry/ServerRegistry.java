@@ -2,12 +2,14 @@ package io.github.harishb2k.easy.http.registry;
 
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.config.Server;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class ServerRegistry {
+    @Getter
     private final Map<String, Server> serverMap;
 
     public ServerRegistry() {

@@ -10,6 +10,7 @@ import io.github.harishb2k.easy.http.config.Server;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
 import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
+import io.github.harishb2k.easy.http.util.EasyHttpHelper;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
@@ -63,8 +64,23 @@ public class SyncHttpRequestExample {
         qp.put("id", 1);
         requestObject.setPathParam(qp);
         ResponseObject responseObject = requestProcessor.process(requestObject);
-
         requestProcessor.shutdown();
+
+
+
+        EasyHttpHelper.setup(config, new StringHelper());
+        EasyHttpHelper.call(
+                "s1",
+                "a1",
+                qp,
+                null,
+                null,
+                null,
+                Map.class
+        ).subscribe(map -> {
+            System.out.println("\n\nSub");
+            System.out.println(map);
+        });
         System.exit(0);
     }
 }

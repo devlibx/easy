@@ -22,7 +22,12 @@ public class Api {
      */
     private String name;
 
+    /**
+     * Fallback API to call if this API fails
+     */
     private String fallbackApiName;
+
+    private boolean async;
 
     /**
      * Name of the server to be used for this request

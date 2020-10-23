@@ -7,6 +7,7 @@ import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.config.Server;
 import io.github.harishb2k.easy.http.helper.HttpClientBuilder;
 import io.github.harishb2k.easy.http.helper.IClientBuilder;
+import lombok.Getter;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ApiRegistry {
+    @Getter
     private final Map<String, Api> apiMap;
 
     @SuppressWarnings("FieldMayBeFinal")
