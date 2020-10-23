@@ -53,6 +53,8 @@ public class Api {
      */
     private int concurrency = 2;
 
+    private int queueSize = 100;
+
     /**
      * If server took > timeout to complete a request then this timeout will occure.
      * <p>

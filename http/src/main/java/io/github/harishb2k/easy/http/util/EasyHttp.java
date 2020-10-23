@@ -1,5 +1,6 @@
 package io.github.harishb2k.easy.http.util;
 
+import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.Safe;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.github.harishb2k.easy.http.IRequestProcessor;
@@ -10,6 +11,10 @@ import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpReques
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
 import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
+import io.github.harishb2k.easy.resilience.IResilienceManager;
+import io.github.harishb2k.easy.resilience.IResilienceManager.IResilienceProcessor;
+import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
+import io.github.harishb2k.easy.resilience.ResilienceManager;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
@@ -18,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
 public class EasyHttp {
@@ -25,6 +32,10 @@ public class EasyHttp {
      * Map of all processor
      */
     private static final Map<String, IRequestProcessor> requestProcessors = new HashMap<>();
+    private static final Map<String, IResilienceProcessor> resilienceProcessors = new HashMap<>();
+
+    private static IResilienceManager resilienceManager;
+    private static Lock resilienceManagerLock = new ReentrantLock();
 
     /**
      * Free all resources
@@ -43,6 +54,9 @@ public class EasyHttp {
         ApiRegistry apiRegistry = new ApiRegistry();
         apiRegistry.configure(config);
 
+        // Make sure we have resilienceManager object created
+        ensureResilienceManager();
+
         // Setup all request processors
         serverRegistry.getServerMap().forEach((serverName, server) -> {
             apiRegistry.getApiMap().forEach((apiName, api) -> {
@@ -53,6 +67,16 @@ public class EasyHttp {
                     requestProcessor = new SyncRequestProcessor(serverRegistry, apiRegistry);
                 }
                 requestProcessors.put(serverName + "-" + apiName, requestProcessor);
+
+                ResilienceCallConfig callConfig = ResilienceCallConfig.withDefaults()
+                        .id(serverName + "-" + apiName)
+                        .concurrency(api.getConcurrency())
+                        .timeout(api.getTimeout() + 1000)
+                        .queueSize(api.getQueueSize())
+                        .build();
+                IResilienceProcessor resilienceProcessor = resilienceManager.getOrCreate(callConfig);
+                resilienceProcessors.put(serverName + "-" + apiName, resilienceProcessor);
+
             });
         });
     }
@@ -65,15 +89,19 @@ public class EasyHttp {
                                  Object body,
                                  Class<T> cls
     ) {
-        return call(
-                server,
-                api,
-                pathParam,
-                queryParam,
-                headers,
-                body,
-                cls
-        ).blockingFirst();
+        try {
+            return call(
+                    server,
+                    api,
+                    pathParam,
+                    queryParam,
+                    headers,
+                    body,
+                    cls
+            ).blockingFirst();
+        } catch (Exception e) {
+            throw resilienceManager.processException(e);
+        }
     }
 
     public static <T> Observable<T> call(String server,
@@ -85,11 +113,17 @@ public class EasyHttp {
                                          Class<T> cls
     ) {
 
+        final String key = server + "-" + api;
+
         // Make sure we have server and api registered
-        if (requestProcessors.get(server + "-" + api) == null) {
+        if (requestProcessors.get(key) == null) {
             return Observable.error(new RuntimeException("server=" + server + " api=" + api + " is not registered"));
         }
 
+        // Get resilienceManager object before we start anything
+        ensureResilienceManager();
+
+        // Build request
         RequestObject requestObject = new RequestObject();
         requestObject.setServer(server);
         requestObject.setApi(api);
@@ -98,7 +132,7 @@ public class EasyHttp {
         requestObject.setHeaders(headers);
         requestObject.setBody(body);
 
-        return requestProcessors.get(server + "-" + api).process(requestObject)
+        Observable<T> observable = requestProcessors.get(server + "-" + api).process(requestObject)
                 .flatMap((Function<ResponseObject, ObservableSource<T>>) responseObject -> {
                     // Get body
                     String bodyString = null;
@@ -110,6 +144,25 @@ public class EasyHttp {
                     T objectToReturn = JsonUtils.readObject(bodyString, cls);
                     return Observable.just(objectToReturn);
                 });
+
+        return resilienceProcessors.get(key).executeAsObservable(
+                key,
+                observable,
+                cls
+        );
+
+      /*  return requestProcessors.get(server + "-" + api).process(requestObject)
+                .flatMap((Function<ResponseObject, ObservableSource<T>>) responseObject -> {
+                    // Get body
+                    String bodyString = null;
+                    if (responseObject.getBody() != null) {
+                        bodyString = new String(responseObject.getBody());
+                    }
+
+                    // Convert to requested class
+                    T objectToReturn = JsonUtils.readObject(bodyString, cls);
+                    return Observable.just(objectToReturn);
+                });*/
     }
 
     public static EasyHttpRequestException convertException(Throwable throwable) {
@@ -117,6 +170,20 @@ public class EasyHttp {
             return (EasyHttpRequestException) throwable;
         } else {
             return new EasyHttpRequestException(throwable);
+        }
+    }
+
+    private static void ensureResilienceManager() {
+        if (resilienceManager == null) {
+            resilienceManagerLock.lock();
+            if (resilienceManager == null) {
+                try {
+                    resilienceManager = ApplicationContext.getInstance(IResilienceManager.class);
+                } catch (Exception e) {
+                    resilienceManager = new ResilienceManager();
+                }
+            }
+            resilienceManagerLock.unlock();
         }
     }
 }

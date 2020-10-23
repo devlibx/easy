@@ -13,6 +13,7 @@ import io.github.harishb2k.easy.http.registry.ServerRegistry;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
 import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.junit.Ignore;
@@ -130,6 +131,34 @@ public class SyncRequestProcessorTest extends TestCase {
         }
     }
 
+    public static void testWithYaml_Resillience() {
+        Config config = YamlUtils.readYamlCamelCase("sync_processor_config.yaml", Config.class);
+
+        Map<String, Object> qp = new HashMap<>();
+        qp.put("id", 1);
+
+        EasyHttp.setup(config);
+        try {
+            Map resultSync = EasyHttp.callSync(
+                    "jsonplaceholder",  // Name of the service
+                    "getPosts",         // Name of the API
+                    qp,                 // Path Params
+                    null,               // Query Params
+                    null,               // Header
+                    null,               // Request Body
+                    Map.class           // Response Class
+            );
+            System.out.println(resultSync);
+        } catch (EasyHttpRequestException e) {
+            System.out.println(e.getResponseAsString());
+            System.out.println(e);
+        } catch (Exception e) {
+            System.out.println("Got Exception");
+            System.out.println(e);
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         ConsoleAppender console = new ConsoleAppender();
         String PATTERN = "%d [%p|%c|%C{1}] %m%n";
@@ -138,9 +167,9 @@ public class SyncRequestProcessorTest extends TestCase {
         console.activateOptions();
         Logger.getRootLogger().addAppender(console);
         Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
-        Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(org.apache.log4j.Level.DEBUG);
+        Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(Level.OFF);
 
-        testWithYaml();
+        testWithYaml_Resillience();
 
         System.exit(0);
     }

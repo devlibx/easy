@@ -15,7 +15,12 @@ public class ResilienceManager implements IResilienceManager {
     @Override
     public synchronized IResilienceProcessor getOrCreate(ResilienceCallConfig config) {
         if (!processorMap.containsKey(config.getId())) {
-            IResilienceProcessor processor = ApplicationContext.getInstance(IResilienceProcessor.class);
+            IResilienceProcessor processor;
+            try {
+                processor = ApplicationContext.getInstance(IResilienceProcessor.class);
+            } catch (Exception e) {
+                processor = new ResilienceProcessor();
+            }
             processor.initialized(config);
             processorMap.put(config.getId(), processor);
         }

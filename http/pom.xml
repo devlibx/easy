@@ -41,6 +41,15 @@
             <artifactId>helper</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.github.harishb2k.easy</groupId>
+            <artifactId>resilience</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
 
         <!-- Utils -->
         <dependency>

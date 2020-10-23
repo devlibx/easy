@@ -11,5 +11,5 @@ apis:
     method: GET
     path: /posts/${id}
     server: jsonplaceholder
-    timeout: 1000
+    timeout: 1
 

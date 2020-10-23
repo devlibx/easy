@@ -57,17 +57,7 @@ public class ResilienceProcessor implements IResilienceProcessor {
                     .toCompletableFuture();
             return future.get();
         } catch (ExecutionException e) {
-            if (e.getCause() instanceof BulkheadFullException) {
-                BulkheadFullException exception = (BulkheadFullException) e.getCause();
-                throw new OverflowException(exception.getMessage(), e);
-            } else if (e.getCause() instanceof CallNotPermittedException) {
-                CallNotPermittedException exception = (CallNotPermittedException) e.getCause();
-                throw new CircuitOpenException(exception.getMessage(), e);
-            } else if (e.getCause() instanceof TimeoutException) {
-                throw new RequestTimeoutException(e.getMessage(), e);
-            } else {
-                throw new UnknownException(e.getMessage(), e.getCause());
-            }
+            throw processException(e);
         } catch (Exception e) {
             throw new UnknownException(e.getMessage(), e);
         }
@@ -81,8 +71,47 @@ public class ResilienceProcessor implements IResilienceProcessor {
                 observableEmitter.onNext(result);
                 observableEmitter.onComplete();
             } catch (Exception e) {
-                observableEmitter.onError(e);
+                if (e.getCause() instanceof ExecutionException) {
+                    observableEmitter.onError(processException((ExecutionException) e.getCause()));
+                } else {
+                    observableEmitter.onError(e);
+                }
             }
         });
+    }
+
+    public <T> Observable<T> executeAsObservable(String id, Observable<T> observable, Class<T> cls) {
+        return Observable.create(observableEmitter -> {
+            try {
+                CompletableFuture<T> future = Decorators.ofSupplier(observable::blockingFirst)
+                        .withThreadPoolBulkhead(threadPoolBulkhead)
+                        .withTimeLimiter(timeLimiter, scheduler)
+                        .withCircuitBreaker(circuitBreaker)
+                        .get()
+                        .toCompletableFuture();
+                observableEmitter.onNext(future.get());
+                observableEmitter.onComplete();
+            } catch (Exception e) {
+                if (e instanceof ExecutionException) {
+                    observableEmitter.onError(processException((ExecutionException) e));
+                } else {
+                    observableEmitter.onError(e);
+                }
+            }
+        });
+    }
+
+    private RuntimeException processException(ExecutionException e) {
+        if (e.getCause() instanceof BulkheadFullException) {
+            BulkheadFullException exception = (BulkheadFullException) e.getCause();
+            return new OverflowException(exception.getMessage(), e);
+        } else if (e.getCause() instanceof CallNotPermittedException) {
+            CallNotPermittedException exception = (CallNotPermittedException) e.getCause();
+            return new CircuitOpenException(exception.getMessage(), e);
+        } else if (e.getCause() instanceof TimeoutException) {
+            return new RequestTimeoutException(e.getMessage(), e);
+        } else {
+            return new UnknownException(e.getMessage(), e.getCause());
+        }
     }
 }
