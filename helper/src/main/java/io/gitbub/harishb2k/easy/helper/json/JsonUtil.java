@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.util.Map;
 
 public class JsonUtil {
     @Getter
@@ -48,5 +49,12 @@ public class JsonUtil {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * Convert string to Map
+     */
+    public Map<String, Object> convertAsMap(String str) {
+        return readObject(str, Map.class);
     }
 }

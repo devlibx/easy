@@ -10,33 +10,32 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class ApiRegistry {
     private final Map<String, Api> apiMap;
-    private final Map<String, CloseableHttpClient> httpClientMap;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Inject
     private IClientBuilder httpClientBuilder = new HttpClientBuilder();
 
     public ApiRegistry() {
         this.apiMap = new HashMap<>();
-        this.httpClientMap = new HashMap<>();
     }
 
     public void configure(Config config) {
         apiMap.putAll(config.getApis());
     }
 
-    public Api get(String api) {
-        return apiMap.get(api);
+    public Optional<Api> getOptional(String api) {
+        return Optional.ofNullable(apiMap.get(api));
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getClient(String apiName, Server server, Class<T> cls) {
-        Api api = get(apiName);
-        if ("HTTP".equals(api.getType())) {
+    public <T> T getClient(Server server, Api api, Class<T> cls) {
+        if (httpClientBuilder.accept(server, api)) {
             return (T) httpClientBuilder.buildClient(server, api, CloseableHttpClient.class);
         }
-        return null;
+        throw new RuntimeException("Request not supported");
     }
 }

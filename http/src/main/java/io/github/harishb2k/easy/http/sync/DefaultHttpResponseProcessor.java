@@ -18,4 +18,9 @@ public class DefaultHttpResponseProcessor implements IHttpResponseProcessor {
         }
         return ResponseObject.builder().body(body).build();
     }
+
+    @Override
+    public ResponseObject processException(Server server, Api api, Throwable e) {
+        return null;
+    }
 }

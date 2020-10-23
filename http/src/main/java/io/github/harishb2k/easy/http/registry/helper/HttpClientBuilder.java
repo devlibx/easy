@@ -26,6 +26,11 @@ public class HttpClientBuilder implements IClientBuilder {
         executorService = Executors.newScheduledThreadPool(2);
     }
 
+    @Override
+    public boolean accept(Server server, Api api) {
+        return "HTTP".equals(api.getType()) || "HTTPS".equals(api.getType());
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <T> T buildClient(Server server, Api api, Class<T> cls) {

@@ -1,7 +1,6 @@
 package io.github.harishb2k.easy.http.sync;
 
 import com.google.common.base.Strings;
-import io.gitbub.harishb2k.easy.helper.json.JsonUtil;
 import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
@@ -10,9 +9,9 @@ import io.github.harishb2k.easy.http.config.Api;
 import io.github.harishb2k.easy.http.config.Server;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -25,14 +24,14 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 import javax.inject.Inject;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
+@SuppressWarnings("FieldMayBeFinal")
 public class SyncRequestProcessor implements IRequestProcessor {
     private final ServerRegistry serverRegistry;
     private final ApiRegistry apiRegistry;
@@ -51,21 +50,24 @@ public class SyncRequestProcessor implements IRequestProcessor {
     @SuppressWarnings("Convert2MethodRef")
     @Override
     public ResponseObject process(RequestObject requestObject) {
+        final Api api = apiRegistry.getOptional(requestObject.getApi()).orElseThrow(() -> new RuntimeException("Could not find api=" + requestObject.getApi()));
+        final Server server = serverRegistry.getOptional(api.getServer()).orElseThrow(() -> new RuntimeException("Could not find server=" + api.getServer()));
+
         switch (requestObject.getMethod()) {
             case "GET":
-                return internalProcess(requestObject, uri -> {
+                return internalProcess(server, api, requestObject, uri -> {
                     return new HttpGet(uri);
                 }, HttpGet.class);
             case "POST":
-                return internalProcess(requestObject, uri -> {
+                return internalProcess(server, api, requestObject, uri -> {
                     return new HttpPost(uri);
                 }, HttpPost.class);
             case "PUT":
-                return internalProcess(requestObject, uri -> {
+                return internalProcess(server, api, requestObject, uri -> {
                     return new HttpPut(uri);
                 }, HttpPut.class);
             case "DELETE":
-                return internalProcess(requestObject, uri -> {
+                return internalProcess(server, api, requestObject, uri -> {
                     return new HttpDelete(uri);
                 }, HttpDelete.class);
         }
@@ -73,22 +75,20 @@ public class SyncRequestProcessor implements IRequestProcessor {
     }
 
     @SuppressWarnings({"EmptyTryBlock", "TryWithIdenticalCatches"})
-    private <REQ_TYPE extends HttpRequestBase> ResponseObject internalProcess(RequestObject requestObject, Function<URI, REQ_TYPE> func, Class<REQ_TYPE> cls) {
-        Api api = apiRegistry.get(requestObject.getApi());
-        Server server = serverRegistry.get(api.getServer());
+    private <REQ_TYPE extends HttpRequestBase> ResponseObject internalProcess(Server server, Api api, RequestObject requestObject, Function<URI, REQ_TYPE> func, Class<REQ_TYPE> cls) {
 
         // Build a URL - replace path param and add query params
         URI uri;
         try {
-            uri = generateURI(requestObject, api);
-            System.out.println(uri);
+            uri = generateURI(server, api, requestObject);
+            log.debug("URL to use = {}", uri);
         } catch (URISyntaxException e) {
             throw new RuntimeException("Failed to generate URI");
         }
 
         // Make a http request
         HttpRequestBase requestBase = func.apply(uri);
-        requestBase.setConfig(buildRequestConfig(api));
+        requestBase.setConfig(buildRequestConfig(server, api, requestObject));
 
         // Add headers to the request
         requestObject.preProcessHeaders();
@@ -96,23 +96,22 @@ public class SyncRequestProcessor implements IRequestProcessor {
             requestBase.addHeader(key, stringHelper.stringify(value));
         });
 
-        ResponseObject responseObject = null;
-        CloseableHttpClient client = apiRegistry.getClient(requestObject.getApi(), server, CloseableHttpClient.class);
+        // Request server
+        ResponseObject responseObject;
+        CloseableHttpClient client = apiRegistry.getClient(server, api, CloseableHttpClient.class);
         try (CloseableHttpResponse response = client.execute(requestBase)) {
             responseObject = httpResponseProcessor.process(serverRegistry.get(api.getServer()), api, response);
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            responseObject = httpResponseProcessor.processException(server, api, e);
         }
-        JsonUtil jsonUtil = new JsonUtil();
-        Map m = jsonUtil.readObject(new String(responseObject.getBody()), Map.class);
-        System.out.println(m);
 
+        log.debug("Request={} Response={}", requestObject, responseObject.convertAsMap());
+       //  System.out.println(responseObject.convertAsMap());
+        System.out.println("---");
         return responseObject;
     }
 
-    private RequestConfig buildRequestConfig(Api api) {
+    private RequestConfig buildRequestConfig(Server server, Api api, RequestObject request) {
         int socketTimeoutToBeUsed = api.getTimeout();
         if (api.getTimeoutDeltaFactor() > 0) {
             socketTimeoutToBeUsed = (int) (socketTimeoutToBeUsed + (api.getTimeoutDeltaFactor() * socketTimeoutToBeUsed));
@@ -124,19 +123,18 @@ public class SyncRequestProcessor implements IRequestProcessor {
                 .build();
     }
 
-    private URI generateURI(RequestObject request, Api api) throws URISyntaxException {
-        Server server = serverRegistry.get(api.getServer());
+    private URI generateURI(Server server, Api api, RequestObject request) throws URISyntaxException {
         return new URIBuilder()
                 .setScheme(server.isHttps() ? "https" : "http")
                 .setHost(server.getHost())
                 .setPort(server.getPort())
-                .setPath(resolvePath(request, api))
-                .setParameters(getQueryParams(request))
+                .setPath(resolvePath(server, api, request))
+                .setParameters(getQueryParams(server, api, request))
                 .build();
     }
 
     @SuppressWarnings("deprecation")
-    private String resolvePath(RequestObject request, Api api) {
+    private String resolvePath(Server server, Api api, RequestObject request) {
         String uri = api.getPath();
         if (!Strings.isNullOrEmpty(uri) && request.getPathParam() != null) {
             uri = StrSubstitutor.replace(api.getPath(), request.getPathParam());
@@ -147,7 +145,7 @@ public class SyncRequestProcessor implements IRequestProcessor {
         return uri.startsWith("/") ? uri : "/" + uri;
     }
 
-    private List<NameValuePair> getQueryParams(RequestObject request) {
+    private List<NameValuePair> getQueryParams(Server server, Api api, RequestObject request) {
         final List<NameValuePair> queryParams = new ArrayList<>();
         if (null != request.getQueryParam()) {
             request.getQueryParam()
