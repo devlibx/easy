@@ -93,9 +93,8 @@ public class ResilienceManagerObservableTest extends TestCase {
             throw new CustomException();
         });
 
-        // Test 1 - We have a good Observable but Circuit is forced open
-        // We must get a CircuitOpenException
-        AtomicBoolean gotException = new AtomicBoolean();
+        // Test 1 - We have Observable which throws a CustomException (we must get the same)
+        final AtomicBoolean gotException = new AtomicBoolean();
         processor.executeObservable(uuid, observable, Long.class)
                 .blockingSubscribe(aLong -> {
                             fail("Circuit is open, we should never get there");
@@ -105,5 +104,23 @@ public class ResilienceManagerObservableTest extends TestCase {
                             gotException.set(true);
                         });
         assertTrue("We must have received a CustomException", gotException.get());
+
+
+        observable = Observable.create(observableEmitter -> {
+            throw new NullPointerException();
+        });
+
+        // Test 2 - We have Observable which throws a NullPointerException (we must get the same)
+        // We must get a CircuitOpenException
+        gotException.set(false);
+        processor.executeObservable(uuid, observable, Long.class)
+                .blockingSubscribe(aLong -> {
+                            fail("Circuit is open, we should never get there");
+                        },
+                        throwable -> {
+                            assertTrue(throwable.getClass().isAssignableFrom(NullPointerException.class));
+                            gotException.set(true);
+                        });
+        assertTrue("We must have received a NullPointerException", gotException.get());
     }
 }
