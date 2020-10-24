@@ -123,8 +123,9 @@ public class EasyHttp {
         requestObject.setHeaders(headers);
         requestObject.setBody(body);
 
+
         // Observable to execute
-        Observable<T> observable = requestProcessors.get(server + "-" + api)
+        /*Observable<T> observable = requestProcessors.get(server + "-" + api)
                 .process(requestObject)
                 .flatMap((Function<ResponseObject, ObservableSource<T>>) responseObject -> {
                     // Get body
@@ -136,7 +137,27 @@ public class EasyHttp {
                     // Convert to requested class
                     T objectToReturn = JsonUtils.readObject(bodyString, cls);
                     return Observable.just(objectToReturn);
-                });
+                });*/
+
+        Observable<T> observable = Observable.create(observableEmitter -> {
+            requestProcessors.get(server + "-" + api)
+                    .process(requestObject)
+                    .flatMap((Function<ResponseObject, ObservableSource<T>>) responseObject -> {
+                        // Get body
+                        String bodyString = null;
+                        if (responseObject.getBody() != null) {
+                            bodyString = new String(responseObject.getBody());
+                        }
+
+                        // Convert to requested class
+                        T objectToReturn = JsonUtils.readObject(bodyString, cls);
+                        return Observable.just(objectToReturn);
+                    })
+                    .subscribe(t -> {
+                        observableEmitter.onNext(t);
+                        observableEmitter.onComplete();
+                    });
+        });
 
         // Run it with resilience processor;
         return resilienceProcessors.get(key)

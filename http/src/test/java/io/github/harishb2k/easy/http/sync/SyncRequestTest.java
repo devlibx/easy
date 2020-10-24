@@ -79,21 +79,21 @@ public class SyncRequestTest extends TestCase {
             try {
                 EasyHttp.callSync(
                         "testServer",
-                        "delay_timeout_5000",
+                        "delay_timeout_1000",
                         null,
-                        multivaluedMap("delay", 2000),
+                        multivaluedMap("delay", 1),
                         null,
                         null,
                         Map.class
                 );
             } catch (OverflowException e) {
                 overflowCount.incrementAndGet();
+                System.out.println("Test is expecting this exception - " + e);
             } catch (Exception e) {
-                System.out.println(e);
+                fail("We should not get a exception - only OverflowException is expected");
             }
         });
-
-        // assertEquals(6, overflowCount.get());
+        assertEquals(6, overflowCount.get());
     }
 
     @Override
