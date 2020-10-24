@@ -6,6 +6,7 @@ import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.github.harishb2k.easy.resilience.ResilienceManagerTest.CustomException;
 import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
 import io.github.harishb2k.easy.resilience.exception.OverflowException;
+import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
 import io.reactivex.Observable;
 import junit.framework.TestCase;
@@ -187,5 +188,38 @@ public class ResilienceManagerObservableTest extends TestCase {
         assertEquals("Expected these many success calls", expectedCountOfSuccessfulRequest, successCalls.get());
         assertEquals("Expected these many error calls", expectedCountOfErrorRequest, errorCalls.get());
         assertEquals("Expected these many error calls - must be of OverflowException", expectedCountOfErrorRequest, overflowExceptionCalls.get());
+    }
+
+    /**
+     * Test we get a proper type of exception when we make too many calls.
+     */
+    public void testRequestTimeoutExceptionIsThrown() {
+        String uuid = UUID.randomUUID().toString();
+        ResilienceProcessor processor = (ResilienceProcessor) resilienceManager.getOrCreate(
+                IResilienceManager.ResilienceCallConfig.withDefaults()
+                        .id(uuid)
+                        .timeout(100)
+                        .concurrency(2)
+                        .build()
+        );
+
+        Observable<Long> observable = Observable.create(observableEmitter -> {
+            Thread.sleep(1000);
+            observableEmitter.onNext(10L);
+            observableEmitter.onComplete();
+        });
+
+        AtomicBoolean gotException = new AtomicBoolean();
+        processor.executeObservable(uuid, observable, Long.class)
+                .blockingSubscribe(
+                        aLong -> {
+                            fail("We should never get here");
+                        },
+                        throwable -> {
+                            assertTrue(throwable.getClass().isAssignableFrom(RequestTimeoutException.class));
+                            gotException.set(true);
+                        }
+                );
+        assertTrue("We must have received an exception", gotException.get());
     }
 }
