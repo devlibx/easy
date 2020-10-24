@@ -87,12 +87,15 @@ public class ResilienceProcessor implements IResilienceProcessor {
 
                 // Run the real code
                 Runnable runnable = () -> {
+                    long start = System.currentTimeMillis();
                     observable.subscribe(
                             obj -> {
+                                circuitBreaker.onSuccess(circuitBreaker.getCurrentTimestamp() - start, circuitBreaker.getTimestampUnit());
                                 observableEmitter.onNext(obj);
                                 observableEmitter.onComplete();
                             },
                             throwable -> {
+                                circuitBreaker.onError(circuitBreaker.getCurrentTimestamp() - start, circuitBreaker.getTimestampUnit(), throwable);
                                 observableEmitter.onError(ExceptionUtil.unwrapResilience4jException(throwable));
                             });
                 };

@@ -370,7 +370,7 @@ public class ResilienceManagerTest extends TestCase {
             throw new CustomException();
         });
 
-        int count = 1000;
+        int count = 100;
         CountDownLatch waitForSuccessOrError = new CountDownLatch(count);
         final AtomicBoolean gotCircuitOpenException = new AtomicBoolean(false);
         for (int i = 0; i < count; i++) {
@@ -379,15 +379,30 @@ public class ResilienceManagerTest extends TestCase {
                                 waitForSuccessOrError.countDown();
                             },
                             throwable -> {
-                                System.out.println(throwable);
                                 if (throwable instanceof CircuitOpenException) {
+                                    System.out.println(throwable);
                                     gotCircuitOpenException.set(true);
                                 }
                                 waitForSuccessOrError.countDown();
                             });
         }
         waitForSuccessOrError.await(5, TimeUnit.SECONDS);
-        // assertTrue(gotCircuitOpenException.get());
+        assertTrue(gotCircuitOpenException.get());
+
+        boolean gotSuccess = false;
+        Thread.sleep(2);
+        for (int i = 0; i < 10000; i++) {
+            try {
+                Long result = processor.execute(uuid, () -> 111L, Long.class);
+                gotSuccess = true;
+                assertEquals(111L, result.longValue());
+            } catch (Exception ignored) {
+                System.out.println(ignored);
+            }
+            Thread.sleep(1);
+        }
+        assertTrue(gotSuccess);
+
     }
 
     private static class CustomException extends RuntimeException {
