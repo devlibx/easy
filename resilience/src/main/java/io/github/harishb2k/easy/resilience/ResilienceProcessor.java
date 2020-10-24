@@ -6,6 +6,7 @@ import io.github.harishb2k.easy.resilience.exception.ResilienceException;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.decorators.Decorators;
 import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.reactivex.Observable;
@@ -13,9 +14,12 @@ import io.reactivex.Observable;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Supplier;
 
 import static io.github.harishb2k.easy.resilience.exception.ExceptionUtil.unwrapResilience4jException;
 import static io.github.harishb2k.easy.resilience.exception.ExceptionUtil.unwrapResilience4jExecutionException;
@@ -30,7 +34,11 @@ public class ResilienceProcessor implements IResilienceProcessor {
     public void initialized(ResilienceCallConfig config) {
 
         // Setup a circuit breaker with default settings
-        circuitBreaker = CircuitBreaker.ofDefaults(config.getId());
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .enableAutomaticTransitionFromOpenToHalfOpen()
+                .waitDurationInOpenState(Duration.ofMillis(100))
+                .build();
+        circuitBreaker = CircuitBreaker.of(config.getId(), circuitBreakerConfig);
 
         // Setup a bulkhead for this request
         ThreadPoolBulkheadConfig threadPoolBulkheadConfig = ThreadPoolBulkheadConfig.custom()
@@ -80,6 +88,8 @@ public class ResilienceProcessor implements IResilienceProcessor {
         });
     }
 
+    static AtomicInteger counter = new AtomicInteger();
+
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public <T> Observable<T> executeAsObservable(String id, Observable<T> observable, Class<T> cls) {
         return Observable.create(observableEmitter -> {
@@ -100,16 +110,33 @@ public class ResilienceProcessor implements IResilienceProcessor {
                             });
                 };
 
-                Decorators.ofRunnable(runnable)
+                Decorators.ofSupplier(new Supplier<T>() {
+                    @Override
+                    public T get() {
+                        return observable.blockingFirst();
+                    }
+                })
+                        .withCircuitBreaker(circuitBreaker)
                         .withThreadPoolBulkhead(threadPoolBulkhead)
                         .withTimeLimiter(timeLimiter, scheduler)
-                        .withCircuitBreaker(circuitBreaker)
+                        .decorate()
                         .get()
-                        .toCompletableFuture()
-                        .get();
+                        .whenComplete((t, throwable) -> {
+                            if (throwable instanceof CompletionException) {
+                                Exception e = ExceptionUtil.unwrapResilience4jException(throwable.getCause());
+                                observableEmitter.onError(e);
+                            } else if (throwable != null) {
+                                Exception e = ExceptionUtil.unwrapResilience4jException(throwable);
+                                observableEmitter.onError(e);
+                            } else {
+                                observableEmitter.onNext(t);
+                                observableEmitter.onComplete();
+                            }
 
-            } catch (ExecutionException e) {
-                observableEmitter.onError(ExceptionUtil.unwrapResilience4jExecutionException(e));
+                        });
+
+            } catch (RuntimeException e) {
+                // observableEmitter.onError(ExceptionUtil.unwrapResilience4jExecutionException(e));
             } catch (Exception e) {
                 // We should never get here. The helper "execute" method never throws exception
                 // (it wraps all to ResilienceException)

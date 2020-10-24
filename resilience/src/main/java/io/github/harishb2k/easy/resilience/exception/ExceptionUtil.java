@@ -11,6 +11,8 @@ public class ExceptionUtil {
     public static RuntimeException unwrapResilience4jException(Throwable e) {
         if (e instanceof TimeoutException) {
             return new RequestTimeoutException(e.getMessage(), e);
+        } else if (e instanceof CallNotPermittedException) {
+            return new CircuitOpenException(e.getMessage(), e);
         }
         return new UnknownException("Unknown exception", e);
     }
