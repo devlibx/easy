@@ -5,6 +5,9 @@ servers:
     https: true
     connectTimeout: 1000
     connectionRequestTimeout: 1000
+  testServer:
+     host: localhost
+     port: 9123
 
 apis:
   getPosts:
@@ -12,4 +15,27 @@ apis:
     path: /posts/${id}
     server: jsonplaceholder
     timeout: 1000
-
+  delay_timeout_10:
+    path: /delay
+    server: testserver
+    timeout: 10
+    concurrency: 3
+  delay_timeout_20:
+    path: /delay
+    server: testserver
+    timeout: 20
+  delay_timeout_50:
+    path: /delay
+    server: testserver
+    timeout: 50
+  delay_timeout_100:
+    path: /delay
+    server: testserver
+    timeout: 100
+    concurrency: 3
+  delay_timeout_1000:
+    path: /delay
+    server: testserver
+    timeout: 1000
+    concurrency: 3
+    queueSize: 1

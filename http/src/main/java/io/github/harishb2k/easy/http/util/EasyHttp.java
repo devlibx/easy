@@ -7,7 +7,6 @@ import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
 import io.github.harishb2k.easy.http.ResponseObject;
 import io.github.harishb2k.easy.http.config.Config;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
 import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
@@ -34,9 +33,8 @@ public class EasyHttp {
      */
     private static final Map<String, IRequestProcessor> requestProcessors = new HashMap<>();
     private static final Map<String, IResilienceProcessor> resilienceProcessors = new HashMap<>();
-
     private static IResilienceManager resilienceManager;
-    private static Lock resilienceManagerLock = new ReentrantLock();
+    private static final Lock resilienceManagerLock = new ReentrantLock();
 
     /**
      * Free all resources
@@ -121,9 +119,6 @@ public class EasyHttp {
             return Observable.error(new RuntimeException("server=" + server + " api=" + api + " is not registered"));
         }
 
-        // Get resilienceManager object before we start anything
-        ensureResilienceManager();
-
         // Build request
         RequestObject requestObject = new RequestObject();
         requestObject.setServer(server);
@@ -133,7 +128,9 @@ public class EasyHttp {
         requestObject.setHeaders(headers);
         requestObject.setBody(body);
 
-        Observable<T> observable = requestProcessors.get(server + "-" + api).process(requestObject)
+        // Observable to execute
+        Observable<T> observable = requestProcessors.get(server + "-" + api)
+                .process(requestObject)
                 .flatMap((Function<ResponseObject, ObservableSource<T>>) responseObject -> {
                     // Get body
                     String bodyString = null;
@@ -146,40 +143,16 @@ public class EasyHttp {
                     return Observable.just(objectToReturn);
                 });
 
-        return resilienceProcessors.get(key).executeObservable(
-                key,
-                observable::blockingFirst,
-                cls
-        );
-
-        /*return resilienceProcessors.get(key).executeAsObservable(
-                key,
-                observable,
-                cls
-        );*/
-
-      /*  return requestProcessors.get(server + "-" + api).process(requestObject)
-                .flatMap((Function<ResponseObject, ObservableSource<T>>) responseObject -> {
-                    // Get body
-                    String bodyString = null;
-                    if (responseObject.getBody() != null) {
-                        bodyString = new String(responseObject.getBody());
-                    }
-
-                    // Convert to requested class
-                    T objectToReturn = JsonUtils.readObject(bodyString, cls);
-                    return Observable.just(objectToReturn);
-                });*/
+        // Run it with resilience processor;
+        return resilienceProcessors.get(key)
+                .executeObservable(
+                        key,
+                        observable,
+                        cls
+                );
     }
 
-    public static EasyHttpRequestException convertException(Throwable throwable) {
-        if (throwable instanceof EasyHttpRequestException) {
-            return (EasyHttpRequestException) throwable;
-        } else {
-            return new EasyHttpRequestException(throwable);
-        }
-    }
-
+    // Make sure we have initialized resilienceManager
     private static void ensureResilienceManager() {
         if (resilienceManager == null) {
             resilienceManagerLock.lock();

@@ -1,0 +1,105 @@
+package io.github.harishb2k.easy.http.sync;
+
+import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
+import io.gitbub.harishb2k.easy.helper.ParallelThread;
+import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
+import io.github.harishb2k.easy.http.config.Config;
+import io.github.harishb2k.easy.http.util.EasyHttp;
+import io.github.harishb2k.easy.resilience.exception.OverflowException;
+import junit.framework.TestCase;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
+
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static io.github.harishb2k.easy.http.helper.CommonHttpHelper.multivaluedMap;
+
+@SuppressWarnings("rawtypes")
+public class SyncRequestTest extends TestCase {
+    private LocalHttpServer localHttpServer;
+
+
+    private void setupLogging() {
+        ConsoleAppender console = new ConsoleAppender();
+        String PATTERN = "%d [%p|%c|%C{1}] %m%n";
+        console.setLayout(new PatternLayout(PATTERN));
+        console.setThreshold(org.apache.log4j.Level.DEBUG);
+        console.activateOptions();
+        Logger.getRootLogger().addAppender(console);
+        Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
+        Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(Level.DEBUG);
+    }
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+
+        // Setup logging
+        setupLogging();
+
+        // Start server
+        localHttpServer = new LocalHttpServer();
+        localHttpServer.startServerInThread();
+
+        // Read config and setup EasyHttp
+        Config config = YamlUtils.readYamlCamelCase("sync_processor_config.yaml", Config.class);
+        config.getServers().get("testServer").setPort(localHttpServer.port);
+        EasyHttp.setup(config);
+    }
+
+    /**
+     * Test a simple http call (with success)
+     */
+    public void testSimpleHttpRequest() {
+        Map resultSync = EasyHttp.callSync(
+                "testServer",
+                "delay_timeout_10",
+                null,
+                multivaluedMap("delay", 1),
+                null,
+                null,
+                Map.class
+        );
+        assertEquals("1", resultSync.get("delay"));
+        assertEquals("some data", resultSync.get("data"));
+    }
+
+    /**
+     * Test a simple http call where we make too many calls to simulate requets rejected
+     */
+    public void testRequestExpectRejected() throws Exception {
+        int count = 10;
+        AtomicInteger overflowCount = new AtomicInteger();
+
+        ParallelThread parallelThread = new ParallelThread(count);
+        parallelThread.execute(() -> {
+            System.out.println("Thread Id = " + Thread.currentThread().getId());
+            try {
+                EasyHttp.callSync(
+                        "testServer",
+                        "delay_timeout_1000",
+                        null,
+                        multivaluedMap("delay", 50),
+                        null,
+                        null,
+                        Map.class
+                );
+            } catch (OverflowException e) {
+                overflowCount.incrementAndGet();
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        });
+
+        assertEquals(7, overflowCount.get());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        localHttpServer.stopServer();
+    }
+}
