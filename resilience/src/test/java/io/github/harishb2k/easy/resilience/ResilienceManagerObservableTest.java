@@ -3,6 +3,7 @@ package io.github.harishb2k.easy.resilience;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
+import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.github.harishb2k.easy.resilience.ResilienceManagerTest.CustomException;
 import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
 import io.github.harishb2k.easy.resilience.exception.OverflowException;
@@ -159,31 +160,24 @@ public class ResilienceManagerObservableTest extends TestCase {
         AtomicInteger errorCalls = new AtomicInteger();
         AtomicInteger overflowExceptionCalls = new AtomicInteger();
         CountDownLatch waitForAllRequestToComplete = new CountDownLatch(total);
-        CountDownLatch waitForAllThreads = new CountDownLatch(total);
-        for (int i = 0; i < total; i++) {
-            new Thread(() -> {
-                try {
-                    waitForAllThreads.await(5, TimeUnit.SECONDS);
-                } catch (InterruptedException ignored) {
-                }
-                processor.executeObservable(uuid, observable, Long.class)
-                        .subscribe(
-                                aLong -> {
-                                    successCalls.incrementAndGet();
-                                    waitForAllRequestToComplete.countDown();
-                                },
-                                throwable -> {
-                                    errorCalls.incrementAndGet();
-                                    if (throwable.getClass().isAssignableFrom(OverflowException.class)) {
-                                        overflowExceptionCalls.incrementAndGet();
-                                    }
-                                    waitForAllRequestToComplete.countDown();
-                                }
-                        );
-            }).start();
-            waitForAllThreads.countDown();
-        }
 
+        ParallelThread parallelThread = new ParallelThread(total, "testOverflowExceptionIsThrown");
+        parallelThread.execute(() -> {
+            processor.executeObservable(uuid, observable, Long.class)
+                    .subscribe(
+                            aLong -> {
+                                successCalls.incrementAndGet();
+                                waitForAllRequestToComplete.countDown();
+                            },
+                            throwable -> {
+                                errorCalls.incrementAndGet();
+                                if (throwable.getClass().isAssignableFrom(OverflowException.class)) {
+                                    overflowExceptionCalls.incrementAndGet();
+                                }
+                                waitForAllRequestToComplete.countDown();
+                            }
+                    );
+        });
         waitForAllRequestToComplete.await(5, TimeUnit.SECONDS);
         assertEquals("Expected these many success calls", expectedCountOfSuccessfulRequest, successCalls.get());
         assertEquals("Expected these many error calls", expectedCountOfErrorRequest, errorCalls.get());

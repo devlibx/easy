@@ -58,7 +58,7 @@ public class SyncRequestTest extends TestCase {
     public void testSimpleHttpRequest() {
         Map resultSync = EasyHttp.callSync(
                 "testServer",
-                "delay_timeout_10",
+                "delay_timeout_100",
                 null,
                 multivaluedMap("delay", 1),
                 null,
