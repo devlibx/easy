@@ -15,6 +15,9 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Api {
 
+    /**
+     * Default set of acceptable codes
+     */
     public static final List<Integer> DEFAULT_ACCEPTABLE_CODES = Collections.unmodifiableList(Arrays.asList(200, 201));
 
     /**
@@ -27,13 +30,29 @@ public class Api {
      */
     private String fallbackApiName;
 
+    /**
+     * Use async HTTP client i.e. use async-io
+     * <p>
+     * e.g. a netty based HTTP client to make call to server
+     */
     private boolean async;
+
+    /**
+     * We will warm-up all the http connection pool and threads at the time of boot-up. If noWarmUp=true then this
+     * bootstrap process will not be done.
+     * <p>
+     * default = false i.e. warm-up connections and thread at bootup
+     */
+    private boolean noWarmUp;
 
     /**
      * Name of the server to be used for this request
      */
     private String server;
 
+    /**
+     * HTTP method to be used for this request
+     */
     private String method = "GET";
 
     /**
@@ -41,6 +60,10 @@ public class Api {
      */
     private String type = "HTTP";
 
+    /**
+     * What status codes are considered as acceptable. If we get http status in response which
+     * is one of these then that call will not be considered as failure.
+     */
     private List<Integer> acceptableCodes = DEFAULT_ACCEPTABLE_CODES;
 
     /**
@@ -53,6 +76,16 @@ public class Api {
      */
     private int concurrency = 2;
 
+    /**
+     * concurrency is the no of parallel request this API can handle. queueSize is the additional queue where we park
+     * a request if we are already processing "N=concurrency" requests.
+     * <p>
+     * Once we process the running requests, we pick the request from this queue.
+     * <p>
+     * e.g. concurrency=2 and queueSize=100
+     * <p>
+     * This means that we can take burst of 102 requests.
+     */
     private int queueSize = 100;
 
     /**

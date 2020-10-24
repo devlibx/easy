@@ -58,6 +58,8 @@ public class SyncRequestProcessor implements IRequestProcessor {
 
     @Override
     public Observable<ResponseObject> process(RequestObject requestObject) {
+
+        // Get api and server from registry
         final Api api = apiRegistry.getOptional(requestObject.getApi()).orElseThrow(() -> new RuntimeException("Could not find api=" + requestObject.getApi()));
         final Server server = serverRegistry.getOptional(api.getServer()).orElseThrow(() -> new RuntimeException("Could not find server=" + api.getServer()));
 
@@ -66,40 +68,52 @@ public class SyncRequestProcessor implements IRequestProcessor {
             requestObject.setMethod(api.getMethod());
         }
 
-        try {
-            return Observable.create(observableEmitter -> {
-                try {
-                    ResponseObject responseObject = internalProcess(server, api, requestObject);
-                    if (responseObject != null) {
-                        observableEmitter.onNext(responseObject);
+        // Build a observer to handle this request
+        return Observable.create(observableEmitter -> {
+
+            try {
+
+                // Primary Path - request and give result
+                ResponseObject responseObject = internalProcess(server, api, requestObject);
+                if (responseObject != null) {
+                    observableEmitter.onNext(responseObject);
+                }
+                observableEmitter.onComplete();
+
+            } catch (Exception e) {
+
+                if (!Strings.isNullOrEmpty(api.getFallbackApiName())) {
+                    // Secondary flow to handle fallback API - If Primary path failed and we have a fallback configured
+                    // then use it
+
+                    // Get api and server from registry
+                    log.info("Going to fallback: server={}, api={}, fallbackApi={}", server.getName(), api.getName(), api.getFallbackApiName());
+                    final Api fallbackApi = apiRegistry.getOptional(api.getFallbackApiName()).orElseThrow(() -> new RuntimeException("Could not find fallback api=" + api.getFallbackApiName()));
+                    final Server fallbackServer = serverRegistry.getOptional(fallbackApi.getServer()).orElseThrow(() -> new RuntimeException("Could not find fallback server=" + fallbackApi.getServer()));
+
+                    // Set correct type of method in request from API
+                    if (Strings.isNullOrEmpty(requestObject.getMethod())) {
+                        requestObject.setMethod(api.getMethod());
                     }
-                    observableEmitter.onComplete();
-                } catch (Exception e) {
+
+                    // Try to process this request by fallback
+                    try {
+                        ResponseObject responseObject = internalProcess(fallbackServer, fallbackApi, requestObject);
+                        if (responseObject != null) {
+                            observableEmitter.onNext(responseObject);
+                        }
+                        observableEmitter.onComplete();
+                    } catch (Exception e1) {
+                        observableEmitter.onError(e1);
+                    }
+
+                } else {
+
+                    // No fallback is set - send back the error
                     observableEmitter.onError(e);
                 }
-            });
-            /*
-            ResponseObject responseObject = internalProcess(server, api, requestObject);
-            if (responseObject != null) {
-                return Observable.just(responseObject);
-            } else {
-                return Observable.empty();
-            }*/
-        } catch (Exception e) {
-            if (!Strings.isNullOrEmpty(api.getFallbackApiName())) {
-                log.info("Going to fallback: server={}, api={}, fallbackApi={}", server.getName(), api.getName(), api.getFallbackApiName());
-                final Api fallbackApi = apiRegistry.getOptional(api.getFallbackApiName()).orElseThrow(() -> new RuntimeException("Could not find fallback api=" + api.getFallbackApiName()));
-                final Server fallbackServer = serverRegistry.getOptional(fallbackApi.getServer()).orElseThrow(() -> new RuntimeException("Could not find fallback server=" + fallbackApi.getServer()));
-                ResponseObject responseObject = internalProcess(fallbackServer, fallbackApi, requestObject);
-                if (responseObject != null) {
-                    return Observable.just(responseObject);
-                } else {
-                    return Observable.empty();
-                }
-            } else {
-                return Observable.error(e);
             }
-        }
+        });
     }
 
     @SuppressWarnings("Convert2MethodRef")

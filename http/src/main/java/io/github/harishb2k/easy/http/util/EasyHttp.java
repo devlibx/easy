@@ -39,6 +39,9 @@ public class EasyHttp {
         requestProcessors.forEach((key, requestProcessor) -> Safe.safe(requestProcessor::shutdown));
     }
 
+    /**
+     * Setup EasyHttp to make HTTP requests
+     */
     public static void setup(Config config) {
 
         // Make server registry
@@ -55,23 +58,52 @@ public class EasyHttp {
         // Setup all request processors
         serverRegistry.getServerMap().forEach((serverName, server) -> {
             apiRegistry.getApiMap().forEach((apiName, api) -> {
+
+                // Key to be used for this API
+                String key = serverName + "-" + apiName;
+
+                // Build a request processor
                 IRequestProcessor requestProcessor;
                 if (api.isAsync()) {
+                    // FIXME - For now we only have sync processor - need to give a correct impl
                     requestProcessor = new SyncRequestProcessor(serverRegistry, apiRegistry);
                 } else {
                     requestProcessor = new SyncRequestProcessor(serverRegistry, apiRegistry);
                 }
-                requestProcessors.put(serverName + "-" + apiName, requestProcessor);
+                requestProcessors.put(key, requestProcessor);
 
+                // Setup resilience processor
                 ResilienceCallConfig callConfig = ResilienceCallConfig.withDefaults()
-                        .id(serverName + "-" + apiName)
+                        .id(key)
                         .concurrency(api.getConcurrency())
-                        .timeout(api.getTimeout() + 1000)
+                        .timeout(api.getTimeout())
                         .queueSize(api.getQueueSize())
                         .build();
                 IResilienceProcessor resilienceProcessor = resilienceManager.getOrCreate(callConfig);
-                resilienceProcessors.put(serverName + "-" + apiName, resilienceProcessor);
+                resilienceProcessors.put(key, resilienceProcessor);
+            });
+        });
 
+        // Warm-up connections and threads
+        serverRegistry.getServerMap().forEach((serverName, server) -> {
+            apiRegistry.getApiMap().forEach((apiName, api) -> {
+                if (api.isNoWarmUp() || true) {
+                    log.debug("service={} api={} warm-up is disabled. The very first call to {}.{} may timeout or fail if api timeout is small", server, api, server, api);
+                    return;
+                }
+                try {
+                    log.debug("making a warm-up call to service={} api={} - you may see bad api call in server logs", server, api);
+                    EasyHttp.callSync(
+                            serverName,
+                            apiName,
+                            null,
+                            null,
+                            null,
+                            null,
+                            Map.class
+                    );
+                } catch (Exception ignored) {
+                }
             });
         });
     }

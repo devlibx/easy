@@ -58,19 +58,19 @@ public class SyncRequestTest extends TestCase {
     public void testSimpleHttpRequest() {
         Map resultSync = EasyHttp.callSync(
                 "testServer",
-                "delay_timeout_100",
+                "delay_timeout_5000",
                 null,
-                multivaluedMap("delay", 1),
+                multivaluedMap("delay", 1000),
                 null,
                 null,
                 Map.class
         );
-        assertEquals("1", resultSync.get("delay"));
+        assertEquals("1000", resultSync.get("delay"));
         assertEquals("some data", resultSync.get("data"));
     }
 
     /**
-     * Test a simple http call where we make too many calls to simulate requets rejected
+     * Test a simple http call where we make too many calls to simulate requests rejected
      */
     public void testRequestExpectRejected() throws Exception {
         AtomicInteger overflowCount = new AtomicInteger();
@@ -81,7 +81,7 @@ public class SyncRequestTest extends TestCase {
                         "testServer",
                         "delay_timeout_1000",
                         null,
-                        multivaluedMap("delay", 1),
+                        multivaluedMap("delay", 100),
                         null,
                         null,
                         Map.class

@@ -23,7 +23,7 @@ import java.util.Map;
 
 @SuppressWarnings("All")
 @Ignore
-public class SyncRequestProcessorTest extends TestCase {
+public abstract class SyncRequestProcessorTest extends TestCase {
 
     private static Config buildConfig() {
         Api api = new Api();
