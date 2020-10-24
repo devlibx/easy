@@ -148,9 +148,15 @@ public class EasyHttp {
 
         return resilienceProcessors.get(key).executeAsObservable(
                 key,
-                observable,
+                observable::blockingFirst,
                 cls
         );
+
+        /*return resilienceProcessors.get(key).executeAsObservable(
+                key,
+                observable,
+                cls
+        );*/
 
       /*  return requestProcessors.get(server + "-" + api).process(requestObject)
                 .flatMap((Function<ResponseObject, ObservableSource<T>>) responseObject -> {
