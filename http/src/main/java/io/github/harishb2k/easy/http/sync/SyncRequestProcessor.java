@@ -58,7 +58,6 @@ public class SyncRequestProcessor implements IRequestProcessor {
 
     @Override
     public Observable<ResponseObject> process(RequestObject requestObject) {
-        System.out.println("Current Thread Id=" + Thread.currentThread().getId());
         final Api api = apiRegistry.getOptional(requestObject.getApi()).orElseThrow(() -> new RuntimeException("Could not find api=" + requestObject.getApi()));
         final Server server = serverRegistry.getOptional(api.getServer()).orElseThrow(() -> new RuntimeException("Could not find server=" + api.getServer()));
 

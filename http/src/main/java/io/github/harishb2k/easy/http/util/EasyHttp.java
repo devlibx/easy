@@ -14,7 +14,6 @@ import io.github.harishb2k.easy.resilience.IResilienceManager;
 import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
 import io.github.harishb2k.easy.resilience.IResilienceProcessor;
 import io.github.harishb2k.easy.resilience.ResilienceManager;
-import io.github.harishb2k.easy.resilience.exception.ExceptionUtil;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
@@ -88,19 +87,15 @@ public class EasyHttp {
                                  Object body,
                                  Class<T> cls
     ) {
-        try {
-            return call(
-                    server,
-                    api,
-                    pathParam,
-                    queryParam,
-                    headers,
-                    body,
-                    cls
-            ).blockingFirst();
-        } catch (Exception e) {
-            throw ExceptionUtil.processException(e);
-        }
+        return call(
+                server,
+                api,
+                pathParam,
+                queryParam,
+                headers,
+                body,
+                cls
+        ).blockingFirst();
     }
 
     public static <T> Observable<T> call(String server,

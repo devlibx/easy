@@ -17,25 +17,31 @@ apis:
     timeout: 1000
   delay_timeout_10:
     path: /delay
-    server: testserver
+    server: testServer
     timeout: 10
     concurrency: 3
   delay_timeout_20:
     path: /delay
-    server: testserver
+    server: testServer
     timeout: 20
   delay_timeout_50:
     path: /delay
-    server: testserver
+    server: testServer
     timeout: 50
   delay_timeout_100:
     path: /delay
-    server: testserver
+    server: testServer
     timeout: 100
     concurrency: 3
   delay_timeout_1000:
     path: /delay
-    server: testserver
+    server: testServer
     timeout: 1000
+    concurrency: 3
+    queueSize: 1
+  delay_timeout_5000:
+    path: /delay
+    server: testServer
+    timeout: 5000
     concurrency: 3
     queueSize: 1

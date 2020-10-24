@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
@@ -98,8 +97,8 @@ public class LocalHttpServer {
                 Map<String, String> qp = splitQuery(t.getRequestURI().getQuery());
 
                 int sleep = Integer.parseInt(qp.get("delay"));
+                log.debug("HTTP Request - {} # Sleep for {} ms", t.getRequestURI(), sleep);
                 Thread.sleep(sleep);
-                System.out.println("Server Sleep for " + sleep);
 
                 Map<String, Object> data = new HashMap<>();
                 data.put("data", "some data");
