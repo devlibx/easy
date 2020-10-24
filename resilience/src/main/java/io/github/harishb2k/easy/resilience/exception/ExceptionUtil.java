@@ -8,8 +8,11 @@ import java.util.concurrent.TimeoutException;
 
 public class ExceptionUtil {
 
-    public static RuntimeException unwrapResilience4jException(Exception e) {
-        throw new RuntimeException(e);
+    public static RuntimeException unwrapResilience4jException(Throwable e) {
+        if (e instanceof TimeoutException) {
+            return new RequestTimeoutException(e.getMessage(), e);
+        }
+        return new UnknownException("Unknown exception", e);
     }
 
     public static RuntimeException unwrapResilience4jExecutionException(ExecutionException e) {

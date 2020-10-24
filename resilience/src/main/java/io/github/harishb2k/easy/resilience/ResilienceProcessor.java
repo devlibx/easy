@@ -80,19 +80,37 @@ public class ResilienceProcessor implements IResilienceProcessor {
         });
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
     public <T> Observable<T> executeAsObservable(String id, Observable<T> observable, Class<T> cls) {
         return Observable.create(observableEmitter -> {
             try {
-                CompletableFuture<T> future = Decorators.ofSupplier(observable::blockingFirst)
+
+                // Run the real code
+                Runnable runnable = () -> {
+                    observable.subscribe(
+                            obj -> {
+                                observableEmitter.onNext(obj);
+                                observableEmitter.onComplete();
+                            },
+                            throwable -> {
+                                observableEmitter.onError(ExceptionUtil.unwrapResilience4jException(throwable));
+                            });
+                };
+
+                Decorators.ofRunnable(runnable)
                         .withThreadPoolBulkhead(threadPoolBulkhead)
                         .withTimeLimiter(timeLimiter, scheduler)
                         .withCircuitBreaker(circuitBreaker)
                         .get()
-                        .toCompletableFuture();
-                observableEmitter.onNext(future.get());
-                observableEmitter.onComplete();
+                        .toCompletableFuture()
+                        .get();
+
+            } catch (ExecutionException e) {
+                observableEmitter.onError(ExceptionUtil.unwrapResilience4jExecutionException(e));
             } catch (Exception e) {
-                observableEmitter.onError(ExceptionUtil.processException(e));
+                // We should never get here. The helper "execute" method never throws exception
+                // (it wraps all to ResilienceException)
+                observableEmitter.onError(ExceptionUtil.unwrapResilience4jException(e));
             }
         });
     }

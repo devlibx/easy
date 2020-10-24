@@ -10,16 +10,20 @@ import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
 import io.github.harishb2k.easy.resilience.exception.ResilienceException;
 import io.github.harishb2k.easy.resilience.exception.UnknownException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
+import io.reactivex.Observable;
 import junit.framework.TestCase;
+import org.junit.Ignore;
 
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 public class ResilienceManagerTest extends TestCase {
     private Injector injector;
     private IResilienceManager resilienceManager;
@@ -268,6 +272,122 @@ public class ResilienceManagerTest extends TestCase {
         assertTrue(gotException.get());
         assertEquals(RequestTimeoutException.class, exception.get().getClass());
         assertTrue(ResilienceException.class.isAssignableFrom(exception.get().getClass()));
+    }
+
+    /**
+     * This is when Resilience timed out
+     */
+    public void testResilienceManager_Observable_With_Observable_Timeout__ResilienceTimedOut() throws InterruptedException {
+        int concurrency = 3;
+        String uuid = UUID.randomUUID().toString();
+        IResilienceProcessor processor = resilienceManager.getOrCreate(
+                ResilienceCallConfig.withDefaults()
+                        .concurrency(concurrency)
+                        .id(uuid)
+                        .timeout(100)
+                        .build()
+        );
+
+        Observable<String> observable = Observable.create(observableEmitter -> {
+            Thread.sleep(1000);
+            observableEmitter.onNext("Done");
+            observableEmitter.onComplete();
+        });
+
+        CountDownLatch waitForSuccessOrError = new CountDownLatch(1);
+        final AtomicBoolean gotException = new AtomicBoolean(false);
+        final AtomicReference<Throwable> exception = new AtomicReference<>();
+        processor.executeAsObservable(uuid, observable, String.class)
+                .subscribe(s -> {
+                            waitForSuccessOrError.countDown();
+                        },
+                        throwable -> {
+                            gotException.set(true);
+                            exception.set(throwable);
+                            waitForSuccessOrError.countDown();
+                        });
+        waitForSuccessOrError.await(5, TimeUnit.SECONDS);
+        assertTrue(gotException.get());
+        assertEquals(RequestTimeoutException.class, exception.get().getClass());
+        assertTrue(ResilienceException.class.isAssignableFrom(exception.get().getClass()));
+    }
+
+    /**
+     * This is when Resilience timed out
+     */
+    public void testResilienceManager_Observable_With_Observable_Timeout__ObservableTimedOut() throws InterruptedException {
+        int concurrency = 3;
+        String uuid = UUID.randomUUID().toString();
+        IResilienceProcessor processor = resilienceManager.getOrCreate(
+                ResilienceCallConfig.withDefaults()
+                        .concurrency(concurrency)
+                        .id(uuid)
+                        .timeout(1000)
+                        .build()
+        );
+
+        Observable<String> observable = Observable.create(observableEmitter -> {
+            Thread.sleep(100);
+            throw new TimeoutException();
+        });
+
+        CountDownLatch waitForSuccessOrError = new CountDownLatch(1);
+        final AtomicBoolean gotException = new AtomicBoolean(false);
+        final AtomicReference<Throwable> exception = new AtomicReference<>();
+        processor.executeAsObservable(uuid, observable, String.class)
+                .subscribe(s -> {
+                            waitForSuccessOrError.countDown();
+                        },
+                        throwable -> {
+                            gotException.set(true);
+                            exception.set(throwable);
+                            waitForSuccessOrError.countDown();
+                        });
+        waitForSuccessOrError.await(5, TimeUnit.SECONDS);
+        assertTrue(gotException.get());
+        assertEquals(RequestTimeoutException.class, exception.get().getClass());
+        assertTrue(ResilienceException.class.isAssignableFrom(exception.get().getClass()));
+    }
+
+
+    /**
+     * This is when Resilience timed out
+     */
+    @Ignore
+    public void testResilienceManager_Observable_With_Observable_CircuitOpen_Simulation() throws InterruptedException {
+        int concurrency = 3;
+        String uuid = UUID.randomUUID().toString();
+        IResilienceProcessor processor = resilienceManager.getOrCreate(
+                ResilienceCallConfig.withDefaults()
+                        .concurrency(concurrency)
+                        .id(uuid)
+                        .timeout(1000)
+                        .build()
+        );
+
+        Observable<String> observable = Observable.create(observableEmitter -> {
+            Thread.sleep(1);
+            throw new CustomException();
+        });
+
+        int count = 1000;
+        CountDownLatch waitForSuccessOrError = new CountDownLatch(count);
+        final AtomicBoolean gotCircuitOpenException = new AtomicBoolean(false);
+        for (int i = 0; i < count; i++) {
+            processor.executeAsObservable(uuid, observable, String.class)
+                    .subscribe(s -> {
+                                waitForSuccessOrError.countDown();
+                            },
+                            throwable -> {
+                                System.out.println(throwable);
+                                if (throwable instanceof CircuitOpenException) {
+                                    gotCircuitOpenException.set(true);
+                                }
+                                waitForSuccessOrError.countDown();
+                            });
+        }
+        waitForSuccessOrError.await(5, TimeUnit.SECONDS);
+        // assertTrue(gotCircuitOpenException.get());
     }
 
     private static class CustomException extends RuntimeException {
