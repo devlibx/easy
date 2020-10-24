@@ -5,7 +5,6 @@ import io.gitbub.harishb2k.easy.helper.Safe;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
-import io.github.harishb2k.easy.http.ResponseObject;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
@@ -15,8 +14,6 @@ import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConf
 import io.github.harishb2k.easy.resilience.IResilienceProcessor;
 import io.github.harishb2k.easy.resilience.ResilienceManager;
 import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.functions.Function;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -123,11 +120,11 @@ public class EasyHttp {
         requestObject.setHeaders(headers);
         requestObject.setBody(body);
 
-
-        // Observable to execute
-        /*Observable<T> observable = requestProcessors.get(server + "-" + api)
+        // Build a Observable and process it to give final response (in flat map)
+        Observable<T> observable = requestProcessors.get(server + "-" + api)
                 .process(requestObject)
-                .flatMap((Function<ResponseObject, ObservableSource<T>>) responseObject -> {
+                .flatMap(responseObject -> {
+
                     // Get body
                     String bodyString = null;
                     if (responseObject.getBody() != null) {
@@ -137,27 +134,8 @@ public class EasyHttp {
                     // Convert to requested class
                     T objectToReturn = JsonUtils.readObject(bodyString, cls);
                     return Observable.just(objectToReturn);
-                });*/
 
-        Observable<T> observable = Observable.create(observableEmitter -> {
-            requestProcessors.get(server + "-" + api)
-                    .process(requestObject)
-                    .flatMap((Function<ResponseObject, ObservableSource<T>>) responseObject -> {
-                        // Get body
-                        String bodyString = null;
-                        if (responseObject.getBody() != null) {
-                            bodyString = new String(responseObject.getBody());
-                        }
-
-                        // Convert to requested class
-                        T objectToReturn = JsonUtils.readObject(bodyString, cls);
-                        return Observable.just(objectToReturn);
-                    })
-                    .subscribe(t -> {
-                        observableEmitter.onNext(t);
-                        observableEmitter.onComplete();
-                    });
-        });
+                });
 
         // Run it with resilience processor;
         return resilienceProcessors.get(key)

@@ -67,12 +67,24 @@ public class SyncRequestProcessor implements IRequestProcessor {
         }
 
         try {
+            return Observable.create(observableEmitter -> {
+                try {
+                    ResponseObject responseObject = internalProcess(server, api, requestObject);
+                    if (responseObject != null) {
+                        observableEmitter.onNext(responseObject);
+                    }
+                    observableEmitter.onComplete();
+                } catch (Exception e) {
+                    observableEmitter.onError(e);
+                }
+            });
+            /*
             ResponseObject responseObject = internalProcess(server, api, requestObject);
             if (responseObject != null) {
                 return Observable.just(responseObject);
             } else {
                 return Observable.empty();
-            }
+            }*/
         } catch (Exception e) {
             if (!Strings.isNullOrEmpty(api.getFallbackApiName())) {
                 log.info("Going to fallback: server={}, api={}, fallbackApi={}", server.getName(), api.getName(), api.getFallbackApiName());
@@ -135,6 +147,7 @@ public class SyncRequestProcessor implements IRequestProcessor {
             requestBase.addHeader(key, stringHelper.stringify(value));
         });
 
+        System.out.println("Calling HTTP client...");
         // Request server
         ResponseObject responseObject;
         CloseableHttpClient client = apiRegistry.getClient(server, api, CloseableHttpClient.class);
