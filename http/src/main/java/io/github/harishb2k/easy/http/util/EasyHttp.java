@@ -146,7 +146,7 @@ public class EasyHttp {
                     return Observable.just(objectToReturn);
                 });
 
-        return resilienceProcessors.get(key).executeAsObservable(
+        return resilienceProcessors.get(key).executeObservable(
                 key,
                 observable::blockingFirst,
                 cls

@@ -10,12 +10,9 @@ import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
 import io.github.harishb2k.easy.resilience.exception.ResilienceException;
 import io.github.harishb2k.easy.resilience.exception.UnknownException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.reactivex.Observable;
 import junit.framework.TestCase;
 
-import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -231,7 +228,7 @@ public class ResilienceManagerTest extends TestCase {
         AtomicInteger results = new AtomicInteger();
         CountDownLatch latch = new CountDownLatch(concurrency);
         for (int i = 0; i < concurrency; i++) {
-            processor.executeAsObservable(uuid, System::currentTimeMillis, Long.class)
+            processor.executeObservable(uuid, System::currentTimeMillis, Long.class)
                     .subscribe(aLong -> {
                         long temp = aLong;
                         results.incrementAndGet();
@@ -264,7 +261,7 @@ public class ResilienceManagerTest extends TestCase {
 
         final AtomicBoolean gotException = new AtomicBoolean(false);
         final AtomicReference<Throwable> exception = new AtomicReference<>();
-        processor.executeAsObservable(uuid, callable, String.class)
+        processor.executeObservable(uuid, callable, String.class)
                 .subscribe(s -> {
                         },
                         throwable -> {
@@ -299,7 +296,7 @@ public class ResilienceManagerTest extends TestCase {
         CountDownLatch waitForSuccessOrError = new CountDownLatch(1);
         final AtomicBoolean gotException = new AtomicBoolean(false);
         final AtomicReference<Throwable> exception = new AtomicReference<>();
-        processor.executeAsObservable(uuid, observable, String.class)
+        processor.executeObservable(uuid, observable, String.class)
                 .subscribe(s -> {
                             waitForSuccessOrError.countDown();
                         },
@@ -336,7 +333,7 @@ public class ResilienceManagerTest extends TestCase {
         CountDownLatch waitForSuccessOrError = new CountDownLatch(1);
         final AtomicBoolean gotException = new AtomicBoolean(false);
         final AtomicReference<Throwable> exception = new AtomicReference<>();
-        processor.executeAsObservable(uuid, observable, String.class)
+        processor.executeObservable(uuid, observable, String.class)
                 .subscribe(s -> {
                             waitForSuccessOrError.countDown();
                         },
@@ -376,7 +373,7 @@ public class ResilienceManagerTest extends TestCase {
         CountDownLatch waitForSuccessOrError = new CountDownLatch(count);
         final AtomicBoolean gotCircuitOpenException = new AtomicBoolean(false);
         for (int i = 0; i < count; i++) {
-            processor.executeAsObservable(uuid, observable, String.class)
+            processor.executeObservable(uuid, observable, String.class)
                     .subscribe(s -> {
                                 waitForSuccessOrError.countDown();
                             },

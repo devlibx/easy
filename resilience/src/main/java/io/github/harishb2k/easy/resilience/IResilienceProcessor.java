@@ -23,10 +23,10 @@ public interface IResilienceProcessor {
     /**
      * Execute a callable as observable
      */
-    <T> Observable<T> executeAsObservable(String id, Callable<T> callable, Class<T> cls);
+    <T> Observable<T> executeObservable(String id, Callable<T> callable, Class<T> cls);
 
     /**
      * Execute a observable
      */
-    <T> Observable<T> executeAsObservable(String id, Observable<T> observable, Class<T> cls);
+    <T> Observable<T> executeObservable(String id, Observable<T> observable, Class<T> cls);
 }

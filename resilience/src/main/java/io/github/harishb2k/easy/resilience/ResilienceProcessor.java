@@ -72,7 +72,7 @@ public class ResilienceProcessor implements IResilienceProcessor {
     }
 
     @Override
-    public <T> Observable<T> executeAsObservable(String id, Callable<T> callable, Class<T> cls) {
+    public <T> Observable<T> executeObservable(String id, Callable<T> callable, Class<T> cls) {
         return Observable.create(observableEmitter -> {
             try {
                 T result = execute(id, callable, cls);
@@ -88,7 +88,8 @@ public class ResilienceProcessor implements IResilienceProcessor {
         });
     }
 
-    public <T> Observable<T> executeAsObservable(String id, Observable<T> observable, Class<T> cls) {
+    @Override
+    public <T> Observable<T> executeObservable(String id, Observable<T> observable, Class<T> cls) {
         return Observable.create(observableEmitter -> {
 
             Decorators.ofSupplier(observable::blockingFirst)

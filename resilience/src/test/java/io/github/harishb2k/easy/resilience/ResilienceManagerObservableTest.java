@@ -47,22 +47,22 @@ public class ResilienceManagerObservableTest extends TestCase {
         // We must get a CircuitOpenException
         AtomicBoolean gotException = new AtomicBoolean();
         processor.getCircuitBreaker().transitionToOpenState();
-        processor.executeAsObservable(uuid, observable, Long.class)
-                .subscribe(aLong -> {
+        processor.executeObservable(uuid, observable, Long.class)
+                .blockingSubscribe(aLong -> {
                             fail("Circuit is open, we should never get there");
                         },
                         throwable -> {
                             assertTrue(throwable.getClass().isAssignableFrom(CircuitOpenException.class));
                             gotException.set(true);
                         });
-        assertTrue(gotException.get());
+        assertTrue("We must have received a CircuitOpenException", gotException.get());
 
 
         // Test 2 - We have a good Observable and Circuit is forced closed
         // We must NOT get a exception
         gotException.set(true);
         processor.getCircuitBreaker().transitionToClosedState();
-        processor.executeAsObservable(uuid, observable, Long.class)
+        processor.executeObservable(uuid, observable, Long.class)
                 .blockingSubscribe(ignored -> {
                             assertEquals(10L, ignored.longValue());
                             gotException.set(false);
