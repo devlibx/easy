@@ -367,6 +367,7 @@
                                     <source>8</source>
                                     <additionalparam>-Xdoclint:none</additionalparam>
                                     <detectJavaApiLink>false</detectJavaApiLink>
+                                    <failOnError>false</failOnError>
                                 </configuration>
                             </execution>
                         </executions>
