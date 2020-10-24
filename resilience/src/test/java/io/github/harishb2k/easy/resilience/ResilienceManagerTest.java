@@ -10,10 +10,12 @@ import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
 import io.github.harishb2k.easy.resilience.exception.ResilienceException;
 import io.github.harishb2k.easy.resilience.exception.UnknownException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.reactivex.Observable;
 import junit.framework.TestCase;
-import org.junit.Ignore;
 
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -140,7 +142,7 @@ public class ResilienceManagerTest extends TestCase {
      * Run overflow test 10 times
      */
     public void testResilienceManager_Overflow_Simulation_10_times() throws Exception {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 3; i++) {
             System.out.println("Iteration - " + i);
             testResilienceManager_Overflow_Simulation();
         }
@@ -349,28 +351,28 @@ public class ResilienceManagerTest extends TestCase {
         assertTrue(ResilienceException.class.isAssignableFrom(exception.get().getClass()));
     }
 
-
     /**
      * This is when Resilience timed out
      */
-    @Ignore
     public void testResilienceManager_Observable_With_Observable_CircuitOpen_Simulation() throws InterruptedException {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
         IResilienceProcessor processor = resilienceManager.getOrCreate(
                 ResilienceCallConfig.withDefaults()
                         .concurrency(concurrency)
+                        .concurrency(100000)
                         .id(uuid)
                         .timeout(1000)
                         .build()
         );
 
         Observable<String> observable = Observable.create(observableEmitter -> {
-            Thread.sleep(1);
+            // Thread.sleep(1);
+            Thread.sleep(10);
             throw new CustomException();
         });
 
-        int count = 100;
+        int count = 200;
         CountDownLatch waitForSuccessOrError = new CountDownLatch(count);
         final AtomicBoolean gotCircuitOpenException = new AtomicBoolean(false);
         for (int i = 0; i < count; i++) {
@@ -379,23 +381,28 @@ public class ResilienceManagerTest extends TestCase {
                                 waitForSuccessOrError.countDown();
                             },
                             throwable -> {
-                                if (throwable instanceof CircuitOpenException) {
-                                    System.out.println(throwable);
+                                System.out.println(throwable);
+                                if (throwable instanceof CircuitOpenException || throwable.getCause() instanceof CircuitOpenException) {
                                     gotCircuitOpenException.set(true);
                                 }
                                 waitForSuccessOrError.countDown();
                             });
         }
         waitForSuccessOrError.await(5, TimeUnit.SECONDS);
-        assertTrue(gotCircuitOpenException.get());
+        assertTrue("Expected a CircuitOpenException", gotCircuitOpenException.get());
 
         boolean gotSuccess = false;
         Thread.sleep(2);
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 200; i++) {
             try {
-                Long result = processor.execute(uuid, () -> 111L, Long.class);
+                Long result = processor.execute(uuid, () -> {
+                    Thread.sleep(100);
+                    return 111L;
+                }, Long.class);
                 gotSuccess = true;
                 assertEquals(111L, result.longValue());
+                System.out.println("Successes");
+                break;
             } catch (Exception ignored) {
                 System.out.println(ignored);
             }

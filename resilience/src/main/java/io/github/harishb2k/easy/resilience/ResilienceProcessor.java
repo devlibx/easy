@@ -18,8 +18,6 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Supplier;
 
 import static io.github.harishb2k.easy.resilience.exception.ExceptionUtil.unwrapResilience4jException;
 import static io.github.harishb2k.easy.resilience.exception.ExceptionUtil.unwrapResilience4jExecutionException;
@@ -88,60 +86,27 @@ public class ResilienceProcessor implements IResilienceProcessor {
         });
     }
 
-    static AtomicInteger counter = new AtomicInteger();
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
     public <T> Observable<T> executeAsObservable(String id, Observable<T> observable, Class<T> cls) {
         return Observable.create(observableEmitter -> {
-            try {
 
-                // Run the real code
-                Runnable runnable = () -> {
-                    long start = System.currentTimeMillis();
-                    observable.subscribe(
-                            obj -> {
-                                circuitBreaker.onSuccess(circuitBreaker.getCurrentTimestamp() - start, circuitBreaker.getTimestampUnit());
-                                observableEmitter.onNext(obj);
-                                observableEmitter.onComplete();
-                            },
-                            throwable -> {
-                                circuitBreaker.onError(circuitBreaker.getCurrentTimestamp() - start, circuitBreaker.getTimestampUnit(), throwable);
-                                observableEmitter.onError(ExceptionUtil.unwrapResilience4jException(throwable));
-                            });
-                };
-
-                Decorators.ofSupplier(new Supplier<T>() {
-                    @Override
-                    public T get() {
-                        return observable.blockingFirst();
-                    }
-                })
-                        .withCircuitBreaker(circuitBreaker)
-                        .withThreadPoolBulkhead(threadPoolBulkhead)
-                        .withTimeLimiter(timeLimiter, scheduler)
-                        .decorate()
-                        .get()
-                        .whenComplete((t, throwable) -> {
-                            if (throwable instanceof CompletionException) {
-                                Exception e = ExceptionUtil.unwrapResilience4jException(throwable.getCause());
-                                observableEmitter.onError(e);
-                            } else if (throwable != null) {
-                                Exception e = ExceptionUtil.unwrapResilience4jException(throwable);
-                                observableEmitter.onError(e);
-                            } else {
-                                observableEmitter.onNext(t);
-                                observableEmitter.onComplete();
-                            }
-
-                        });
-
-            } catch (RuntimeException e) {
-                // observableEmitter.onError(ExceptionUtil.unwrapResilience4jExecutionException(e));
-            } catch (Exception e) {
-                // We should never get here. The helper "execute" method never throws exception
-                // (it wraps all to ResilienceException)
-                observableEmitter.onError(ExceptionUtil.unwrapResilience4jException(e));
-            }
+            Decorators.ofSupplier(observable::blockingFirst)
+                    .withCircuitBreaker(circuitBreaker)
+                    .withThreadPoolBulkhead(threadPoolBulkhead)
+                    .withTimeLimiter(timeLimiter, scheduler)
+                    .decorate()
+                    .get()
+                    .whenComplete((t, throwable) -> {
+                        if (throwable instanceof CompletionException) {
+                            Exception e = ExceptionUtil.unwrapResilience4jException(throwable.getCause());
+                            observableEmitter.onError(e);
+                        } else if (throwable != null) {
+                            Exception e = ExceptionUtil.unwrapResilience4jException(throwable);
+                            observableEmitter.onError(e);
+                        } else {
+                            observableEmitter.onNext(t);
+                            observableEmitter.onComplete();
+                        }
+                    });
         });
     }
 }

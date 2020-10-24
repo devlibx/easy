@@ -8,13 +8,21 @@ import java.util.concurrent.TimeoutException;
 
 public class ExceptionUtil {
 
-    public static RuntimeException unwrapResilience4jException(Throwable e) {
+    private static RuntimeException unwrap(Throwable e) {
         if (e instanceof TimeoutException) {
             return new RequestTimeoutException(e.getMessage(), e);
         } else if (e instanceof CallNotPermittedException) {
             return new CircuitOpenException(e.getMessage(), e);
         }
-        return new UnknownException("Unknown exception", e);
+        return null;
+    }
+
+    public static RuntimeException unwrapResilience4jException(Throwable e) {
+        RuntimeException ex = unwrap(e);
+        if (ex == null) {
+            ex = unwrap(e.getCause());
+        }
+        return ex == null ? new UnknownException("Unknown exception", e) : ex;
     }
 
     public static RuntimeException unwrapResilience4jExecutionException(ExecutionException e) {
