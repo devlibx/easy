@@ -10,6 +10,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.decorators.Decorators;
 import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.reactivex.Observable;
+import lombok.Getter;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
@@ -23,6 +24,7 @@ import static io.github.harishb2k.easy.resilience.exception.ExceptionUtil.unwrap
 import static io.github.harishb2k.easy.resilience.exception.ExceptionUtil.unwrapResilience4jExecutionException;
 
 public class ResilienceProcessor implements IResilienceProcessor {
+    @Getter
     private CircuitBreaker circuitBreaker;
     private ThreadPoolBulkhead threadPoolBulkhead;
     private ScheduledExecutorService scheduler;
