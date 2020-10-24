@@ -3,13 +3,12 @@ package io.github.harishb2k.easy.resilience;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import io.github.harishb2k.easy.resilience.IResilienceManager.CircuitOpenException;
-import io.github.harishb2k.easy.resilience.IResilienceManager.IResilienceProcessor;
-import io.github.harishb2k.easy.resilience.IResilienceManager.OverflowException;
-import io.github.harishb2k.easy.resilience.IResilienceManager.RequestTimeoutException;
 import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
-import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceException;
-import io.github.harishb2k.easy.resilience.IResilienceManager.UnknownException;
+import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
+import io.github.harishb2k.easy.resilience.exception.OverflowException;
+import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
+import io.github.harishb2k.easy.resilience.exception.ResilienceException;
+import io.github.harishb2k.easy.resilience.exception.UnknownException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
 import junit.framework.TestCase;
 
@@ -33,6 +32,9 @@ public class ResilienceManagerTest extends TestCase {
         resilienceManager = injector.getInstance(IResilienceManager.class);
     }
 
+    /**
+     * Run processor N times with concurrency=N, we expect success for all calls.
+     */
     public void testResilienceManager() throws Exception {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
@@ -44,6 +46,8 @@ public class ResilienceManagerTest extends TestCase {
                         .build()
         );
 
+        // Execute this N times - we must get all success because we run this for N time only and
+        // processor is also configured with N
         AtomicInteger results = new AtomicInteger();
         CountDownLatch latch = new CountDownLatch(concurrency);
         for (int i = 0; i < concurrency; i++) {
@@ -55,18 +59,24 @@ public class ResilienceManagerTest extends TestCase {
                 latch.countDown();
             }
         }
-        latch.await(1, TimeUnit.SECONDS);
+        latch.await(5, TimeUnit.SECONDS);
+
+        // We must have N success
         assertEquals(concurrency, results.get());
     }
 
-    public void testResilienceManager_WithErrors_10_times() throws Exception {
-        for (int i = 0; i < 10; i++) {
-            System.out.println("Iteration - " + i);
-            testResilienceManager_WithErrors();
-        }
-    }
 
-    public void testResilienceManager_WithErrors() throws Exception {
+    /**
+     * Test request overflow
+     * <pre>
+     * e.g.
+     *  we can only handle 10 concurrent requests
+     *  we can hold extra 1 request in queue
+     *      So we should be able to execute 11 requests without error
+     *  we add 4 more requests
+     *      So we should get 4 overflow (or reject) requests
+     */
+    public void testResilienceManager_Overflow_Simulation() throws Exception {
         int concurrency = 10;
         int queueSize = 1;
         int extraCalls = 4;
@@ -102,6 +112,7 @@ public class ResilienceManagerTest extends TestCase {
                     totalSuccessLatch.countDown();
                     success.incrementAndGet();
                 } catch (OverflowException e) {
+                    // When we get overflow or rejected errors
                     error.incrementAndGet();
                     bulkheadFullError.incrementAndGet();
                 } finally {
@@ -110,7 +121,10 @@ public class ResilienceManagerTest extends TestCase {
 
             }).start();
         }
+        // Make sure all threads are started
         waitForAllThreadsToStartLatch.await(10, TimeUnit.SECONDS);
+
+        // Wait for all success and request to execute + all 15 request to finish
         totalSuccessLatch.await(15, TimeUnit.SECONDS);
         allCallLatch.await(15, TimeUnit.SECONDS);
 
@@ -118,7 +132,20 @@ public class ResilienceManagerTest extends TestCase {
         assertEquals("We expect error for these requests", extraCalls, bulkheadFullError.get());
     }
 
-    public void testResilienceManager_Timeout_Error() throws Exception {
+    /**
+     * Run overflow test 10 times
+     */
+    public void testResilienceManager_Overflow_Simulation_10_times() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            System.out.println("Iteration - " + i);
+            testResilienceManager_Overflow_Simulation();
+        }
+    }
+
+    /**
+     * Generate a timeout from execution
+     */
+    public void testResilienceManager_Timeout_Simulation() throws Exception {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
         IResilienceProcessor processor = resilienceManager.getOrCreate(
@@ -143,7 +170,10 @@ public class ResilienceManagerTest extends TestCase {
         assertTrue(gotException);
     }
 
-    public void testResilienceManager_CircuitOpen_Error() throws Exception {
+    /**
+     * Generate a open circuit due to many errors
+     */
+    public void testResilienceManager_CircuitOpen_Simulation() {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
         IResilienceProcessor processor = resilienceManager.getOrCreate(
@@ -178,6 +208,9 @@ public class ResilienceManagerTest extends TestCase {
         assertTrue(gotCircuitOpenException);
     }
 
+    /**
+     * Test a observable with success
+     */
     public void testResilienceManager_Observable() throws Exception {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
@@ -204,6 +237,9 @@ public class ResilienceManagerTest extends TestCase {
         assertEquals(concurrency, results.get());
     }
 
+    /**
+     * Test a observable with timeout
+     */
     public void testResilienceManager_Observable_Timeout_Error() throws Exception {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();

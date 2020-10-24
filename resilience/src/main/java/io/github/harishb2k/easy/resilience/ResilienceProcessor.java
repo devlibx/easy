@@ -1,16 +1,10 @@
 package io.github.harishb2k.easy.resilience;
 
-import io.github.harishb2k.easy.resilience.IResilienceManager.CircuitOpenException;
-import io.github.harishb2k.easy.resilience.IResilienceManager.IResilienceProcessor;
-import io.github.harishb2k.easy.resilience.IResilienceManager.OverflowException;
-import io.github.harishb2k.easy.resilience.IResilienceManager.RequestTimeoutException;
 import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
-import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceException;
-import io.github.harishb2k.easy.resilience.IResilienceManager.UnknownException;
-import io.github.resilience4j.bulkhead.BulkheadFullException;
+import io.github.harishb2k.easy.resilience.exception.ExceptionUtil;
+import io.github.harishb2k.easy.resilience.exception.ResilienceException;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
-import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.decorators.Decorators;
 import io.github.resilience4j.timelimiter.TimeLimiter;
@@ -22,7 +16,9 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeoutException;
+
+import static io.github.harishb2k.easy.resilience.exception.ExceptionUtil.unwrapResilience4jException;
+import static io.github.harishb2k.easy.resilience.exception.ExceptionUtil.unwrapResilience4jExecutionException;
 
 public class ResilienceProcessor implements IResilienceProcessor {
     private CircuitBreaker circuitBreaker;
@@ -33,8 +29,10 @@ public class ResilienceProcessor implements IResilienceProcessor {
     @Override
     public void initialized(ResilienceCallConfig config) {
 
+        // Setup a circuit breaker with default settings
         circuitBreaker = CircuitBreaker.ofDefaults(config.getId());
 
+        // Setup a bulkhead for this request
         ThreadPoolBulkheadConfig threadPoolBulkheadConfig = ThreadPoolBulkheadConfig.custom()
                 .coreThreadPoolSize(config.getConcurrency())
                 .maxThreadPoolSize(config.getConcurrency())
@@ -42,6 +40,7 @@ public class ResilienceProcessor implements IResilienceProcessor {
                 .build();
         threadPoolBulkhead = ThreadPoolBulkhead.of(config.getId(), threadPoolBulkheadConfig);
 
+        // A scheduler and time limiter to handle timeouts
         scheduler = Executors.newScheduledThreadPool(config.getConcurrency());
         timeLimiter = TimeLimiter.of(Duration.ofMillis(config.getTimeout()));
     }
@@ -49,7 +48,8 @@ public class ResilienceProcessor implements IResilienceProcessor {
     @Override
     public <T> T execute(String id, Callable<T> callable, Class<T> cls) throws ResilienceException {
         try {
-            CompletableFuture<T> future = Decorators.ofCallable(callable)
+            CompletableFuture<T> future = Decorators
+                    .ofCallable(callable)
                     .withThreadPoolBulkhead(threadPoolBulkhead)
                     .withTimeLimiter(timeLimiter, scheduler)
                     .withCircuitBreaker(circuitBreaker)
@@ -57,9 +57,9 @@ public class ResilienceProcessor implements IResilienceProcessor {
                     .toCompletableFuture();
             return future.get();
         } catch (ExecutionException e) {
-            throw processException(e);
+            throw unwrapResilience4jExecutionException(e);
         } catch (Exception e) {
-            throw new UnknownException(e.getMessage(), e);
+            throw unwrapResilience4jException(e);
         }
     }
 
@@ -70,12 +70,12 @@ public class ResilienceProcessor implements IResilienceProcessor {
                 T result = execute(id, callable, cls);
                 observableEmitter.onNext(result);
                 observableEmitter.onComplete();
+            } catch (ResilienceException e) {
+                observableEmitter.onError(e);
             } catch (Exception e) {
-                if (e.getCause() instanceof ExecutionException) {
-                    observableEmitter.onError(processException((ExecutionException) e.getCause()));
-                } else {
-                    observableEmitter.onError(e);
-                }
+                // We should never get here. The helper "execute" method never throws exception
+                // (it wraps all to ResilienceException)
+                observableEmitter.onError(ExceptionUtil.unwrapResilience4jException(e));
             }
         });
     }
@@ -92,26 +92,8 @@ public class ResilienceProcessor implements IResilienceProcessor {
                 observableEmitter.onNext(future.get());
                 observableEmitter.onComplete();
             } catch (Exception e) {
-                if (e instanceof ExecutionException) {
-                    observableEmitter.onError(processException((ExecutionException) e));
-                } else {
-                    observableEmitter.onError(e);
-                }
+                observableEmitter.onError(ExceptionUtil.processException(e));
             }
         });
-    }
-
-    private RuntimeException processException(ExecutionException e) {
-        if (e.getCause() instanceof BulkheadFullException) {
-            BulkheadFullException exception = (BulkheadFullException) e.getCause();
-            return new OverflowException(exception.getMessage(), e);
-        } else if (e.getCause() instanceof CallNotPermittedException) {
-            CallNotPermittedException exception = (CallNotPermittedException) e.getCause();
-            return new CircuitOpenException(exception.getMessage(), e);
-        } else if (e.getCause() instanceof TimeoutException) {
-            return new RequestTimeoutException(e.getMessage(), e);
-        } else {
-            return new UnknownException(e.getMessage(), e.getCause());
-        }
     }
 }

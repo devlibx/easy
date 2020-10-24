@@ -3,7 +3,7 @@ package io.github.harishb2k.easy.resilience.module;
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
 import io.github.harishb2k.easy.resilience.IResilienceManager;
-import io.github.harishb2k.easy.resilience.IResilienceManager.IResilienceProcessor;
+import io.github.harishb2k.easy.resilience.IResilienceProcessor;
 import io.github.harishb2k.easy.resilience.ResilienceManager;
 import io.github.harishb2k.easy.resilience.ResilienceProcessor;
 

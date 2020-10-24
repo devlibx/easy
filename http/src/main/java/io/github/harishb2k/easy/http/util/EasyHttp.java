@@ -12,9 +12,10 @@ import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
 import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
 import io.github.harishb2k.easy.resilience.IResilienceManager;
-import io.github.harishb2k.easy.resilience.IResilienceManager.IResilienceProcessor;
 import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
+import io.github.harishb2k.easy.resilience.IResilienceProcessor;
 import io.github.harishb2k.easy.resilience.ResilienceManager;
+import io.github.harishb2k.easy.resilience.exception.ExceptionUtil;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
@@ -100,7 +101,7 @@ public class EasyHttp {
                     cls
             ).blockingFirst();
         } catch (Exception e) {
-            throw resilienceManager.processException(e);
+            throw ExceptionUtil.processException(e);
         }
     }
 
