@@ -202,7 +202,6 @@ public class ResilienceManagerTest extends TestCase {
                 if (e.getCause() instanceof CustomException) {
                     // This is expected - we threw this error to open circuit
                 } else {
-                    System.out.println(e);
                     fail("we did not expected this error");
                 }
 
@@ -378,7 +377,6 @@ public class ResilienceManagerTest extends TestCase {
                                 waitForSuccessOrError.countDown();
                             },
                             throwable -> {
-                                System.out.println(throwable);
                                 if (throwable instanceof CircuitOpenException || throwable.getCause() instanceof CircuitOpenException) {
                                     gotCircuitOpenException.set(true);
                                 }
@@ -398,10 +396,8 @@ public class ResilienceManagerTest extends TestCase {
                 }, Long.class);
                 gotSuccess = true;
                 assertEquals(111L, result.longValue());
-                System.out.println("Successes");
                 break;
             } catch (Exception ignored) {
-                System.out.println(ignored);
             }
             Thread.sleep(1);
         }

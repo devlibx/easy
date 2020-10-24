@@ -5,12 +5,16 @@ import com.google.inject.Injector;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.github.harishb2k.easy.resilience.ResilienceManagerTest.CustomException;
 import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
+import io.github.harishb2k.easy.resilience.exception.OverflowException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
 import io.reactivex.Observable;
 import junit.framework.TestCase;
 
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class ResilienceManagerObservableTest extends TestCase {
@@ -122,5 +126,66 @@ public class ResilienceManagerObservableTest extends TestCase {
                             gotException.set(true);
                         });
         assertTrue("We must have received a NullPointerException", gotException.get());
+    }
+
+    /**
+     * Test we get a proper type of exception when we make too many calls.
+     */
+    public void testOverflowExceptionIsThrown() throws InterruptedException {
+        int concurrency = 10;
+        int queueSize = 1;
+        int expectedCountOfSuccessfulRequest = concurrency + queueSize;
+        int expectedCountOfErrorRequest = 4;
+        int total = expectedCountOfSuccessfulRequest + expectedCountOfErrorRequest;
+
+        String uuid = UUID.randomUUID().toString();
+        ResilienceProcessor processor = (ResilienceProcessor) resilienceManager.getOrCreate(
+                IResilienceManager.ResilienceCallConfig.withDefaults()
+                        .id(uuid)
+                        .timeout(5000)
+                        .concurrency(concurrency)
+                        .queueSize(queueSize)
+                        .build()
+        );
+
+        Observable<Long> observable = Observable.create(observableEmitter -> {
+            Thread.sleep(1000);
+            observableEmitter.onNext(10L);
+            observableEmitter.onComplete();
+        });
+
+        AtomicInteger successCalls = new AtomicInteger();
+        AtomicInteger errorCalls = new AtomicInteger();
+        AtomicInteger overflowExceptionCalls = new AtomicInteger();
+        CountDownLatch waitForAllRequestToComplete = new CountDownLatch(total);
+        CountDownLatch waitForAllThreads = new CountDownLatch(total);
+        for (int i = 0; i < total; i++) {
+            new Thread(() -> {
+                try {
+                    waitForAllThreads.await(5, TimeUnit.SECONDS);
+                } catch (InterruptedException ignored) {
+                }
+                processor.executeObservable(uuid, observable, Long.class)
+                        .subscribe(
+                                aLong -> {
+                                    successCalls.incrementAndGet();
+                                    waitForAllRequestToComplete.countDown();
+                                },
+                                throwable -> {
+                                    errorCalls.incrementAndGet();
+                                    if (throwable.getClass().isAssignableFrom(OverflowException.class)) {
+                                        overflowExceptionCalls.incrementAndGet();
+                                    }
+                                    waitForAllRequestToComplete.countDown();
+                                }
+                        );
+            }).start();
+            waitForAllThreads.countDown();
+        }
+
+        waitForAllRequestToComplete.await(5, TimeUnit.SECONDS);
+        assertEquals("Expected these many success calls", expectedCountOfSuccessfulRequest, successCalls.get());
+        assertEquals("Expected these many error calls", expectedCountOfErrorRequest, errorCalls.get());
+        assertEquals("Expected these many error calls - must be of OverflowException", expectedCountOfErrorRequest, overflowExceptionCalls.get());
     }
 }

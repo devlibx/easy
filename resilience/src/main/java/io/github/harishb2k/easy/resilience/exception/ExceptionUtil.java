@@ -13,6 +13,8 @@ public class ExceptionUtil {
             return new RequestTimeoutException(e.getMessage(), e);
         } else if (e instanceof CallNotPermittedException) {
             return new CircuitOpenException(e.getMessage(), e);
+        } else if (e instanceof BulkheadFullException) {
+            return new OverflowException(e.getMessage(), e);
         }
         return null;
     }
