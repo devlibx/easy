@@ -22,6 +22,9 @@ public class ExceptionUtil {
         if (ex == null) {
             ex = unwrap(e.getCause());
         }
+        if (ex == null && e instanceof RuntimeException) {
+            ex = (RuntimeException) e;
+        }
         return ex == null ? new UnknownException("Unknown exception", e) : ex;
     }
 

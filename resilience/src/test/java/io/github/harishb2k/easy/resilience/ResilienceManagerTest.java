@@ -409,6 +409,6 @@ public class ResilienceManagerTest extends TestCase {
 
     }
 
-    private static class CustomException extends RuntimeException {
+    public static class CustomException extends RuntimeException {
     }
 }

@@ -3,6 +3,7 @@ package io.github.harishb2k.easy.resilience;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
+import io.github.harishb2k.easy.resilience.ResilienceManagerTest.CustomException;
 import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
 import io.reactivex.Observable;
@@ -71,5 +72,38 @@ public class ResilienceManagerObservableTest extends TestCase {
                             fail("Circuit is close, we should never get there");
                         });
         assertFalse(gotException.get());
+    }
+
+
+    /**
+     * Test we get a proper type of exception is thrown when circuit is open
+     */
+    public void testApplicationExceptionIsThrown() {
+        int concurrency = 3;
+        String uuid = UUID.randomUUID().toString();
+        ResilienceProcessor processor = (ResilienceProcessor) resilienceManager.getOrCreate(
+                IResilienceManager.ResilienceCallConfig.withDefaults()
+                        .concurrency(concurrency)
+                        .id(uuid)
+                        .timeout(100)
+                        .build()
+        );
+
+        Observable<Long> observable = Observable.create(observableEmitter -> {
+            throw new CustomException();
+        });
+
+        // Test 1 - We have a good Observable but Circuit is forced open
+        // We must get a CircuitOpenException
+        AtomicBoolean gotException = new AtomicBoolean();
+        processor.executeObservable(uuid, observable, Long.class)
+                .blockingSubscribe(aLong -> {
+                            fail("Circuit is open, we should never get there");
+                        },
+                        throwable -> {
+                            assertTrue(throwable.getClass().isAssignableFrom(CustomException.class));
+                            gotException.set(true);
+                        });
+        assertTrue("We must have received a CustomException", gotException.get());
     }
 }
