@@ -66,9 +66,17 @@ public class EasyHttp {
                 // Build a request processor
                 IRequestProcessor requestProcessor;
                 if (api.isAsync()) {
-                    requestProcessor = new AsyncRequestProcessor(serverRegistry, apiRegistry);
+                    try {
+                        requestProcessor = ApplicationContext.getInstance(AsyncRequestProcessor.class);
+                    } catch (Exception e) {
+                        requestProcessor = new AsyncRequestProcessor(serverRegistry, apiRegistry);
+                    }
                 } else {
-                    requestProcessor = new SyncRequestProcessor(serverRegistry, apiRegistry);
+                    try {
+                        requestProcessor = ApplicationContext.getInstance(SyncRequestProcessor.class);
+                    } catch (Exception e) {
+                        requestProcessor = new SyncRequestProcessor(serverRegistry, apiRegistry);
+                    }
                 }
                 requestProcessors.put(key, requestProcessor);
 
@@ -81,6 +89,7 @@ public class EasyHttp {
                         .build();
                 IResilienceProcessor resilienceProcessor = resilienceManager.getOrCreate(callConfig);
                 resilienceProcessors.put(key, resilienceProcessor);
+
             });
         });
 
