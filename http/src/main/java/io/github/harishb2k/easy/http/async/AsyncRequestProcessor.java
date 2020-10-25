@@ -8,32 +8,17 @@ import io.github.harishb2k.easy.http.RequestObject;
 import io.github.harishb2k.easy.http.ResponseObject;
 import io.github.harishb2k.easy.http.config.Api;
 import io.github.harishb2k.easy.http.config.Server;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyBadGatewayException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyBadRequestException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyConflictRequestException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyGatewayTimeoutException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyGoneException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyInternalServerErrorException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyMethodNotAllowedException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyNotAcceptableException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyNotFoundException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyNotImplementedException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyServiceUnavailableException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyTooManyRequestsException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyUnauthorizedRequestException;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
 import io.github.harishb2k.easy.http.sync.DefaultHttpResponseProcessor;
 import io.github.harishb2k.easy.http.sync.IHttpResponseProcessor;
-import io.netty.handler.timeout.ReadTimeoutException;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.function.Consumer;
 
@@ -144,48 +129,8 @@ public class AsyncRequestProcessor implements IRequestProcessor {
     private Consumer<Throwable> onErrorConsumer(Server server, Api api, ObservableEmitter<ResponseObject> observableEmitter) {
         return throwable -> {
             log.trace("Got error for server={}, api={}", server, api, throwable);
-
             ResponseObject responseObject = httpResponseProcessor.processException(server, api, throwable);
-            EasyHttpRequestException exception;
-
-            if (throwable instanceof ReadTimeoutException) {
-                exception = new EasyRequestTimeOutException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.GatewayTimeout) {
-                exception = new EasyGatewayTimeoutException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.ServiceUnavailable) {
-                exception = new EasyServiceUnavailableException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.BadGateway) {
-                exception = new EasyBadGatewayException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.NotImplemented) {
-                exception = new EasyNotImplementedException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.InternalServerError) {
-                exception = new EasyInternalServerErrorException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.TooManyRequests) {
-                exception = new EasyTooManyRequestsException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.UnprocessableEntity) {
-                exception = new EasyBadRequestException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.UnsupportedMediaType) {
-                exception = new EasyBadRequestException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.Gone) {
-                exception = new EasyGoneException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.Conflict) {
-                exception = new EasyConflictRequestException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.NotAcceptable) {
-                exception = new EasyNotAcceptableException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.MethodNotAllowed) {
-                exception = new EasyMethodNotAllowedException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.NotFound) {
-                exception = new EasyNotFoundException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.Forbidden) {
-                exception = new EasyUnauthorizedRequestException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.Unauthorized) {
-                exception = new EasyUnauthorizedRequestException(responseObject);
-            } else if (throwable instanceof WebClientResponseException.BadRequest) {
-                exception = new EasyBadRequestException(responseObject);
-            } else {
-                exception = new EasyHttpRequestException(responseObject);
-            }
-
+            EasyHttpRequestException exception = EasyHttpExceptions.convert(responseObject.getStatusCode(), throwable, responseObject);
             observableEmitter.onError(exception);
         };
     }

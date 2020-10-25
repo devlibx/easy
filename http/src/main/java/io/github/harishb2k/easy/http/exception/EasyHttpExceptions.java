@@ -6,11 +6,14 @@ import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
 import io.github.harishb2k.easy.resilience.exception.OverflowException;
 import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
 import io.github.harishb2k.easy.resilience.exception.ResilienceException;
+import io.netty.handler.timeout.ReadTimeoutException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import javax.ws.rs.core.Response;
+import java.net.SocketTimeoutException;
 import java.util.Map;
 import java.util.Optional;
 
@@ -190,5 +193,64 @@ public class EasyHttpExceptions {
         } else {
             return Optional.empty();
         }
+    }
+
+    public static EasyHttpRequestException convert(int statusCode, Throwable throwable, ResponseObject responseObject) {
+
+        // First check if this is a Resilience exception
+        EasyHttpRequestException exception = easyEasyResilienceException(throwable).orElse(null);
+        if (exception != null) {
+            return exception;
+        }
+
+        // Check if this is a timeout issues
+        if (throwable instanceof ReadTimeoutException || throwable instanceof SocketTimeoutException) {
+            return new EasyRequestTimeOutException(responseObject);
+        }
+
+        // If we got WebClientResponseException use status code from WebClientResponseException
+        if (throwable instanceof WebClientResponseException) {
+            WebClientResponseException ex = (WebClientResponseException) throwable;
+            statusCode = ex.getRawStatusCode();
+        }
+
+        // Try to build exceptions from status code
+        if (statusCode == Response.Status.GATEWAY_TIMEOUT.getStatusCode()) {
+            exception = new EasyGatewayTimeoutException(responseObject);
+        } else if (statusCode == Response.Status.SERVICE_UNAVAILABLE.getStatusCode()) {
+            exception = new EasyServiceUnavailableException(responseObject);
+        } else if (statusCode == Response.Status.BAD_GATEWAY.getStatusCode()) {
+            exception = new EasyBadGatewayException(responseObject);
+        } else if (statusCode == Response.Status.NOT_IMPLEMENTED.getStatusCode()) {
+            exception = new EasyNotImplementedException(responseObject);
+        } else if (statusCode == Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
+            exception = new EasyInternalServerErrorException(responseObject);
+        } else if (statusCode == 429 /* TooManyRequests */) {
+            exception = new EasyTooManyRequestsException(responseObject);
+        } else if (statusCode == 422 /* TooManyRequests */) {
+            exception = new EasyBadRequestException(responseObject);
+        } else if (statusCode == Response.Status.UNSUPPORTED_MEDIA_TYPE.getStatusCode()) {
+            exception = new EasyBadRequestException(responseObject);
+        } else if (statusCode == Response.Status.GONE.getStatusCode()) {
+            exception = new EasyGoneException(responseObject);
+        } else if (statusCode == Response.Status.CONFLICT.getStatusCode()) {
+            exception = new EasyConflictRequestException(responseObject);
+        } else if (statusCode == Response.Status.NOT_ACCEPTABLE.getStatusCode()) {
+            exception = new EasyNotAcceptableException(responseObject);
+        } else if (statusCode == Response.Status.METHOD_NOT_ALLOWED.getStatusCode()) {
+            exception = new EasyMethodNotAllowedException(responseObject);
+        } else if (statusCode == Response.Status.NOT_FOUND.getStatusCode()) {
+            exception = new EasyNotFoundException(responseObject);
+        } else if (statusCode == Response.Status.FORBIDDEN.getStatusCode()) {
+            exception = new EasyUnauthorizedRequestException(responseObject);
+        } else if (statusCode == Response.Status.UNAUTHORIZED.getStatusCode()) {
+            exception = new EasyUnauthorizedRequestException(responseObject);
+        } else if (statusCode == Response.Status.BAD_REQUEST.getStatusCode()) {
+            exception = new EasyBadRequestException(responseObject);
+        } else {
+            exception = new EasyHttpRequestException(responseObject);
+        }
+
+        return exception;
     }
 }
