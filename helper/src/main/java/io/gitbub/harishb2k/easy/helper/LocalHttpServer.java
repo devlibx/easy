@@ -1,15 +1,18 @@
 package io.gitbub.harishb2k.easy.helper;
 
+import com.google.common.base.Strings;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -54,10 +57,10 @@ public class LocalHttpServer {
         for (port = 9123; port < 9130; port++) {
             try {
                 server = HttpServer.create(new InetSocketAddress(port), 0);
-                System.out.println("Using Port = " + port);
+                log.debug("Using port={} for test server", port);
                 break;
             } catch (Exception e) {
-                System.out.println("Port=" + port + " is not free, try next");
+                log.debug("Port= {} is not free, try next", port);
             }
         }
         if (server == null) {
@@ -68,6 +71,7 @@ public class LocalHttpServer {
         // server.setExecutor(Executors.newFixedThreadPool(4));
         server.start();
         waitForServerStartLatch.countDown();
+        log.trace("HTTP Server at port {} started", port);
 
         keepRunning = true;
         while (keepRunning) {
@@ -76,6 +80,8 @@ public class LocalHttpServer {
             } catch (InterruptedException ignored) {
             }
         }
+        server.stop(1);
+        log.trace("HTTP Server at port {} stopped", port);
         waitForServerStopLatch.countDown();
     }
 
@@ -100,10 +106,42 @@ public class LocalHttpServer {
                 log.debug("HTTP Request - {} # Sleep for {} ms", t.getRequestURI(), sleep);
                 Thread.sleep(sleep);
 
-                Map<String, Object> data = new HashMap<>();
-                data.put("data", "some data");
-                data.putAll(qp);
-                String response = new StringHelper().stringify(data);
+                String requestBody = null;
+                try {
+                    requestBody = IOUtils.toString(t.getRequestBody(), Charset.defaultCharset());
+                } catch (Exception e) {
+                }
+
+                String response = null;
+                if ("GET".equals(t.getRequestMethod())) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("method", "get");
+                    data.put("data", "some data");
+                    if (!Strings.isNullOrEmpty(requestBody)) {
+                        data.put("request_body", requestBody);
+                    }
+                    data.putAll(qp);
+                    response = new StringHelper().stringify(data);
+                } else if ("POST".equals(t.getRequestMethod())) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("method", "post");
+                    data.put("data", "some data");
+                    if (!Strings.isNullOrEmpty(requestBody)) {
+                        data.put("request_body", requestBody);
+                    }
+                    data.putAll(qp);
+                    response = new StringHelper().stringify(data);
+                } else if ("PUT".equals(t.getRequestMethod())) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("method", "put");
+                    data.put("data", "some data");
+                    if (!Strings.isNullOrEmpty(requestBody)) {
+                        data.put("request_body", requestBody);
+                    }
+                    data.putAll(qp);
+                    response = new StringHelper().stringify(data);
+                }
+
                 if (qp.containsKey("status")) {
                     t.sendResponseHeaders(Integer.parseInt(qp.get("status")), response.length());
                 } else {
@@ -114,7 +152,7 @@ public class LocalHttpServer {
                 os.write(response.getBytes());
                 os.close();
             } catch (Exception e) {
-                System.out.println("Got some error");
+                log.error("Got some error in http server", e);
                 throw new RuntimeException(e);
             }
         }

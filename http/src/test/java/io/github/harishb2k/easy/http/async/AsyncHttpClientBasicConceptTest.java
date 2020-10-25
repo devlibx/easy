@@ -2,6 +2,7 @@ package io.github.harishb2k.easy.http.async;
 
 import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
+import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import junit.framework.TestCase;
@@ -15,6 +16,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -114,6 +116,111 @@ public class AsyncHttpClientBasicConceptTest extends TestCase {
         wait.await(10, TimeUnit.SECONDS);
         assertTrue(gotExpected.get());
     }
+
+
+    public void testReactor_HttpClient_Post_Example_With_Success() throws Exception {
+        CountDownLatch wait = new CountDownLatch(1);
+        AtomicBoolean gotExpected = new AtomicBoolean(false);
+        webClient
+                .post()
+                .uri("/delay?delay=20")
+                .bodyValue("my request body")
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnError(throwable -> {
+                    wait.countDown();
+                    System.out.println("Got exception which was not expected - " + throwable);
+                })
+                .subscribe(data -> {
+                    if (!Strings.isNullOrEmpty(data)) {
+                        Map<String, Object> dataMap = JsonUtils.convertAsMap(data);
+                        assertEquals("post", dataMap.get("method"));
+                        assertEquals("my request body", dataMap.get("request_body"));
+                        gotExpected.set(true);
+                    }
+                    wait.countDown();
+                });
+        wait.await(10, TimeUnit.SECONDS);
+        assertTrue(gotExpected.get());
+    }
+
+    public void testReactor_HttpClient_Post_Example_With_404() throws Exception {
+        CountDownLatch wait = new CountDownLatch(1);
+        AtomicBoolean gotExpected = new AtomicBoolean(false);
+        webClient
+                .post()
+                .uri("/invalid_api?delay=20")
+                .bodyValue("my request body")
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnError(throwable -> {
+                    if (throwable instanceof WebClientResponseException.NotFound) {
+                        gotExpected.set(true);
+                    } else {
+                        System.out.println("Got " + throwable + " this is not expected exception");
+                    }
+                    wait.countDown();
+                })
+                .subscribe(data -> {
+                    System.out.println("Got some response which was not expected - " + data);
+                    wait.countDown();
+                });
+        wait.await(10, TimeUnit.SECONDS);
+        assertTrue(gotExpected.get());
+    }
+
+    public void testReactor_HttpClient_Post_Example_With_Timeout() throws Exception {
+        CountDownLatch wait = new CountDownLatch(1);
+        AtomicBoolean gotExpected = new AtomicBoolean(false);
+        webClient
+                .post()
+                .uri("/delay?delay=2000")
+                .bodyValue("my request body")
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnError(throwable -> {
+                    if (throwable instanceof ReadTimeoutException) {
+                        gotExpected.set(true);
+                    } else {
+                        System.out.println("Got " + throwable + " this is not expected exception");
+                    }
+                    wait.countDown();
+                })
+                .subscribe(data -> {
+                    System.out.println("Got some response which was not expected - " + data);
+                    wait.countDown();
+                });
+        wait.await(10, TimeUnit.SECONDS);
+        assertTrue(gotExpected.get());
+    }
+
+
+    public void testReactor_HttpClient_Put_Example_With_Success() throws Exception {
+        CountDownLatch wait = new CountDownLatch(1);
+        AtomicBoolean gotExpected = new AtomicBoolean(false);
+        webClient
+                .put()
+                .uri("/delay?delay=20")
+                .bodyValue("my request body")
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnError(throwable -> {
+                    wait.countDown();
+                    System.out.println("Got exception which was not expected - " + throwable);
+                })
+                .subscribe(data -> {
+                    if (!Strings.isNullOrEmpty(data)) {
+                        Map<String, Object> dataMap = JsonUtils.convertAsMap(data);
+                        assertEquals("put", dataMap.get("method"));
+                        assertEquals("my request body", dataMap.get("request_body"));
+                        gotExpected.set(true);
+                    }
+                    wait.countDown();
+                });
+        wait.await(10, TimeUnit.SECONDS);
+        assertTrue(gotExpected.get());
+    }
+
 
     @Override
     protected void tearDown() throws Exception {
