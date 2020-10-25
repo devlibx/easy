@@ -50,6 +50,7 @@
         <javax.ws.rs-api.version>2.0.1</javax.ws.rs-api.version>
         <resilience4j.version>1.6.1</resilience4j.version>
         <reactor-netty.version>0.9.12.RELEASE</reactor-netty.version>
+        <spring.version>5.2.9.RELEASE</spring.version>
     </properties>
 
     <dependencyManagement>
@@ -111,6 +112,11 @@
             </dependency>
 
             <!-- HTTP -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webflux</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
             <dependency>
                 <groupId>io.projectreactor.netty</groupId>
                 <artifactId>reactor-netty</artifactId>
