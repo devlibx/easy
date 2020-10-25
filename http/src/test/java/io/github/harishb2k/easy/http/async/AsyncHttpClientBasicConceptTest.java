@@ -2,6 +2,7 @@ package io.github.harishb2k.easy.http.async;
 
 import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
+import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -21,6 +22,7 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class AsyncHttpClientBasicConceptTest extends TestCase {
     private LocalHttpServer localHttpServer;
@@ -245,6 +247,44 @@ public class AsyncHttpClientBasicConceptTest extends TestCase {
         assertTrue(gotExpected.get());
     }
 
+    public void testParallelRequests_Get() throws Exception {
+        Logger.getLogger(LocalHttpServer.class).setLevel(Level.INFO);
+
+        httpClient = HttpClient.create(ConnectionProvider.create(service, 100))
+                .tcpConfiguration(tcpClient ->
+                        tcpClient.doOnConnected(connection -> connection
+                                .addHandlerLast(new ReadTimeoutHandler(20, TimeUnit.SECONDS))
+                        )
+                );
+        webClient = WebClient.builder()
+                .baseUrl("http://localhost:" + localHttpServer.port)
+                .clientConnector(new ReactorClientHttpConnector(httpClient))
+                .build();
+
+        int count = 100;
+        AtomicInteger successCount = new AtomicInteger();
+        CountDownLatch wait = new CountDownLatch(count);
+        ParallelThread parallelThread = new ParallelThread(count, "testParallelRequests_Get");
+        parallelThread.execute(() -> {
+            webClient
+                    .get()
+                    .uri("/delay?delay=1")
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .doOnError(throwable -> {
+                        wait.countDown();
+                        System.out.println("Got exception which was not expected - " + throwable);
+                    })
+                    .subscribe(data -> {
+                        if (!Strings.isNullOrEmpty(data)) {
+                            successCount.incrementAndGet();
+                        }
+                        wait.countDown();
+                    });
+        });
+        wait.await(10, TimeUnit.SECONDS);
+        assertEquals(count, successCount.get());
+    }
 
     @Override
     protected void tearDown() throws Exception {
