@@ -161,8 +161,8 @@ public class LocalHttpServer {
                 os.write(response.getBytes());
                 os.close();
             } catch (Exception e) {
-                log.error("Got some error in http server", e);
-                throw new RuntimeException(e);
+                log.error("Got some error in http server : {}", e.getMessage());
+                // throw new RuntimeException(e);
             }
         }
     }

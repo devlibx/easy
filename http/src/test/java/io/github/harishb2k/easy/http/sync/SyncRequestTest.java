@@ -4,6 +4,9 @@ import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.config.Config;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import io.github.harishb2k.easy.resilience.exception.OverflowException;
 import junit.framework.TestCase;
@@ -14,6 +17,9 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static io.github.harishb2k.easy.http.helper.CommonHttpHelper.multivaluedMap;
@@ -90,7 +96,7 @@ public class SyncRequestTest extends TestCase {
                         Map.class
                 );
                 successCount.incrementAndGet();
-            } catch (OverflowException e) {
+            } catch (EasyResilienceOverflowException e) {
                 overflowCount.incrementAndGet();
                 log.info("Test is expecting this exception - " + e);
             } catch (Exception e) {
@@ -100,6 +106,31 @@ public class SyncRequestTest extends TestCase {
         });
         assertEquals(6, overflowCount.get());
         assertEquals(4, successCount.get());
+    }
+
+    /**
+     * Test a simple http call where we make too many calls to simulate requests rejected
+     */
+    public void testRequestTimeout() throws Exception {
+        CountDownLatch wait = new CountDownLatch(1);
+        AtomicBoolean gotException = new AtomicBoolean(false);
+        try {
+            EasyHttp.callSync(
+                    "testServer",
+                    "delay_timeout_10",
+                    null,
+                    multivaluedMap("delay", 100),
+                    null,
+                    null,
+                    Map.class
+            );
+            wait.countDown();
+        } catch (EasyResilienceRequestTimeoutException e) {
+            gotException.set(true);
+            wait.countDown();
+        }
+        wait.await(10, TimeUnit.SECONDS);
+        assertTrue(gotException.get());
     }
 
     @Override

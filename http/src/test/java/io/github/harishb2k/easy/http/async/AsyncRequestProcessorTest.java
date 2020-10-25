@@ -3,6 +3,7 @@ package io.github.harishb2k.easy.http.async;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.config.Config;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
 import org.apache.log4j.ConsoleAppender;
@@ -11,6 +12,9 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.harishb2k.easy.http.helper.CommonHttpHelper.multivaluedMap;
 
@@ -51,6 +55,38 @@ public class AsyncRequestProcessorTest extends TestCase {
         );
         assertEquals(delay + "", resultSync.get("delay"));
         assertEquals("some data", resultSync.get("data"));
+    }
+
+
+    /**
+     * Test a simple http call where we make too many calls to simulate requests rejected
+     */
+    public void testRequestTimeout() throws Exception {
+        CountDownLatch wait = new CountDownLatch(1);
+        AtomicBoolean gotException = new AtomicBoolean(false);
+        try {
+            EasyHttp.callSync(
+                    "testServer",
+                    "delay_timeout_10",
+                    null,
+                    multivaluedMap("delay", 100),
+                    null,
+                    null,
+                    Map.class
+            );
+            wait.countDown();
+        } catch (EasyResilienceRequestTimeoutException e) {
+            gotException.set(true);
+            wait.countDown();
+        }
+        wait.await(10, TimeUnit.SECONDS);
+        assertTrue(gotException.get());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
+        localHttpServer.stopServer();
     }
 
     private void setupLogging() {

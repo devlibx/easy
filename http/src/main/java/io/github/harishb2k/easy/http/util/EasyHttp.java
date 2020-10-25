@@ -7,6 +7,10 @@ import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
 import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
 import io.github.harishb2k.easy.http.config.Config;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceCircuitOpenException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
 import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
@@ -14,6 +18,10 @@ import io.github.harishb2k.easy.resilience.IResilienceManager;
 import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
 import io.github.harishb2k.easy.resilience.IResilienceProcessor;
 import io.github.harishb2k.easy.resilience.ResilienceManager;
+import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
+import io.github.harishb2k.easy.resilience.exception.OverflowException;
+import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
+import io.github.harishb2k.easy.resilience.exception.ResilienceException;
 import io.reactivex.Observable;
 import lombok.extern.slf4j.Slf4j;
 
@@ -130,15 +138,29 @@ public class EasyHttp {
                                  Object body,
                                  Class<T> cls
     ) {
-        return call(
-                server,
-                api,
-                pathParam,
-                queryParam,
-                headers,
-                body,
-                cls
-        ).blockingFirst();
+        try {
+            return call(
+                    server,
+                    api,
+                    pathParam,
+                    queryParam,
+                    headers,
+                    body,
+                    cls
+            ).blockingFirst();
+        } catch (Exception e) {
+            if (e instanceof RequestTimeoutException) {
+                throw new EasyResilienceRequestTimeoutException(e);
+            } else if (e instanceof OverflowException) {
+                throw new EasyResilienceOverflowException(e);
+            } else if (e instanceof CircuitOpenException) {
+                throw new EasyResilienceCircuitOpenException(e);
+            } else if (e instanceof ResilienceException) {
+                throw new EasyResilienceException(e);
+            } else {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public static <T> Observable<T> call(String server,
