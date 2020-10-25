@@ -221,6 +221,30 @@ public class AsyncHttpClientBasicConceptTest extends TestCase {
         assertTrue(gotExpected.get());
     }
 
+    public void testReactor_HttpClient_Delete_Example_With_Success() throws Exception {
+        CountDownLatch wait = new CountDownLatch(1);
+        AtomicBoolean gotExpected = new AtomicBoolean(false);
+        webClient
+                .delete()
+                .uri("/delay?delay=20")
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnError(throwable -> {
+                    wait.countDown();
+                    System.out.println("Got exception which was not expected - " + throwable);
+                })
+                .subscribe(data -> {
+                    if (!Strings.isNullOrEmpty(data)) {
+                        Map<String, Object> dataMap = JsonUtils.convertAsMap(data);
+                        assertEquals("delete", dataMap.get("method"));
+                        gotExpected.set(true);
+                    }
+                    wait.countDown();
+                });
+        wait.await(10, TimeUnit.SECONDS);
+        assertTrue(gotExpected.get());
+    }
+
 
     @Override
     protected void tearDown() throws Exception {
