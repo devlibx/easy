@@ -3,6 +3,8 @@ package io.github.harishb2k.easy.http.async;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.config.Config;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
@@ -75,9 +77,13 @@ public class AsyncRequestProcessorTest extends TestCase {
                     Map.class
             );
             wait.countDown();
-        } catch (EasyResilienceRequestTimeoutException e) {
+        } catch (EasyResilienceRequestTimeoutException | EasyRequestTimeOutException e) {
             gotException.set(true);
             wait.countDown();
+        } catch (Exception e) {
+            System.out.println("Not expected - " + e);
+            wait.countDown();
+            e.printStackTrace();
         }
         wait.await(10, TimeUnit.SECONDS);
         assertTrue(gotException.get());
@@ -100,5 +106,6 @@ public class AsyncRequestProcessorTest extends TestCase {
         Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
         Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(Level.OFF);
         Logger.getLogger(LocalHttpServer.class).setLevel(Level.DEBUG);
+        Logger.getLogger("reactor.netty.http.client").setLevel(Level.OFF);
     }
 }

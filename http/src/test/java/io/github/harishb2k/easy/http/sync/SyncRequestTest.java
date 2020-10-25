@@ -4,11 +4,10 @@ import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.config.Config;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
 import io.github.harishb2k.easy.http.util.EasyHttp;
-import io.github.harishb2k.easy.resilience.exception.OverflowException;
 import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.ConsoleAppender;
@@ -40,7 +39,7 @@ public class SyncRequestTest extends TestCase {
         Logger.getRootLogger().addAppender(console);
         Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
         Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(Level.OFF);
-        Logger.getLogger(LocalHttpServer.class).setLevel(Level.DEBUG);
+        Logger.getLogger(LocalHttpServer.class).setLevel(Level.TRACE);
     }
 
     @Override
@@ -58,6 +57,8 @@ public class SyncRequestTest extends TestCase {
         Config config = YamlUtils.readYamlCamelCase("sync_processor_config.yaml", Config.class);
         config.getServers().get("testServer").setPort(localHttpServer.port);
         EasyHttp.setup(config);
+
+        Thread.sleep(5000);
     }
 
     /**
@@ -124,9 +125,15 @@ public class SyncRequestTest extends TestCase {
                     null,
                     Map.class
             );
+            System.out.println("Got it working");
             wait.countDown();
-        } catch (EasyResilienceRequestTimeoutException e) {
+        } catch (EasyResilienceRequestTimeoutException | EasyRequestTimeOutException e) {
+            log.error("Not expected - error1", e);
             gotException.set(true);
+            wait.countDown();
+        } catch (Throwable e) {
+            log.error("Not expected - error", e);
+            System.out.println("--> " + e);
             wait.countDown();
         }
         wait.await(10, TimeUnit.SECONDS);

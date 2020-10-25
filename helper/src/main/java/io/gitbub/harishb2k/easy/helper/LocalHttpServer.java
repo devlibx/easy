@@ -8,6 +8,7 @@ import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -161,8 +162,11 @@ public class LocalHttpServer {
                 os.write(response.getBytes());
                 os.close();
             } catch (Exception e) {
-                log.error("Got some error in http server : {}", e.getMessage());
-                // throw new RuntimeException(e);
+                if (e instanceof IOException) {
+                    log.error("Got some IOException error in http server");
+                } else {
+                    log.error("Got some error in http server : {}", e.getMessage());
+                }
             }
         }
     }

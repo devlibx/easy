@@ -3,10 +3,15 @@ package io.github.harishb2k.easy.http.sync;
 import io.github.harishb2k.easy.http.ResponseObject;
 import io.github.harishb2k.easy.http.config.Api;
 import io.github.harishb2k.easy.http.config.Server;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
+
+import java.net.SocketTimeoutException;
+import java.util.concurrent.TimeoutException;
 
 import static io.github.harishb2k.easy.http.config.Api.DEFAULT_ACCEPTABLE_CODES;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
@@ -55,6 +60,14 @@ public class DefaultHttpResponseProcessor implements IHttpResponseProcessor {
     @Override
     public void processResponseForException(ResponseObject response) {
         if (response.isSuccess()) return;
-        throw new EasyHttpRequestException(response);
+
+        EasyHttpRequestException exception = EasyHttpExceptions.easyEasyResilienceException(response.getException()).orElse(null);
+        if (exception != null) {
+            throw exception;
+        } else if (response.getException() instanceof SocketTimeoutException) {
+            throw new EasyRequestTimeOutException(response);
+        } else {
+            throw new EasyHttpRequestException(response.getException());
+        }
     }
 }

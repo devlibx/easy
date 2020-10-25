@@ -32,7 +32,7 @@ public class EasyHttpExceptions {
         }
 
         public EasyHttpRequestException(String message, ResponseObject response) {
-            super(message);
+            super(message, response.getException() != null ? response.getException() : null);
             this.statusCode = response.getStatusCode();
             this.body = response.getBody();
             this.response = response;

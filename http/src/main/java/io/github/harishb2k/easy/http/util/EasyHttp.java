@@ -7,6 +7,8 @@ import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
 import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
 import io.github.harishb2k.easy.http.config.Config;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceException;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
 import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
@@ -93,6 +95,7 @@ public class EasyHttp {
                         .concurrency(api.getConcurrency())
                         .timeout(api.getTimeout())
                         .queueSize(api.getQueueSize())
+                        .useSemaphore(api.isAsync())
                         .build();
                 IResilienceProcessor resilienceProcessor = resilienceManager.getOrCreate(callConfig);
                 resilienceProcessors.put(key, resilienceProcessor);
@@ -142,6 +145,10 @@ public class EasyHttp {
                     body,
                     cls
             ).blockingFirst();
+        } catch (EasyResilienceException e) {
+            throw easyEasyResilienceException(e).get();
+        } catch (EasyHttpRequestException e) {
+            throw e;
         } catch (Exception e) {
             throw easyEasyResilienceException(e).orElseThrow(() -> new RuntimeException(e));
         }
