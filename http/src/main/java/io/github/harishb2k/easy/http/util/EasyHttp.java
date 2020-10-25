@@ -9,6 +9,7 @@ import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
+import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
 import io.github.harishb2k.easy.resilience.IResilienceManager;
 import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
 import io.github.harishb2k.easy.resilience.IResilienceProcessor;
@@ -79,7 +80,7 @@ public class EasyHttp {
                     } catch (Exception e) {
                     }
                     if (requestProcessor == null) {
-                        requestProcessor = new AsyncRequestProcessor(serverRegistry, apiRegistry);
+                        requestProcessor = new SyncRequestProcessor(serverRegistry, apiRegistry);
                     }
                 }
                 requestProcessors.put(key, requestProcessor);

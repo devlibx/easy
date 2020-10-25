@@ -58,7 +58,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                         .get()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
                         .retrieve()
-                        .bodyToMono(String.class)
+                        .bodyToMono(byte[].class)
                         .doOnError(onErrorConsumer(observableEmitter))
                         .subscribe(consumer(observableEmitter));
                 break;
@@ -69,7 +69,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                         .delete()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
                         .retrieve()
-                        .bodyToMono(String.class)
+                        .bodyToMono(byte[].class)
                         .doOnError(onErrorConsumer(observableEmitter))
                         .subscribe(consumer(observableEmitter));
                 break;
@@ -81,7 +81,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
                         .bodyValue(requestObject.getBody())
                         .retrieve()
-                        .bodyToMono(String.class)
+                        .bodyToMono(byte[].class)
                         .doOnError(onErrorConsumer(observableEmitter))
                         .subscribe(consumer(observableEmitter));
                 break;
@@ -93,7 +93,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
                         .bodyValue(requestObject.getBody())
                         .retrieve()
-                        .bodyToMono(String.class)
+                        .bodyToMono(byte[].class)
                         .doOnError(onErrorConsumer(observableEmitter))
                         .subscribe(consumer(observableEmitter));
                 break;
@@ -104,10 +104,10 @@ public class AsyncRequestProcessor implements IRequestProcessor {
         }
     }
 
-    private Consumer<String> consumer(ObservableEmitter<ResponseObject> observableEmitter) {
+    private Consumer<byte[]> consumer(ObservableEmitter<ResponseObject> observableEmitter) {
         return data -> {
             ResponseObject responseObject = new ResponseObject();
-            responseObject.setBody(data.getBytes());
+            responseObject.setBody(data);
             responseObject.setStatusCode(200);
             observableEmitter.onNext(responseObject);
             observableEmitter.onComplete();

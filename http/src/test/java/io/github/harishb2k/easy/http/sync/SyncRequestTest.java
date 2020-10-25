@@ -7,6 +7,7 @@ import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import io.github.harishb2k.easy.resilience.exception.OverflowException;
 import junit.framework.TestCase;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -18,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static io.github.harishb2k.easy.http.helper.CommonHttpHelper.multivaluedMap;
 
 @SuppressWarnings("rawtypes")
+@Slf4j
 public class SyncRequestTest extends TestCase {
     private LocalHttpServer localHttpServer;
 
@@ -74,6 +76,7 @@ public class SyncRequestTest extends TestCase {
      */
     public void testRequestExpectRejected() throws Exception {
         AtomicInteger overflowCount = new AtomicInteger();
+        AtomicInteger successCount = new AtomicInteger();
         ParallelThread parallelThread = new ParallelThread(10, "testRequestExpectRejected");
         parallelThread.execute(() -> {
             try {
@@ -86,14 +89,17 @@ public class SyncRequestTest extends TestCase {
                         null,
                         Map.class
                 );
+                successCount.incrementAndGet();
             } catch (OverflowException e) {
                 overflowCount.incrementAndGet();
-                System.out.println("Test is expecting this exception - " + e);
+                log.info("Test is expecting this exception - " + e);
             } catch (Exception e) {
-                fail("We should not get a exception - only OverflowException is expected");
+                log.error("Test expecting is not expected - " + e);
+                // fail("We should not get a exception - only OverflowException is expected");
             }
         });
         assertEquals(6, overflowCount.get());
+        assertEquals(4, successCount.get());
     }
 
     @Override
