@@ -28,6 +28,7 @@ public class HttpClientBuilder implements IClientBuilder {
 
     @Override
     public boolean accept(Server server, Api api) {
+        if (api.isAsync()) return false;
         return "HTTP".equals(api.getType()) || "HTTPS".equals(api.getType());
     }
 

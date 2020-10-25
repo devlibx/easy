@@ -57,4 +57,17 @@ public class Server {
      * Why we get this type of timeout -> when we connect to server, it may be busy or server may be down.
      */
     private int connectTimeout = 100;
+
+    public String getUrl() {
+        StringBuilder sb = new StringBuilder();
+        if (isHttps) {
+            sb.append("https://");
+        } else {
+            sb.append("http://");
+        }
+        sb.append(host);
+        sb.append(":");
+        sb.append(port);
+        return sb.toString();
+    }
 }

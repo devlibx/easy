@@ -1,13 +1,19 @@
 package io.github.harishb2k.easy.http.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.base.Strings;
+import io.gitbub.harishb2k.easy.helper.string.StringHelper;
+import io.github.harishb2k.easy.http.RequestObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.text.StrSubstitutor;
 
+import javax.ws.rs.core.MultivaluedMap;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -103,4 +109,40 @@ public class Api {
      * e.g. If your timeout is 1000 and this value is 0.1 then we will set socket timeout = (1000 + 1000 * 0.1 = 1100)
      */
     private float timeoutDeltaFactor = 0.0f;
+
+    public String getUrlForRequestObject(RequestObject requestObject, StringHelper stringHelper) {
+        return getUrlWithPathParamAndQueryParam(requestObject.getPathParam(), requestObject.getQueryParam(), stringHelper);
+    }
+
+    public String getUrlWithPathParamAndQueryParam(
+            Map<String, Object> pathParam,
+            MultivaluedMap<String, Object> queryParam,
+            StringHelper stringHelper
+    ) {
+
+        // Build URI
+        String uri = getPath();
+        if (!Strings.isNullOrEmpty(uri) && pathParam != null) {
+            uri = StrSubstitutor.replace(getPath(), pathParam);
+        }
+        if (Strings.isNullOrEmpty(uri)) {
+            uri = "/";
+        }
+        uri = uri.startsWith("/") ? uri : "/" + uri;
+
+        //
+        StringBuilder sb = new StringBuilder();
+        if (queryParam != null) {
+            queryParam.forEach((key, values) -> {
+                values.forEach(value -> {
+                    if (!sb.toString().isEmpty()) {
+                        sb.append("&");
+                    }
+                    sb.append(key).append("=").append(value);
+                });
+            });
+        }
+        String qp = sb.toString();
+        return uri + (Strings.isNullOrEmpty(qp) ? "" : "?" + qp);
+    }
 }

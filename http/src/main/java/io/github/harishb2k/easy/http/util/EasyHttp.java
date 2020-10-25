@@ -5,6 +5,7 @@ import io.gitbub.harishb2k.easy.helper.Safe;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
+import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
@@ -65,8 +66,7 @@ public class EasyHttp {
                 // Build a request processor
                 IRequestProcessor requestProcessor;
                 if (api.isAsync()) {
-                    // FIXME - For now we only have sync processor - need to give a correct impl
-                    requestProcessor = new SyncRequestProcessor(serverRegistry, apiRegistry);
+                    requestProcessor = new AsyncRequestProcessor(serverRegistry, apiRegistry);
                 } else {
                     requestProcessor = new SyncRequestProcessor(serverRegistry, apiRegistry);
                 }
