@@ -2,19 +2,24 @@ package io.github.harishb2k.easy.http.exception;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.harishb2k.easy.http.ResponseObject;
+import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
+import io.github.harishb2k.easy.resilience.exception.OverflowException;
+import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
+import io.github.harishb2k.easy.resilience.exception.ResilienceException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
+import java.util.Optional;
 
-public interface EasyHttpExceptions {
+public class EasyHttpExceptions {
 
     @Getter
     @AllArgsConstructor
     @Builder
-    class EasyHttpRequestException extends RuntimeException {
+    public static class EasyHttpRequestException extends RuntimeException {
         private final int statusCode;
         private final byte[] body;
         private final ResponseObject response;
@@ -48,125 +53,142 @@ public interface EasyHttpExceptions {
         }
     }
 
-    class Easy4xxException extends EasyHttpRequestException {
+    public static class Easy4xxException extends EasyHttpRequestException {
         public Easy4xxException(ResponseObject response) {
             super(response);
         }
     }
 
-    class Easy5xxException extends EasyHttpRequestException {
+    public static class Easy5xxException extends EasyHttpRequestException {
         public Easy5xxException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyGatewayTimeoutException extends Easy5xxException {
+    public static class EasyGatewayTimeoutException extends Easy5xxException {
         public EasyGatewayTimeoutException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyServiceUnavailableException extends Easy5xxException {
+    public static class EasyServiceUnavailableException extends Easy5xxException {
         public EasyServiceUnavailableException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyBadGatewayException extends Easy5xxException {
+    public static class EasyBadGatewayException extends Easy5xxException {
         public EasyBadGatewayException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyNotImplementedException extends Easy5xxException {
+    public static class EasyNotImplementedException extends Easy5xxException {
         public EasyNotImplementedException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyInternalServerErrorException extends Easy5xxException {
+    public static class EasyInternalServerErrorException extends Easy5xxException {
         public EasyInternalServerErrorException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyTooManyRequestsException extends Easy4xxException {
+    public static class EasyTooManyRequestsException extends Easy4xxException {
         public EasyTooManyRequestsException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyBadRequestException extends Easy4xxException {
+    public static class EasyBadRequestException extends Easy4xxException {
         public EasyBadRequestException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyGoneException extends Easy4xxException {
+    public static class EasyGoneException extends Easy4xxException {
         public EasyGoneException(ResponseObject response) {
             super(response);
         }
     }
 
 
-    class EasyConflictRequestException extends Easy4xxException {
+    public static class EasyConflictRequestException extends Easy4xxException {
         public EasyConflictRequestException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyNotAcceptableException extends Easy4xxException {
+    public static class EasyNotAcceptableException extends Easy4xxException {
         public EasyNotAcceptableException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyMethodNotAllowedException extends Easy4xxException {
+    public static class EasyMethodNotAllowedException extends Easy4xxException {
         public EasyMethodNotAllowedException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyNotFoundException extends Easy4xxException {
+    public static class EasyNotFoundException extends Easy4xxException {
         public EasyNotFoundException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyUnauthorizedRequestException extends Easy4xxException {
+    public static class EasyUnauthorizedRequestException extends Easy4xxException {
         public EasyUnauthorizedRequestException(ResponseObject response) {
             super(response);
         }
     }
 
-    class EasyRequestTimeOutException extends Easy4xxException {
+    public static class EasyRequestTimeOutException extends Easy4xxException {
         public EasyRequestTimeOutException(ResponseObject response) {
             super(response);
         }
     }
 
 
-    class EasyResilienceException extends EasyHttpRequestException {
+    public static class EasyResilienceException extends EasyHttpRequestException {
         public EasyResilienceException(Throwable throwable) {
             super(throwable);
         }
     }
 
-    class EasyResilienceRequestTimeoutException extends EasyResilienceException {
+    public static class EasyResilienceRequestTimeoutException extends EasyResilienceException {
         public EasyResilienceRequestTimeoutException(Throwable throwable) {
             super(throwable);
         }
     }
 
-    class EasyResilienceOverflowException extends EasyResilienceException {
+    public static class EasyResilienceOverflowException extends EasyResilienceException {
         public EasyResilienceOverflowException(Throwable throwable) {
             super(throwable);
         }
     }
 
-    class EasyResilienceCircuitOpenException extends EasyResilienceException {
+    public static class EasyResilienceCircuitOpenException extends EasyResilienceException {
         public EasyResilienceCircuitOpenException(Throwable throwable) {
             super(throwable);
+        }
+    }
+
+    /**
+     * Helper to convert ResilienceException to Easy Exceptions
+     */
+    public static Optional<EasyResilienceException> easyEasyResilienceException(Throwable e) {
+        if (e instanceof RequestTimeoutException) {
+            return Optional.of(new EasyResilienceRequestTimeoutException(e));
+        } else if (e instanceof OverflowException) {
+            return Optional.of(new EasyResilienceOverflowException(e));
+        } else if (e instanceof CircuitOpenException) {
+            return Optional.of(new EasyResilienceCircuitOpenException(e));
+        } else if (e instanceof ResilienceException) {
+            return Optional.of(new EasyResilienceException(e));
+        } else {
+            return Optional.empty();
         }
     }
 }
