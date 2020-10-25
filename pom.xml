@@ -49,6 +49,7 @@
         <slf4j.version>1.7.5</slf4j.version>
         <javax.ws.rs-api.version>2.0.1</javax.ws.rs-api.version>
         <resilience4j.version>1.6.1</resilience4j.version>
+        <reactor-netty.version>0.9.12.RELEASE</reactor-netty.version>
     </properties>
 
     <dependencyManagement>
@@ -104,6 +105,18 @@
                 <version>${javax.ws.rs-api.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.7</version>
+            </dependency>
+
+            <!-- HTTP -->
+            <dependency>
+                <groupId>io.projectreactor.netty</groupId>
+                <artifactId>reactor-netty</artifactId>
+                <version>${reactor-netty.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.opentracing.contrib</groupId>
                 <artifactId>opentracing-apache-httpclient</artifactId>
                 <version>0.0.2</version>
@@ -112,11 +125,6 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>4.5.3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.7</version>
             </dependency>
 
             <!-- MySQL -->
@@ -255,7 +263,7 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-
+<!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -274,7 +282,7 @@
                     </execution>
                 </executions>
             </plugin>
-
+-->
         </plugins>
 
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
