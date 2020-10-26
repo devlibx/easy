@@ -7,8 +7,12 @@ import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
 import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
 import io.github.harishb2k.easy.http.config.Config;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyBadRequestException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyInternalServerErrorException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
 import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
@@ -127,6 +131,25 @@ public class EasyHttp {
         });
     }
 
+    /**
+     * Make a HTTP call which returns a response.
+     * </br>
+     * Note - to check for timeout errors you must catch both
+     * {@link EasyResilienceRequestTimeoutException} and {@link EasyRequestTimeOutException}
+     *
+     * @param call request object
+     * @param cls  class type of response
+     * @param <T>  type of response
+     * @return response of http call
+     * @throws EasyHttpRequestException if error, it provides {@link EasyHttpRequestException}. You can catch specific
+     *                                  type of errors by caching sub-class of EasyHttpRequestException.
+     *                                  e.g. {@link EasyInternalServerErrorException}, {@link EasyBadRequestException}
+     *                                  <p>
+     *                                  It also throws {@link EasyResilienceException} which is also a sub-class of
+     *                                  {@link EasyHttpRequestException}. These resilience exception are thrown when
+     *                                  circuit is open, too many calls are made, or request timed out.
+     *                                  <p>
+     */
     public static <T> T callSync(Call call, Class<T> cls) {
         return callSync(
                 call.getServer(),

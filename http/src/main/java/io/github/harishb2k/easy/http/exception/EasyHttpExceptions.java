@@ -147,6 +147,9 @@ public class EasyHttpExceptions {
         }
     }
 
+    /**
+     * This exception is thrown when a socket timeout occurs
+     */
     public static class EasyRequestTimeOutException extends Easy4xxException {
         public EasyRequestTimeOutException(ResponseObject response) {
             super(response);
@@ -160,6 +163,11 @@ public class EasyHttpExceptions {
         }
     }
 
+    /**
+     * This error is thrown when request is timed out due to you timeout specified in "api.timeout" property.
+     * <p>
+     * Note - socket timeout is different which is captured by {@link EasyRequestTimeOutException}.
+     */
     public static class EasyResilienceRequestTimeoutException extends EasyResilienceException {
         public EasyResilienceRequestTimeoutException(Throwable throwable) {
             super(throwable);
