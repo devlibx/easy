@@ -127,6 +127,19 @@ public class EasyHttp {
         });
     }
 
+    public static <T> T callSync(Call call, Class<T> cls) {
+        return callSync(
+                call.getServer(),
+                call.getApi(),
+                call.getPathParams(),
+                call.getQueryParam(),
+                call.getHeaders(),
+                call.getBody(),
+                cls
+        );
+    }
+
+    @Deprecated
     public static <T> T callSync(String server,
                                  String api,
                                  Map<String, Object> pathParam,

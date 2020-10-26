@@ -3,9 +3,9 @@ package io.github.harishb2k.easy.http.async;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.config.Config;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
+import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
 import org.apache.log4j.ConsoleAppender;
@@ -17,8 +17,6 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static io.github.harishb2k.easy.http.helper.CommonHttpHelper.multivaluedMap;
 
 public class AsyncRequestProcessorTest extends TestCase {
     private LocalHttpServer localHttpServer;
@@ -47,12 +45,10 @@ public class AsyncRequestProcessorTest extends TestCase {
     public void testSuccessGet() {
         int delay = 10;
         Map resultSync = EasyHttp.callSync(
-                "testServer",
-                "delay_timeout_5000",
-                null,
-                multivaluedMap("delay", delay),
-                null,
-                null,
+                Call.builder()
+                        .withServerAndApi("testServer", "delay_timeout_5000")
+                        .addQueryParam("delay", delay)
+                        .build(),
                 Map.class
         );
         assertEquals(delay + "", resultSync.get("delay"));
@@ -67,13 +63,11 @@ public class AsyncRequestProcessorTest extends TestCase {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotException = new AtomicBoolean(false);
         try {
-            EasyHttp.callSync(
-                    "testServer",
-                    "delay_timeout_10",
-                    null,
-                    multivaluedMap("delay", 100),
-                    null,
-                    null,
+            Map result = EasyHttp.callSync(
+                    Call.builder()
+                            .withServerAndApi("testServer", "delay_timeout_10")
+                            .addQueryParam("delay", 100)
+                            .build(),
                     Map.class
             );
             wait.countDown();
