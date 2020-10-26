@@ -201,7 +201,12 @@ public class EasyHttp {
                                 } else if (throwable instanceof EasyHttpRequestException) {
                                     e = (EasyHttpRequestException) throwable;
                                 } else {
-                                    e = easyEasyResilienceException(throwable).orElseThrow(() -> new RuntimeException(throwable));
+                                    Optional<EasyResilienceException> err = easyEasyResilienceException(throwable);
+                                    if (err.isPresent()) {
+                                        e = err.get();
+                                    } else {
+                                        e = new RuntimeException(throwable);
+                                    }
                                 }
                                 observableEmitter.onError(e);
                             })

@@ -18,6 +18,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static io.github.harishb2k.easy.http.util.EasyHttp.callAsync;
 
@@ -107,6 +108,73 @@ public class AsyncRequestProcessorTest extends TestCase {
         });
         assertEquals(6, overflowExceptionCount.get());
         assertEquals(4, successCount.get());
+    }
+
+    public void testSuccessAsync() throws Exception {
+        int count = 1;
+        CountDownLatch wait = new CountDownLatch(count);
+        AtomicInteger overflowExceptionCount = new AtomicInteger();
+        AtomicInteger successCount = new AtomicInteger();
+
+        long runningThreadId = Thread.currentThread().getId();
+        AtomicLong successThreadId = new AtomicLong();
+        log.info("Running in Thread={}", Thread.currentThread().getName());
+        callAsync(
+                Call.builder(Map.class)
+                        .withServerAndApi("testServer", "delay_timeout_5000")
+                        .addQueryParam("delay", 500)
+                        .build()
+        ).subscribe(
+                map -> {
+                    log.info("Get response in Thread={}", Thread.currentThread().getName());
+                    successCount.incrementAndGet();
+                    successThreadId.set(Thread.currentThread().getId());
+                    wait.countDown();
+                },
+                throwable -> {
+                    if (throwable instanceof EasyResilienceOverflowException) {
+                        overflowExceptionCount.incrementAndGet();
+                    } else {
+                        log.error("Unexpected exception: e={}, cls={}", throwable.getMessage(), throwable.getClass());
+                    }
+                    wait.countDown();
+                })
+                .dispose();
+        wait.await(10, TimeUnit.SECONDS);
+        assertEquals(1, successCount.get());
+        assertEquals("Running and success callback thread must be same", runningThreadId, successThreadId.get());
+    }
+
+    public void testErrorAsync() throws Exception {
+        int count = 1;
+        CountDownLatch wait = new CountDownLatch(count);
+        AtomicInteger errorCount = new AtomicInteger();
+        AtomicInteger successCount = new AtomicInteger();
+        long runningThreadId = Thread.currentThread().getId();
+        AtomicLong errorThreadId = new AtomicLong();
+        log.info("Running in Thread={}", Thread.currentThread().getName());
+        callAsync(
+                Call.builder(Map.class)
+                        .withServerAndApi("testServer", "delay_timeout_1")
+                        .addQueryParam("delay", 500)
+                        .build()
+        ).subscribe(
+                map -> {
+                    log.error("Unexpected call - did not expected success");
+                    successCount.incrementAndGet();
+                    wait.countDown();
+                },
+                throwable -> {
+                    log.info("Get error response in Thread={}", Thread.currentThread().getName());
+                    errorThreadId.set(Thread.currentThread().getId());
+                    errorCount.incrementAndGet();
+                    wait.countDown();
+                })
+                .dispose();
+        wait.await(10, TimeUnit.SECONDS);
+        assertEquals(0, successCount.get());
+        assertEquals(1, errorCount.get());
+        assertEquals("Running and error callback thread must be same", runningThreadId, errorThreadId.get());
     }
 
     public void testRejectRequest_Async() throws Exception {

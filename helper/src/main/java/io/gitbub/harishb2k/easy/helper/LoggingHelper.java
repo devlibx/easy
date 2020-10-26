@@ -31,6 +31,6 @@ public class LoggingHelper {
         Logger.getRootLogger().addAppender(console);
         Logger.getRootLogger().setLevel(INFO);
         Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(OFF);
-        Logger.getLogger(LocalHttpServer.class).setLevel(TRACE);
+        Logger.getLogger(LocalHttpServer.class).setLevel(INFO);
     }
 }
