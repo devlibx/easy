@@ -1,11 +1,21 @@
 package io.github.harishb2k.easy.resilience;
 
+import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
+import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.decorators.Decorators;
+import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.exceptions.CompositeException;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import junit.framework.TestCase;
 
+import java.time.Duration;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
@@ -184,5 +194,112 @@ public class RxJavaTest extends TestCase {
         assertEquals(uuid, e.getExceptions().get(0).getMessage());
         assertTrue(e.getExceptions().get(1) instanceof RuntimeException);
         assertEquals(uuidAfterProcessingDoOnError, e.getExceptions().get(1).getMessage());
+    }
+
+    /**
+     * This test case is added for some experiments
+     */
+    public void _testCompose() throws Exception {
+
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .enableAutomaticTransitionFromOpenToHalfOpen()
+                .waitDurationInOpenState(Duration.ofMillis(100))
+                .minimumNumberOfCalls(1)
+                .slidingWindowSize(2)
+                .build();
+        CircuitBreaker circuitBreaker = CircuitBreaker.of("testCompose-cb", circuitBreakerConfig);
+
+        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+        TimeLimiter timeLimiter = TimeLimiter.of(Duration.ofMillis(10000));
+        ThreadPoolBulkheadConfig config = ThreadPoolBulkheadConfig.custom()
+                .coreThreadPoolSize(2)
+                .maxThreadPoolSize(2)
+                .queueCapacity(1)
+                .build();
+        ThreadPoolBulkhead threadPoolBulkhead = ThreadPoolBulkhead.of("testCompose", config);
+
+        String uuid = UUID.randomUUID().toString() + "-Thrown_From_Create";
+        final Observable<String> observable = Observable.create(emitter -> {
+            Thread.sleep(1000);
+            System.out.println("Original Observable Thread - " + Thread.currentThread().getName());
+            emitter.onNext(uuid);
+            emitter.onComplete();
+        });
+
+        Observable<String> observableNew = Observable.create(emitter -> {
+            Decorators.ofCallable(() -> {
+                System.out.println("ofRunnable Thread - " + Thread.currentThread().getName());
+                return observable.blockingFirst();
+            }).withThreadPoolBulkhead(threadPoolBulkhead)
+                    .withTimeLimiter(timeLimiter, scheduler)
+                    .withCircuitBreaker(circuitBreaker)
+                    .get()
+                    .whenCompleteAsync(
+                            (unused, throwable) -> {
+                                try {
+                                    if (throwable == null) {
+                                        System.out.println("whenCompleteAsync Thread - " + Thread.currentThread().getName() + " Result = " + unused);
+                                        emitter.onNext(unused);
+                                        emitter.onComplete();
+                                    } else {
+                                        System.err.println("whenCompleteAsync Thread - " + Thread.currentThread().getName());
+                                        emitter.onError(throwable);
+                                    }
+                                } catch (Throwable e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                    );
+        });
+
+
+        String uuidFromCompose = UUID.randomUUID().toString() + "-Thrown_From_Compose";
+        Observable<String> observableA = observable.compose(upstream -> {
+            return Observable.create(emitter -> {
+                Decorators.ofCallable(() -> {
+                    System.out.println("ofRunnable Thread - " + Thread.currentThread().getName());
+                    return upstream.blockingFirst();
+                }).withThreadPoolBulkhead(threadPoolBulkhead)
+                        .withTimeLimiter(timeLimiter, scheduler)
+                        .withCircuitBreaker(circuitBreaker)
+                        .get()
+                        .whenCompleteAsync(
+                                (unused, throwable) -> {
+                                    if (throwable == null) {
+                                        System.out.println("whenCompleteAsync Thread - " + Thread.currentThread().getName() + " Result = " + unused);
+                                        emitter.onNext(unused);
+                                        emitter.onComplete();
+                                    } else {
+                                        System.err.println("whenCompleteAsync Thread - " + Thread.currentThread().getName());
+                                        emitter.onError(throwable);
+                                    }
+                                }
+                        );
+            });
+        });
+
+        System.out.println("Will called subscribe");
+        AtomicLong success = new AtomicLong();
+        int count = 10;
+        CountDownLatch countDownLatch = new CountDownLatch(count);
+        for (int i = 0; i < count; i++) {
+            int _i = i;
+            observableNew
+                    .subscribe(str -> {
+                                System.out.println("observe result on Thread - " + _i + " " + Thread.currentThread().getName());
+                                System.out.println(str);
+                                success.incrementAndGet();
+                                countDownLatch.countDown();
+                                throw new RuntimeException("00000000");
+                            },
+                            throwable -> {
+                                System.err.println("observe error on Thread - " + _i + " " + Thread.currentThread().getName() + " " + throwable.getMessage());
+                                countDownLatch.countDown();
+                            });
+        }
+        System.out.println("Already called subscribe");
+        countDownLatch.await();
+        Thread.sleep(5000);
+        System.out.println("\n\n" + success.get());
     }
 }
