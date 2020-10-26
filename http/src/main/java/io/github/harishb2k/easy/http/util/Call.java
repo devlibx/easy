@@ -2,6 +2,7 @@ package io.github.harishb2k.easy.http.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Strings;
+import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.vavr.Function0;
 import io.vavr.Function1;
 import lombok.Data;
@@ -48,6 +49,15 @@ public class Call<R> {
 
         public Builder(Class<R> responseClass) {
             this.responseClass = responseClass;
+
+            // Default response builder
+            this.responseBuilder = (Function1<byte[], R>) bytes -> {
+                if (bytes != null) {
+                    String str = new String(bytes);
+                    return JsonUtils.readObject(str, responseClass);
+                }
+                return null;
+            };
         }
 
         public Builder<R> withResponseBuilder(Function1<byte[], R> responseBuilder) {

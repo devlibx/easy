@@ -3,6 +3,7 @@ package io.github.harishb2k.easy.http.sync;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
+import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
@@ -68,16 +69,33 @@ public class SyncRequestTest extends TestCase {
         Map resultSync = EasyHttp.callSync(
                 Call.builder(Map.class)
                         .withServerAndApi("testServer", "delay_timeout_5000")
-                        .withResponseBuilder(bytes -> {
-                            String str = new String(bytes);
-                            return JsonUtils.convertAsMap(str);
-                        })
                         .addQueryParam("delay", 1000)
                         .build()
         );
         assertEquals("1000", resultSync.get("delay"));
         assertEquals("some data", resultSync.get("data"));
     }
+
+    /**
+     * Test a simple http call (with success)
+     */
+    public void testSimpleHttpRequest_WithResponseBuilder() {
+        StringObjectMap resultSync = EasyHttp.callSync(
+                Call.builder(StringObjectMap.class)
+                        .withServerAndApi("testServer", "delay_timeout_5000")
+                        .withResponseBuilder(bytes -> {
+                            StringObjectMap toReturn = JsonUtils.convertAsStringObjectMap(bytes);
+                            toReturn.put("processed", true);
+                            return toReturn;
+                        })
+                        .addQueryParam("delay", 1000)
+                        .build()
+        );
+        assertEquals(1000, resultSync.getInt("delay").intValue());
+        assertEquals("some data", resultSync.getString("data"));
+        assertEquals(Boolean.TRUE, resultSync.getBoolean("processed"));
+    }
+
 
     /**
      * Test a simple http call where we make too many calls to simulate requests rejected

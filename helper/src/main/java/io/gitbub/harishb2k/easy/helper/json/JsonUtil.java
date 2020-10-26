@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -67,5 +68,20 @@ public class JsonUtil {
      */
     public Map<String, Object> convertAsMap(String str) {
         return readObject(str, Map.class);
+    }
+
+    /**
+     * Convert string to Map
+     */
+    public StringObjectMap convertAsStringObjectMap(String str) {
+        return readObject(str, StringObjectMap.class);
+    }
+
+    /**
+     * Convert string to Map
+     */
+    public StringObjectMap convertAsStringObjectMap(byte[] bytes) {
+        String str = new String(bytes);
+        return readObject(str, StringObjectMap.class);
     }
 }

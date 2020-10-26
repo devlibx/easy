@@ -2,7 +2,6 @@ package io.github.harishb2k.easy.http.util;
 
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.Safe;
-import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
 import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
@@ -189,17 +188,8 @@ public class EasyHttp {
         Observable<T> observable = requestProcessors.get(server + "-" + api)
                 .process(requestObject)
                 .flatMap(responseObject -> {
-
-                    // Get body
-                    String bodyString = null;
-                    if (responseObject.getBody() != null) {
-                        bodyString = new String(responseObject.getBody());
-                    }
-
-                    // Convert to requested class
-                    T objectToReturn = JsonUtils.readObject(bodyString, call.getResponseClass());
+                    T objectToReturn = call.getResponseBuilder().apply(responseObject.getBody());
                     return Observable.just(objectToReturn);
-
                 });
 
         // Run it with resilience processor;
