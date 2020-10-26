@@ -1,6 +1,7 @@
 package io.github.harishb2k.easy.http.async;
 
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
+import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.config.Config;
@@ -11,10 +12,6 @@ import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -33,7 +30,7 @@ public class AsyncRequestProcessorTest extends TestCase {
         super.setUp();
 
         // Setup logging
-        setupLogging();
+        LoggingHelper.setupLogging();
 
         // Start server
         localHttpServer = new LocalHttpServer();
@@ -148,19 +145,5 @@ public class AsyncRequestProcessorTest extends TestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         localHttpServer.stopServer();
-    }
-
-    private void setupLogging() {
-        ConsoleAppender console = new ConsoleAppender();
-        // String PATTERN = "%d [%p|%c|%C{1}] %m%n";
-        String PATTERN = "%m%n";
-        console.setLayout(new PatternLayout(PATTERN));
-        console.setThreshold(org.apache.log4j.Level.DEBUG);
-        console.activateOptions();
-        Logger.getRootLogger().addAppender(console);
-        Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
-        Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(Level.OFF);
-        Logger.getLogger(LocalHttpServer.class).setLevel(Level.DEBUG);
-        Logger.getLogger("reactor.netty.http.client").setLevel(Level.OFF);
     }
 }

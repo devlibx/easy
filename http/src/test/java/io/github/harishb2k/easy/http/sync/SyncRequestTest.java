@@ -1,6 +1,7 @@
 package io.github.harishb2k.easy.http.sync;
 
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
+import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
@@ -13,10 +14,6 @@ import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -29,26 +26,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class SyncRequestTest extends TestCase {
     private LocalHttpServer localHttpServer;
 
-
-    private void setupLogging() {
-        ConsoleAppender console = new ConsoleAppender();
-        // String PATTERN = "%d [%p|%c|%C{1}] %m%n";
-        String PATTERN = "%m%n";
-        console.setLayout(new PatternLayout(PATTERN));
-        console.setThreshold(org.apache.log4j.Level.DEBUG);
-        console.activateOptions();
-        Logger.getRootLogger().addAppender(console);
-        Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
-        Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(Level.OFF);
-        Logger.getLogger(LocalHttpServer.class).setLevel(Level.TRACE);
-    }
-
     @Override
     protected void setUp() throws Exception {
         super.setUp();
 
         // Setup logging
-        setupLogging();
+        LoggingHelper.setupLogging();
 
         // Start server
         localHttpServer = new LocalHttpServer();

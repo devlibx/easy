@@ -2,15 +2,14 @@ package io.github.harishb2k.easy.http.async;
 
 import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
+import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import junit.framework.TestCase;
-import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -35,7 +34,7 @@ public class AsyncHttpClientBasicConceptTest extends TestCase {
         super.setUp();
         localHttpServer = new LocalHttpServer();
         localHttpServer.startServerInThread();
-        setupLogging();
+        LoggingHelper.setupLogging();
         service = UUID.randomUUID().toString();
         httpClient = HttpClient.create(ConnectionProvider.create(service, 10))
                 .tcpConfiguration(tcpClient ->
@@ -290,17 +289,5 @@ public class AsyncHttpClientBasicConceptTest extends TestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         localHttpServer.stopServer();
-    }
-
-    private void setupLogging() {
-        ConsoleAppender console = new ConsoleAppender();
-        String PATTERN = "%d [%p|%c|%C{1}] %m%n";
-        console.setLayout(new PatternLayout(PATTERN));
-        console.setThreshold(org.apache.log4j.Level.DEBUG);
-        console.activateOptions();
-        Logger.getRootLogger().addAppender(console);
-        Logger.getRootLogger().setLevel(org.apache.log4j.Level.INFO);
-        Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(Level.OFF);
-        Logger.getLogger(LocalHttpServer.class).setLevel(Level.DEBUG);
     }
 }
