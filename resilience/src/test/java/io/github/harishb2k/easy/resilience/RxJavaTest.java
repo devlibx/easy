@@ -2,10 +2,12 @@ package io.github.harishb2k.easy.resilience;
 
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.exceptions.CompositeException;
+import io.reactivex.rxjava3.schedulers.Schedulers;
 import junit.framework.TestCase;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -28,6 +30,34 @@ public class RxJavaTest extends TestCase {
             gotInside.set(true);
         });
         assertTrue(gotInside.get());
+    }
+
+    /**
+     * Here heavy work of thread block is happening on "subscribeOn" thread.
+     * <p>
+     * blockingSubscribe - this will execute on main thread. E.g. in android you dont use
+     * blockingSubscribe but observeOn(Android.MainThread())
+     */
+    public void test_ObserveOn_SubscribeOn() throws Exception {
+        long currentThreadId = Thread.currentThread().getId();
+        Observable<Long> observable = Observable.create(emitter -> {
+            long currentThreadIdInsideObservable = Thread.currentThread().getId();
+
+            Thread.sleep(100);
+            emitter.onNext(currentThreadIdInsideObservable);
+            emitter.onComplete();
+
+        });
+
+        AtomicLong threadWhereSubscribeMethodIsExecuted = new AtomicLong();
+        AtomicLong threadWhereCreateMethodIsCalled = new AtomicLong();
+        observable
+                .subscribeOn(Schedulers.newThread())
+                .blockingSubscribe(aLong -> {
+                    threadWhereCreateMethodIsCalled.set(aLong);
+                    threadWhereSubscribeMethodIsExecuted.set(Thread.currentThread().getId());
+                });
+        assertEquals(currentThreadId, threadWhereSubscribeMethodIsExecuted.get());
     }
 
     /**
