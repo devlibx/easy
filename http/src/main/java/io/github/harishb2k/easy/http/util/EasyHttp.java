@@ -23,7 +23,6 @@ import io.github.harishb2k.easy.resilience.ResilienceManager;
 import io.reactivex.Observable;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -118,10 +117,9 @@ public class EasyHttp {
                 try {
                     log.debug("making a warm-up call to service={} api={} - you may see bad api call in server logs", server, api);
                     EasyHttp.callSync(
-                            Call.builder()
+                            Call.builder(Map.class)
                                     .withServerAndApi(serverName, apiName)
-                                    .build(),
-                            Map.class
+                                    .build()
                     );
                 } catch (Exception ignored) {
                 }
@@ -136,7 +134,6 @@ public class EasyHttp {
      * {@link EasyResilienceRequestTimeoutException} and {@link EasyRequestTimeOutException}
      *
      * @param call request object
-     * @param cls  class type of response
      * @param <T>  type of response
      * @return response of http call
      * @throws EasyHttpRequestException if error, it provides {@link EasyHttpRequestException}. You can catch specific
@@ -148,17 +145,9 @@ public class EasyHttp {
      *                                  circuit is open, too many calls are made, or request timed out.
      *                                  <p>
      */
-    public static <T> T callSync(Call call, Class<T> cls) {
+    public static <T> T callSync(Call<T> call) {
         try {
-            return internalCall(
-                    call.getServer(),
-                    call.getApi(),
-                    call.getPathParams(),
-                    call.getQueryParam(),
-                    call.getHeaders(),
-                    call.getBody(),
-                    cls
-            ).blockingFirst();
+            return internalCall(call).blockingFirst();
         } catch (EasyResilienceException e) {
             Optional<EasyResilienceException> ex = easyEasyResilienceException(e);
             if (ex.isPresent()) {
@@ -176,15 +165,10 @@ public class EasyHttp {
     /**
      * Call a HTTP Api. This API is wrapped in other convenience method to be used.
      */
-    private static <T> Observable<T> internalCall(String server,
-                                                  String api,
-                                                  Map<String, Object> pathParam,
-                                                  MultivaluedMap<String, Object> queryParam,
-                                                  Map<String, Object> headers,
-                                                  Object body,
-                                                  Class<T> cls
-    ) {
+    private static <T> Observable<T> internalCall(Call<T> call) {
 
+        final String server = call.getServer();
+        final String api = call.getApi();
         final String key = server + "-" + api;
 
         // Make sure we have server and api registered
@@ -196,10 +180,10 @@ public class EasyHttp {
         RequestObject requestObject = new RequestObject();
         requestObject.setServer(server);
         requestObject.setApi(api);
-        requestObject.setPathParam(pathParam);
-        requestObject.setQueryParam(queryParam);
-        requestObject.setHeaders(headers);
-        requestObject.setBody(body);
+        requestObject.setPathParam(call.getPathParams());
+        requestObject.setQueryParam(call.getQueryParam());
+        requestObject.setHeaders(call.getHeaders());
+        requestObject.setBody(call.getBody());
 
         // Build a Observable and process it to give final response (in flat map)
         Observable<T> observable = requestProcessors.get(server + "-" + api)
@@ -213,7 +197,7 @@ public class EasyHttp {
                     }
 
                     // Convert to requested class
-                    T objectToReturn = JsonUtils.readObject(bodyString, cls);
+                    T objectToReturn = JsonUtils.readObject(bodyString, call.getResponseClass());
                     return Observable.just(objectToReturn);
 
                 });
@@ -223,7 +207,7 @@ public class EasyHttp {
                 .executeObservable(
                         key,
                         observable,
-                        cls
+                        call.getResponseClass()
                 );
     }
 

@@ -3,6 +3,7 @@ package io.github.harishb2k.easy.http.util;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Strings;
 import io.vavr.Function0;
+import io.vavr.Function1;
 import lombok.Data;
 
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -12,13 +13,15 @@ import java.util.Map;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Call {
+public class Call<R> {
     private String server;
     private String api;
     private Map<String, Object> headers = new HashMap<>();
     private Map<String, Object> pathParams;
     private MultivaluedMap<String, Object> queryParam;
     private Object body;
+    private Class<R> responseClass;
+    private Function1<byte[], R> responseBuilder;
 
     private Call() {
     }
@@ -26,20 +29,31 @@ public class Call {
     /**
      * A call object builder
      */
-    public static Builder builder() {
-        return new Builder();
+    public static <R> Builder<R> builder(Class<R> responseClass) {
+        return new Builder<>(responseClass);
     }
 
     /**
      * Builder class
      */
-    public static class Builder {
+    public static class Builder<R> {
         private String server;
         private String api;
         private Map<String, Object> headers;
         private Map<String, Object> pathParams;
         private MultivaluedMap<String, Object> queryParam;
         private Object body;
+        private final Class<R> responseClass;
+        private Function1<byte[], R> responseBuilder;
+
+        public Builder(Class<R> responseClass) {
+            this.responseClass = responseClass;
+        }
+
+        public Builder<R> withResponseBuilder(Function1<byte[], R> responseBuilder) {
+            this.responseBuilder = responseBuilder;
+            return this;
+        }
 
         /**
          * Ensure that all the required params are provided.
@@ -53,18 +67,20 @@ public class Call {
         /**
          * @return a call object
          */
-        public Call build() {
+        public Call<R> build() {
 
             // Make sure we have all required fields set
             validate();
 
-            Call call = new Call();
+            Call<R> call = new Call();
             call.server = server;
             call.api = api;
             call.headers = headers;
             call.pathParams = pathParams;
             call.queryParam = queryParam;
             call.body = body;
+            call.responseClass = responseClass;
+            call.responseBuilder = responseBuilder;
             return call;
         }
 
@@ -72,7 +88,7 @@ public class Call {
          * @param api name of the API
          * @return builder object
          */
-        public Builder withServerAndApi(String server, String api) {
+        public Builder<R> withServerAndApi(String server, String api) {
             this.server = server;
             this.api = api;
             return this;
@@ -82,7 +98,7 @@ public class Call {
          * @param body body to be passed in the request
          * @return builder object
          */
-        public Builder withBody(Object body) {
+        public Builder<R> withBody(Object body) {
             this.body = body;
             return this;
         }
@@ -91,7 +107,7 @@ public class Call {
          * @param bodyFunc a function which returns the body object to be passed in request
          * @return builder object
          */
-        public Builder withBodyFunc(Function0<Object> bodyFunc) {
+        public Builder<R> withBodyFunc(Function0<Object> bodyFunc) {
             this.body = bodyFunc.apply();
             return this;
         }
@@ -101,7 +117,7 @@ public class Call {
          *
          * @return builder object
          */
-        public Builder asContentTypeJson() {
+        public Builder<R> asContentTypeJson() {
             getHeaders().put("Content-Type", "application/json");
             return this;
         }
@@ -111,7 +127,7 @@ public class Call {
          *
          * @return builder object
          */
-        public Builder addPathParam(String key, Object value) {
+        public Builder<R> addPathParam(String key, Object value) {
             getPathParams().put(key, String.format("%s", value));
             return this;
         }
@@ -122,7 +138,7 @@ public class Call {
          * @return builder object
          * @throws RuntimeException if params size is not even
          */
-        public Builder addPathParams(Object... params) {
+        public Builder<R> addPathParams(Object... params) {
             if (params.length % 2 != 0) {
                 throw new RuntimeException("params count must be even");
             }
@@ -137,7 +153,7 @@ public class Call {
          *
          * @return builder object
          */
-        public Builder addPathParams(Map<String, Object> pathParams) {
+        public Builder<R> addPathParams(Map<String, Object> pathParams) {
             getPathParams().putAll(pathParams);
             return this;
         }
@@ -147,7 +163,7 @@ public class Call {
          *
          * @return builder object
          */
-        public Builder addHeader(String key, Object value) {
+        public Builder<R> addHeader(String key, Object value) {
             getHeaders().put(key, String.format("%s", value));
             return this;
         }
@@ -158,7 +174,7 @@ public class Call {
          * @return builder object
          * @throws RuntimeException if headers size is not even
          */
-        public Builder addHeaders(Object... headers) {
+        public Builder<R> addHeaders(Object... headers) {
             if (headers.length % 2 != 0) {
                 throw new RuntimeException("headers count must be even");
             }
@@ -173,7 +189,7 @@ public class Call {
          *
          * @return builder object
          */
-        public Builder addHeaders(Map<String, Object> headers) {
+        public Builder<R> addHeaders(Map<String, Object> headers) {
             getHeaders().putAll(headers);
             return this;
         }
@@ -184,7 +200,7 @@ public class Call {
          *
          * @return builder object
          */
-        public Builder addQueryParam(String key, Object value) {
+        public Builder<R> addQueryParam(String key, Object value) {
             getQueryParam().add(key, String.format("%s", value));
             return this;
         }
@@ -195,7 +211,7 @@ public class Call {
          * @return builder object
          * @throws RuntimeException if queryParams size is not even
          */
-        public Builder addQueryParams(Object... queryParams) {
+        public Builder<R> addQueryParams(Object... queryParams) {
             if (queryParams.length % 2 != 0) {
                 throw new RuntimeException("params count must be even");
             }
@@ -210,7 +226,7 @@ public class Call {
          *
          * @return builder object
          */
-        public Builder addQueryParams(MultivaluedHashMap<String, Object> queryParams) {
+        public Builder<R> addQueryParams(MultivaluedHashMap<String, Object> queryParams) {
             getQueryParam().putAll(queryParams);
             return this;
         }
@@ -220,7 +236,7 @@ public class Call {
          *
          * @return builder object
          */
-        public Builder addQueryParams(Map<String, Object> queryParams) {
+        public Builder<R> addQueryParams(Map<String, Object> queryParams) {
             queryParams.forEach((key, value) -> {
                 getQueryParam().add(key, String.format("%s", value));
             });

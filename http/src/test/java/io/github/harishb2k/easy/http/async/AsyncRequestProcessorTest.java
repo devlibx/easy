@@ -45,11 +45,10 @@ public class AsyncRequestProcessorTest extends TestCase {
     public void testSuccessGet() {
         int delay = 10;
         Map resultSync = EasyHttp.callSync(
-                Call.builder()
+                Call.builder(Map.class)
                         .withServerAndApi("testServer", "delay_timeout_5000")
                         .addQueryParam("delay", delay)
-                        .build(),
-                Map.class
+                        .build()
         );
         assertEquals(delay + "", resultSync.get("delay"));
         assertEquals("some data", resultSync.get("data"));
@@ -64,11 +63,10 @@ public class AsyncRequestProcessorTest extends TestCase {
         AtomicBoolean gotException = new AtomicBoolean(false);
         try {
             Map result = EasyHttp.callSync(
-                    Call.builder()
+                    Call.builder(Map.class)
                             .withServerAndApi("testServer", "delay_timeout_10")
                             .addQueryParam("delay", 100)
-                            .build(),
-                    Map.class
+                            .build()
             );
             wait.countDown();
         } catch (EasyResilienceRequestTimeoutException | EasyRequestTimeOutException e) {
