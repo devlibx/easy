@@ -1,13 +1,16 @@
 package io.github.harishb2k.easy.http.async;
 
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
+import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
+import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
 import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -17,7 +20,11 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static io.github.harishb2k.easy.http.util.EasyHttp.callAsync;
+
+@Slf4j
 public class AsyncRequestProcessorTest extends TestCase {
     private LocalHttpServer localHttpServer;
 
@@ -79,6 +86,62 @@ public class AsyncRequestProcessorTest extends TestCase {
         }
         wait.await(10, TimeUnit.SECONDS);
         assertTrue(gotException.get());
+    }
+
+    public void testRejectRequest_Sync() throws Exception {
+        int count = 10;
+        AtomicInteger overflowExceptionCount = new AtomicInteger();
+        AtomicInteger successCount = new AtomicInteger();
+        ParallelThread parallelThread = new ParallelThread(count, "testRejectRequest");
+        parallelThread.execute(() -> {
+            try {
+                EasyHttp.callSync(
+                        Call.builder(Map.class)
+                                .withServerAndApi("testServer", "delay_timeout_5000")
+                                .addQueryParam("delay", 500)
+                                .build()
+                );
+                successCount.incrementAndGet();
+            } catch (EasyResilienceOverflowException e) {
+                overflowExceptionCount.incrementAndGet();
+            } catch (Exception e) {
+                log.error("Unexpected exception: e={}", e.getMessage());
+            }
+        });
+        assertEquals(6, overflowExceptionCount.get());
+        assertEquals(4, successCount.get());
+    }
+
+    public void testRejectRequest_Async() throws Exception {
+        int count = 10;
+        CountDownLatch wait = new CountDownLatch(count);
+        AtomicInteger overflowExceptionCount = new AtomicInteger();
+        AtomicInteger successCount = new AtomicInteger();
+        ParallelThread parallelThread = new ParallelThread(count, "testRejectRequest");
+        parallelThread.execute(() -> {
+            callAsync(
+                    Call.builder(Map.class)
+                            .withServerAndApi("testServer", "delay_timeout_5000")
+                            .addQueryParam("delay", 500)
+                            .build()
+            ).subscribe(
+                    map -> {
+                        successCount.incrementAndGet();
+                        wait.countDown();
+                    },
+                    throwable -> {
+                        if (throwable instanceof EasyResilienceOverflowException) {
+                            overflowExceptionCount.incrementAndGet();
+                        } else {
+                            log.error("Unexpected exception: e={}, cls={}", throwable.getMessage(), throwable.getClass());
+                        }
+                        wait.countDown();
+                    })
+                    .dispose();
+        });
+        wait.await(10, TimeUnit.SECONDS);
+        assertEquals(6, overflowExceptionCount.get());
+        assertEquals(4, successCount.get());
     }
 
     @Override

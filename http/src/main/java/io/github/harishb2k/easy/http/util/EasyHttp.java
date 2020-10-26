@@ -162,6 +162,54 @@ public class EasyHttp {
     }
 
     /**
+     * Make a HTTP call which returns a observable.
+     * </br>
+     * Note - to check for timeout errors you must catch both
+     * {@link EasyResilienceRequestTimeoutException} and {@link EasyRequestTimeOutException}
+     * <p>
+     *
+     * @param call request object
+     * @param <T>  type of response
+     * @return observable for response of http call
+     * @throws EasyHttpRequestException <b color='red'>(exceptions will be received in the onError callback in subscriber)</b>
+     *                                  if error, it provides {@link EasyHttpRequestException}. You can catch specific
+     *                                  type of errors by caching sub-class of EasyHttpRequestException.
+     *                                  e.g. {@link EasyInternalServerErrorException}, {@link EasyBadRequestException}
+     *                                  <p>
+     *                                  It also throws {@link EasyResilienceException} which is also a sub-class of
+     *                                  {@link EasyHttpRequestException}. These resilience exception are thrown when
+     *                                  circuit is open, too many calls are made, or request timed out.
+     *                                  <p>
+     */
+    public static <T> Observable<T> callAsync(Call<T> call) {
+        return Observable.create(observableEmitter -> {
+            internalCall(call)
+                    .subscribe(
+                            t -> {
+                                observableEmitter.onNext(t);
+                                observableEmitter.onComplete();
+                            },
+                            throwable -> {
+                                Exception e;
+                                if (throwable instanceof EasyResilienceException) {
+                                    Optional<EasyResilienceException> ex = easyEasyResilienceException(throwable);
+                                    if (ex.isPresent()) {
+                                        e = ex.get();
+                                    } else {
+                                        e = new EasyHttpRequestException(throwable);
+                                    }
+                                } else if (throwable instanceof EasyHttpRequestException) {
+                                    e = (EasyHttpRequestException) throwable;
+                                } else {
+                                    e = easyEasyResilienceException(throwable).orElseThrow(() -> new RuntimeException(throwable));
+                                }
+                                observableEmitter.onError(e);
+                            })
+                    .dispose();
+        });
+    }
+
+    /**
      * Call a HTTP Api. This API is wrapped in other convenience method to be used.
      */
     private static <T> Observable<T> internalCall(Call<T> call) {
