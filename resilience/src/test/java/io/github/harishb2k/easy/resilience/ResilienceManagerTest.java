@@ -10,7 +10,7 @@ import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
 import io.github.harishb2k.easy.resilience.exception.ResilienceException;
 import io.github.harishb2k.easy.resilience.exception.UnknownException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 import junit.framework.TestCase;
 
 import java.util.UUID;

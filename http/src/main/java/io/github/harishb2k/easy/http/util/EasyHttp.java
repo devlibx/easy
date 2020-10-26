@@ -19,7 +19,7 @@ import io.github.harishb2k.easy.resilience.IResilienceManager;
 import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
 import io.github.harishb2k.easy.resilience.IResilienceProcessor;
 import io.github.harishb2k.easy.resilience.ResilienceManager;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.HashMap;

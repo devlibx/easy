@@ -2,7 +2,7 @@ package io.github.harishb2k.easy.resilience;
 
 import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
 import io.github.harishb2k.easy.resilience.exception.ResilienceException;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 
 import java.util.concurrent.Callable;
 

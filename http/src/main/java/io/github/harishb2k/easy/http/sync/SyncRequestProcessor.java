@@ -11,7 +11,7 @@ import io.github.harishb2k.easy.http.config.Api;
 import io.github.harishb2k.easy.http.config.Server;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
-import io.reactivex.Observable;
+import io.reactivex.rxjava3.core.Observable;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.http.NameValuePair;

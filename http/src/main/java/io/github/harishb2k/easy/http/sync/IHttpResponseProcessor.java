@@ -7,6 +7,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 
 public interface IHttpResponseProcessor {
     ResponseObject process(Server server, Api api, CloseableHttpResponse response);
+
     ResponseObject processException(Server server, Api api, Throwable e);
+
     void processResponseForException(ResponseObject response);
 }

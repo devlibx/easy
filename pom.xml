@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.harishb2k.easy</groupId>
     <artifactId>easy</artifactId>
@@ -65,9 +66,9 @@
 
             <!-- Utils -->
             <dependency>
-                <groupId>io.reactivex.rxjava2</groupId>
+                <groupId>io.reactivex.rxjava3</groupId>
                 <artifactId>rxjava</artifactId>
-                <version>2.1.16</version>
+                <version>3.0.7</version>
             </dependency>
             <dependency>
                 <groupId>org.yaml</groupId>
@@ -269,26 +270,26 @@
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>
-<!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.9.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <source>8</source>
-                            <additionalparam>-Xdoclint:none</additionalparam>
-                            <detectJavaApiLink>false</detectJavaApiLink>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
--->
+            <!--
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-javadoc-plugin</artifactId>
+                            <version>2.9.1</version>
+                            <executions>
+                                <execution>
+                                    <id>attach-javadocs</id>
+                                    <goals>
+                                        <goal>jar</goal>
+                                    </goals>
+                                    <configuration>
+                                        <source>8</source>
+                                        <additionalparam>-Xdoclint:none</additionalparam>
+                                        <detectJavaApiLink>false</detectJavaApiLink>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+            -->
         </plugins>
 
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
