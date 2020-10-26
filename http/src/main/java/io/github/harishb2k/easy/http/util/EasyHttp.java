@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -117,12 +118,9 @@ public class EasyHttp {
                 try {
                     log.debug("making a warm-up call to service={} api={} - you may see bad api call in server logs", server, api);
                     EasyHttp.callSync(
-                            serverName,
-                            apiName,
-                            null,
-                            null,
-                            null,
-                            null,
+                            Call.builder()
+                                    .withServerAndApi(serverName, apiName)
+                                    .build(),
                             Map.class
                     );
                 } catch (Exception ignored) {
@@ -151,38 +149,23 @@ public class EasyHttp {
      *                                  <p>
      */
     public static <T> T callSync(Call call, Class<T> cls) {
-        return callSync(
-                call.getServer(),
-                call.getApi(),
-                call.getPathParams(),
-                call.getQueryParam(),
-                call.getHeaders(),
-                call.getBody(),
-                cls
-        );
-    }
-
-    @Deprecated
-    public static <T> T callSync(String server,
-                                 String api,
-                                 Map<String, Object> pathParam,
-                                 MultivaluedMap<String, Object> queryParam,
-                                 Map<String, Object> headers,
-                                 Object body,
-                                 Class<T> cls
-    ) {
         try {
-            return call(
-                    server,
-                    api,
-                    pathParam,
-                    queryParam,
-                    headers,
-                    body,
+            return internalCall(
+                    call.getServer(),
+                    call.getApi(),
+                    call.getPathParams(),
+                    call.getQueryParam(),
+                    call.getHeaders(),
+                    call.getBody(),
                     cls
             ).blockingFirst();
         } catch (EasyResilienceException e) {
-            throw easyEasyResilienceException(e).get();
+            Optional<EasyResilienceException> ex = easyEasyResilienceException(e);
+            if (ex.isPresent()) {
+                throw ex.get();
+            } else {
+                throw new EasyHttpRequestException(e);
+            }
         } catch (EasyHttpRequestException e) {
             throw e;
         } catch (Exception e) {
@@ -190,13 +173,16 @@ public class EasyHttp {
         }
     }
 
-    public static <T> Observable<T> call(String server,
-                                         String api,
-                                         Map<String, Object> pathParam,
-                                         MultivaluedMap<String, Object> queryParam,
-                                         Map<String, Object> headers,
-                                         Object body,
-                                         Class<T> cls
+    /**
+     * Call a HTTP Api. This API is wrapped in other convenience method to be used.
+     */
+    private static <T> Observable<T> internalCall(String server,
+                                                  String api,
+                                                  Map<String, Object> pathParam,
+                                                  MultivaluedMap<String, Object> queryParam,
+                                                  Map<String, Object> headers,
+                                                  Object body,
+                                                  Class<T> cls
     ) {
 
         final String key = server + "-" + api;

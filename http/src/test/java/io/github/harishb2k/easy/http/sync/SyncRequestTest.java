@@ -7,6 +7,7 @@ import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
+import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +21,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static io.github.harishb2k.easy.http.helper.CommonHttpHelper.multivaluedMap;
 
 @SuppressWarnings("rawtypes")
 @Slf4j
@@ -66,12 +65,10 @@ public class SyncRequestTest extends TestCase {
      */
     public void testSimpleHttpRequest() {
         Map resultSync = EasyHttp.callSync(
-                "testServer",
-                "delay_timeout_5000",
-                null,
-                multivaluedMap("delay", 1000),
-                null,
-                null,
+                Call.builder()
+                        .withServerAndApi("testServer", "delay_timeout_5000")
+                        .addQueryParam("delay", 1000)
+                        .build(),
                 Map.class
         );
         assertEquals("1000", resultSync.get("delay"));
@@ -88,12 +85,10 @@ public class SyncRequestTest extends TestCase {
         parallelThread.execute(() -> {
             try {
                 EasyHttp.callSync(
-                        "testServer",
-                        "delay_timeout_1000",
-                        null,
-                        multivaluedMap("delay", 100),
-                        null,
-                        null,
+                        Call.builder()
+                                .withServerAndApi("testServer", "delay_timeout_1000")
+                                .addQueryParam("delay", 100)
+                                .build(),
                         Map.class
                 );
                 successCount.incrementAndGet();
@@ -117,12 +112,10 @@ public class SyncRequestTest extends TestCase {
         AtomicBoolean gotException = new AtomicBoolean(false);
         try {
             EasyHttp.callSync(
-                    "testServer",
-                    "delay_timeout_10",
-                    null,
-                    multivaluedMap("delay", 100),
-                    null,
-                    null,
+                    Call.builder()
+                            .withServerAndApi("testServer", "delay_timeout_10")
+                            .addQueryParam("delay", 100)
+                            .build(),
                     Map.class
             );
             System.out.println("Got it working");
