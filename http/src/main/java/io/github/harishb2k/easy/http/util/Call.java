@@ -122,11 +122,11 @@ public class Call {
          * @return builder object
          * @throws RuntimeException if params size is not even
          */
-        public Builder addPathParam(Object... params) {
+        public Builder addPathParams(Object... params) {
             if (params.length % 2 != 0) {
                 throw new RuntimeException("params count must be even");
             }
-            for (int i = 0; i < params.length; i = i + 1) {
+            for (int i = 0; i < params.length; i = i + 2) {
                 getPathParams().put(String.format("%s", params[i]), String.format("%s", params[i + 1]));
             }
             return this;
@@ -199,7 +199,7 @@ public class Call {
             if (queryParams.length % 2 != 0) {
                 throw new RuntimeException("params count must be even");
             }
-            for (int i = 0; i < queryParams.length; i = i + 1) {
+            for (int i = 0; i < queryParams.length; i = i + 2) {
                 getQueryParam().add(String.format("%s", queryParams[i]), String.format("%s", queryParams[i + 1]));
             }
             return this;
