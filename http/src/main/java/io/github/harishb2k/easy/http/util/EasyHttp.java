@@ -3,6 +3,7 @@ package io.github.harishb2k.easy.http.util;
 import com.google.inject.Key;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.Safe;
+import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
 import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
 import io.github.harishb2k.easy.http.config.Config;
@@ -41,6 +42,7 @@ public class EasyHttp {
     private static final Map<String, IResilienceProcessor> resilienceProcessors = new HashMap<>();
     private static IResilienceManager resilienceManager;
     private static final Lock resilienceManagerLock = new ReentrantLock();
+    private static IMetrics metrics;
 
     /**
      * Free all resources
@@ -56,6 +58,13 @@ public class EasyHttp {
      * Setup EasyHttp to make HTTP requests
      */
     public static void setup(Config config) {
+
+        // Get metrics class if provided
+        try {
+            metrics = ApplicationContext.getInstance(IMetrics.class);
+        } catch (Exception e) {
+            metrics = new IMetrics.NoOpMetrics();
+        }
 
         // Make server registry
         ServerRegistry serverRegistry = ApplicationContext.getInstance(ServerRegistry.class);
@@ -140,6 +149,16 @@ public class EasyHttp {
      *                                  <p>
      */
     public static <T> T callSync(Call<T> call) {
+        return metrics.time(
+                call.getServer() + "_" + call.getApi() + "_call_time",
+                () -> internalCallSync(call)
+        );
+    }
+
+    /**
+     * Sync call implementation
+     */
+    private static <T> T internalCallSync(Call<T> call) {
         try {
             return internalCall(call).blockingFirst();
         } catch (EasyResilienceException e) {

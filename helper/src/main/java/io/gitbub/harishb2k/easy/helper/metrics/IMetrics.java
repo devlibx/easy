@@ -1,5 +1,7 @@
 package io.gitbub.harishb2k.easy.helper.metrics;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.concurrent.Callable;
 
 public interface IMetrics {
@@ -49,6 +51,43 @@ public interface IMetrics {
                 throw e;
             } catch (Throwable e) {
                 throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void registerCounter(String name, String help, String... labelNames) {
+        }
+
+        @Override
+        public void registerTimer(String name, String help, String... labelNames) {
+        }
+    }
+
+    // No-Op metrics - ignore all calls
+    @Slf4j
+    class ConsoleOutputMetrics implements IMetrics {
+
+        @Override
+        public <T> T getRegistry(Class<T> cls) {
+            return null;
+        }
+
+        @Override
+        public void inc(String name, String... labels) {
+            log.debug("increment metrics={}", name);
+        }
+
+        @Override
+        public <T> T time(String name, Callable<T> callable, String... labels) {
+            long start = System.currentTimeMillis();
+            try {
+                return callable.call();
+            } catch (RuntimeException e) {
+                throw e;
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            } finally {
+                log.debug("time taken by metrics={} is {}", name, (System.currentTimeMillis() - start));
             }
         }
 

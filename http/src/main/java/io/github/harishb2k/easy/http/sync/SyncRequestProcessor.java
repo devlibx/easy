@@ -174,16 +174,22 @@ public class SyncRequestProcessor implements IRequestProcessor {
             requestBase.addHeader(key, stringHelper.stringify(value));
         });
 
-        // Request server
+        // Get a http client to make request
         CloseableHttpClient client = apiRegistry.getClient(server, api, CloseableHttpClient.class);
-        ResponseObject responseObject = metrics.time(server.getName() + "_" + api.getName() + "_http_client", () -> {
-            try (CloseableHttpResponse response = client.execute(requestBase)) {
-                return httpResponseProcessor.process(serverRegistry.get(api.getServer()), api, response);
-            } catch (Exception e) {
-                log.error("Unknown issue: request={}", requestObject, e);
-                return httpResponseProcessor.processException(server, api, e);
-            }
-        });
+
+        // Request server
+        ResponseObject responseObject;
+        try (CloseableHttpResponse response =
+                     metrics.time(
+                             server.getName() + "_" + api.getName() + "_http_client_time",
+                             () -> client.execute(requestBase)
+                     )
+        ) {
+            responseObject = httpResponseProcessor.process(serverRegistry.get(api.getServer()), api, response);
+        } catch (Exception e) {
+            log.error("Unknown issue: request={}", requestObject, e);
+            responseObject = httpResponseProcessor.processException(server, api, e);
+        }
 
         log.debug("Request={} Response={}", requestObject, responseObject.convertAsMap());
 

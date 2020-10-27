@@ -42,6 +42,11 @@ public class DemoApplication extends TestCase {
             @Override
             protected void configure() {
                 bind(IMetrics.class).to(IMetrics.ConsoleOutputMetrics.class).in(Scopes.SINGLETON);
+
+                // Or if you do not any console logs
+                // bind(IMetrics.class).to(IMetrics.NoOpMetrics.class).in(Scopes.SINGLETON);
+
+                // Or you can use Prometheus Module to get Prometheus metrics
             }
         }, new EasyHttpModule());
         ApplicationContext.setInjector(injector);
