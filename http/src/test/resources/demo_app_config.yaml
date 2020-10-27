@@ -1,0 +1,20 @@
+servers:
+  jsonplaceholder:
+    host: jsonplaceholder.typicode.com
+    port: 443
+    https: true
+    connectTimeout: 1000
+    connectionRequestTimeout: 1000
+
+apis:
+  getPosts:
+    method: GET
+    path: /posts/${id}
+    server: jsonplaceholder
+    timeout: 10000
+  getPostsAsync:
+    method: GET
+    path: /posts/${id}
+    server: jsonplaceholder
+    timeout: 1000
+    async: true
