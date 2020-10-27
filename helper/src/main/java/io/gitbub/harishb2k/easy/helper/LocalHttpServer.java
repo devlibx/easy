@@ -108,7 +108,9 @@ public class LocalHttpServer {
 
                 int sleep = Integer.parseInt(qp.get("delay"));
                 log.debug("HTTP Request - {} # Sleep for {} ms", t.getRequestURI(), sleep);
-                Thread.sleep(sleep);
+                if (sleep > 0) {
+                    Thread.sleep(sleep);
+                }
 
                 String requestBody = null;
                 try {
