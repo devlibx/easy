@@ -2,6 +2,7 @@ package io.github.harishb2k.easy.http.async;
 
 import com.google.inject.Inject;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
+import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
 import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
@@ -27,12 +28,14 @@ public class AsyncRequestProcessor implements IRequestProcessor {
     private final ApiRegistry apiRegistry;
     private final StringHelper stringHelper;
     private final IHttpResponseProcessor httpResponseProcessor;
+    private final IMetrics metrics;
 
     @Inject
-    public AsyncRequestProcessor(ServerRegistry serverRegistry, ApiRegistry apiRegistry, IHttpResponseProcessor httpResponseProcessor) {
+    public AsyncRequestProcessor(ServerRegistry serverRegistry, ApiRegistry apiRegistry, IHttpResponseProcessor httpResponseProcessor, IMetrics metrics) {
         this.serverRegistry = serverRegistry;
         this.apiRegistry = apiRegistry;
         this.httpResponseProcessor = httpResponseProcessor;
+        this.metrics = metrics;
         this.stringHelper = ApplicationContext.getOptionalInstance(StringHelper.class).orElse(new StringHelper());
     }
 
@@ -57,7 +60,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
 
         // Get a web client to process this request
         WebClient webClient = apiRegistry.getClient(server, api, WebClient.class);
-
+        long startTime = System.currentTimeMillis();
         switch (api.getMethod()) {
             case "GET": {
                 webClient
@@ -66,8 +69,8 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                         .headers(consumerHeaders(requestObject))
                         .retrieve()
                         .bodyToMono(byte[].class)
-                        .doOnError(onErrorConsumer(server, api, observableEmitter))
-                        .subscribe(consumer(observableEmitter));
+                        .doOnError(onErrorConsumer(server, api, observableEmitter, startTime))
+                        .subscribe(consumer(server, api, observableEmitter, startTime));
                 break;
             }
 
@@ -78,8 +81,8 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                         .headers(consumerHeaders(requestObject))
                         .retrieve()
                         .bodyToMono(byte[].class)
-                        .doOnError(onErrorConsumer(server, api, observableEmitter))
-                        .subscribe(consumer(observableEmitter));
+                        .doOnError(onErrorConsumer(server, api, observableEmitter, startTime))
+                        .subscribe(consumer(server, api, observableEmitter, startTime));
                 break;
             }
 
@@ -91,8 +94,8 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                         .bodyValue(requestObject.getBody())
                         .retrieve()
                         .bodyToMono(byte[].class)
-                        .doOnError(onErrorConsumer(server, api, observableEmitter))
-                        .subscribe(consumer(observableEmitter));
+                        .doOnError(onErrorConsumer(server, api, observableEmitter, startTime))
+                        .subscribe(consumer(server, api, observableEmitter, startTime));
                 break;
             }
 
@@ -105,18 +108,21 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                         .bodyValue(requestObject.getBody())
                         .retrieve()
                         .bodyToMono(byte[].class)
-                        .doOnError(onErrorConsumer(server, api, observableEmitter))
-                        .subscribe(consumer(observableEmitter));
+                        .doOnError(onErrorConsumer(server, api, observableEmitter, startTime))
+                        .subscribe(consumer(server, api, observableEmitter, startTime));
                 break;
             }
 
             default:
-                throw new RuntimeException("Api has a invalid HTTP method: " + api.getMethod());
+                observableEmitter.onError(new RuntimeException("Api has a invalid HTTP method: " + api.getMethod()));
         }
     }
 
-    private Consumer<byte[]> consumer(ObservableEmitter<ResponseObject> observableEmitter) {
+    private Consumer<byte[]> consumer(Server server, Api api, ObservableEmitter<ResponseObject> observableEmitter, long startTime) {
         return data -> {
+            // Log time taken by http client
+            metrics.observe(server.getName() + "_" + api.getName() + "_http_client_time", System.currentTimeMillis() - startTime);
+
             ResponseObject responseObject = new ResponseObject();
             responseObject.setBody(data);
             responseObject.setStatusCode(200);
@@ -125,8 +131,11 @@ public class AsyncRequestProcessor implements IRequestProcessor {
         };
     }
 
-    private Consumer<Throwable> onErrorConsumer(Server server, Api api, ObservableEmitter<ResponseObject> observableEmitter) {
+    private Consumer<Throwable> onErrorConsumer(Server server, Api api, ObservableEmitter<ResponseObject> observableEmitter, long startTime) {
         return throwable -> {
+            // Log time taken by http client
+            metrics.observe(server.getName() + "_" + api.getName() + "_http_client_error_time", System.currentTimeMillis() - startTime);
+
             log.trace("Got error for server={}, api={}", server, api, throwable);
             ResponseObject responseObject = httpResponseProcessor.processException(server, api, throwable);
             EasyHttpRequestException exception = EasyHttpExceptions.convert(responseObject.getStatusCode(), throwable, responseObject);

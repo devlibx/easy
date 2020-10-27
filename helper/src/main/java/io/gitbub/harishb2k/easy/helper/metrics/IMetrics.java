@@ -22,6 +22,12 @@ public interface IMetrics {
     <T> T time(String name, Callable<T> callable, String... labels);
 
     /**
+     * Add time taken to given metrics
+     */
+    default void observe(String name, double amt) {
+    }
+
+    /**
      * Register a counter
      */
     void registerCounter(String name, String help, String... labelNames);
@@ -89,6 +95,11 @@ public interface IMetrics {
             } finally {
                 log.debug("time taken by metrics={} is {}", name, (System.currentTimeMillis() - start));
             }
+        }
+
+        @Override
+        public void observe(String name, double amt) {
+            log.debug("time taken by metrics={} is {}", name, amt);
         }
 
         @Override

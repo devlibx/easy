@@ -149,18 +149,12 @@ public class EasyHttp {
      *                                  <p>
      */
     public static <T> T callSync(Call<T> call) {
-        return metrics.time(
-                call.getServer() + "_" + call.getApi() + "_call_time",
-                () -> internalCallSync(call)
-        );
-    }
-
-    /**
-     * Sync call implementation
-     */
-    private static <T> T internalCallSync(Call<T> call) {
+        long start = System.currentTimeMillis();
+        String key = call.getServer() + "_" + call.getApi() + "_call_error_time";
         try {
-            return internalCall(call).blockingFirst();
+            T t = internalCall(call).blockingFirst();
+            key = call.getServer() + "_" + call.getApi() + "_call_time";
+            return t;
         } catch (EasyResilienceException e) {
             Optional<EasyResilienceException> ex = easyEasyResilienceException(e);
             if (ex.isPresent()) {
@@ -172,6 +166,8 @@ public class EasyHttp {
             throw e;
         } catch (Exception e) {
             throw easyEasyResilienceException(e).orElseThrow(() -> new RuntimeException(e));
+        } finally {
+            metrics.observe(key, System.currentTimeMillis() - start);
         }
     }
 
@@ -196,14 +192,21 @@ public class EasyHttp {
      *                                  <p>
      */
     public static <T> Observable<T> callAsync(Call<T> call) {
+        long start = System.currentTimeMillis();
         return Observable.create(observableEmitter -> {
             internalCall(call)
                     .subscribe(
                             t -> {
+                                // Log metrics for success call
+                                metrics.observe(call.getServer() + "_" + call.getApi() + "_call_time", (System.currentTimeMillis() - start));
+
                                 observableEmitter.onNext(t);
                                 observableEmitter.onComplete();
                             },
                             throwable -> {
+                                // Log metrics for error call
+                                metrics.observe(call.getServer() + "_" + call.getApi() + "_call_error_time", (System.currentTimeMillis() - start));
+
                                 Exception e;
                                 if (throwable instanceof EasyResilienceException) {
                                     Optional<EasyResilienceException> ex = easyEasyResilienceException(throwable);

@@ -79,9 +79,10 @@ public class DemoApplication extends TestCase {
                 result -> {
                     log.info("Print Result as Json String = " + JsonUtils.asJson(result));
                     // Result = {"userId":1,"id":1,"title":"some text ..."}
+                    waitForComplete.countDown();
                 },
                 throwable -> {
-
+                    waitForComplete.countDown();
                 });
         waitForComplete.await(5, TimeUnit.SECONDS);
     }

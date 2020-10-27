@@ -179,14 +179,12 @@ public class SyncRequestProcessor implements IRequestProcessor {
 
         // Request server
         ResponseObject responseObject;
-        try (CloseableHttpResponse response =
-                     metrics.time(
-                             server.getName() + "_" + api.getName() + "_http_client_time",
-                             () -> client.execute(requestBase)
-                     )
-        ) {
+        long startTime = System.currentTimeMillis();
+        try (CloseableHttpResponse response = client.execute(requestBase)) {
             responseObject = httpResponseProcessor.process(serverRegistry.get(api.getServer()), api, response);
+            metrics.observe(server.getName() + "_" + api.getName() + "_http_client_time", System.currentTimeMillis() - startTime);
         } catch (Exception e) {
+            metrics.observe(server.getName() + "_" + api.getName() + "_http_client_error_time", System.currentTimeMillis() - startTime);
             log.error("Unknown issue: request={}", requestObject, e);
             responseObject = httpResponseProcessor.processException(server, api, e);
         }

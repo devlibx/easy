@@ -71,6 +71,23 @@ public class PrometheusMetrics implements IMetrics {
     }
 
     @Override
+    public void observe(String name, double amt) {
+        try {
+            // Just increase we do not have it registered already - register it
+            if (!summaryMap.containsKey(name)) {
+                registerTimer(name, name + " Help");
+            }
+            summaryMap.get(name).observe(amt);
+        } catch (RuntimeException e) {
+            metricsLogger.printf("error in timing method (runtime exception) - e=%s", e);
+            throw e;
+        } catch (Exception e) {
+            metricsLogger.printf("error in timing method (exception) - e=%s", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
     public void registerCounter(String name, String help, String... labels) {
         try {
             Counter requests;
@@ -142,6 +159,10 @@ public class PrometheusMetrics implements IMetrics {
                 System.arraycopy(labels, 0, temp, 0, labels.length);
                 return summary.labels(temp).time(callable);
             }
+        }
+
+        public void observe(double amt) {
+            summary.observe(amt);
         }
     }
 }
