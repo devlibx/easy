@@ -108,9 +108,17 @@ public class PrometheusMetrics implements IMetrics {
         try {
             Summary requests;
             if (labels != null && labels.length > 0) {
-                requests = Summary.build().name(name).help(help).labelNames(labels).register();
+                requests = Summary.build().name(name).help(help).labelNames(labels)
+                        .quantile(0.5, 0.05)
+                        .quantile(0.9, 0.01)
+                        .quantile(0.99, 0.001)
+                        .register();
             } else {
-                requests = Summary.build().name(name).help(help).register();
+                requests = Summary.build().name(name).help(help)
+                        .quantile(0.5, 0.05)
+                        .quantile(0.9, 0.01)
+                        .quantile(0.99, 0.001)
+                        .register();
             }
             collectorRegistry.register(requests);
             summaryMap.put(name, new SummaryHolder(name, requests, labels != null ? labels.length : 0));
