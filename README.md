@@ -98,6 +98,7 @@ databaseService.startDatabase();
 
 Http Module
 ===
+[Http Module Wiki] (https://github.com/harishb2k/easy/wiki/Http-Module)
 
 ```yaml
 servers:
