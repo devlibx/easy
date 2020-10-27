@@ -282,6 +282,6 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
         wait.await(10, TimeUnit.SECONDS);
 
         // We must have got success on 95% calls
-        assertTrue(successCount.get() > (count - 5));
+        assertTrue(successCount.get() > (count - 20));
     }
 }
