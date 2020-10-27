@@ -3,7 +3,6 @@ package io.github.harishb2k.easy.http.util;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
-import io.vavr.Function0;
 import io.vavr.Function1;
 import lombok.Data;
 
@@ -23,8 +22,13 @@ public class Call<R> {
     private Object body;
     private Class<R> responseClass;
     private Function1<byte[], R> responseBuilder;
+    private Function1<Object, byte[]> requestBodyFunc;
 
     private Call() {
+    }
+
+    public byte[] getBodyAsByteArray() {
+        return requestBodyFunc.apply(body);
     }
 
     /**
@@ -46,6 +50,7 @@ public class Call<R> {
         private Object body;
         private final Class<R> responseClass;
         private Function1<byte[], R> responseBuilder;
+        private Function1<Object, byte[]> requestBodyFunc;
 
         public Builder(Class<R> responseClass) {
             this.responseClass = responseClass;
@@ -55,6 +60,21 @@ public class Call<R> {
                 if (bytes != null) {
                     String str = new String(bytes);
                     return JsonUtils.readObject(str, responseClass);
+                }
+                return null;
+            };
+
+            // Default method to convert body to byte array
+            this.requestBodyFunc = object -> {
+                if (object == null) {
+                    return null;
+                } else if (object instanceof byte[]) {
+                    return (byte[]) object;
+                } else {
+                    String body = JsonUtils.asJson(object);
+                    if (body != null) {
+                        return body.getBytes();
+                    }
                 }
                 return null;
             };
@@ -82,7 +102,7 @@ public class Call<R> {
             // Make sure we have all required fields set
             validate();
 
-            Call<R> call = new Call();
+            Call<R> call = new Call<>();
             call.server = server;
             call.api = api;
             call.headers = headers;
@@ -91,6 +111,7 @@ public class Call<R> {
             call.body = body;
             call.responseClass = responseClass;
             call.responseBuilder = responseBuilder;
+            call.requestBodyFunc = requestBodyFunc;
             return call;
         }
 
@@ -101,6 +122,11 @@ public class Call<R> {
         public Builder<R> withServerAndApi(String server, String api) {
             this.server = server;
             this.api = api;
+            return this;
+        }
+
+        private Builder<R> withRequestBodyFunc(Function1<Object, byte[]> requestBodyFunc) {
+            this.requestBodyFunc = requestBodyFunc;
             return this;
         }
 
@@ -117,8 +143,7 @@ public class Call<R> {
          * @param bodyFunc a function which returns the body object to be passed in request
          * @return builder object
          */
-        public Builder<R> withBodyFunc(Function0<Object> bodyFunc) {
-            this.body = bodyFunc.apply();
+        public Builder<R> withBodyFunc(Function1<Object, byte[]> bodyFunc) {
             return this;
         }
 

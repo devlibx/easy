@@ -1,13 +1,17 @@
 package io.github.harishb2k.easy.http.async;
 
+import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
+import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
+import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
+import io.github.harishb2k.easy.http.sync.SyncRequestTest.Payload;
 import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
@@ -19,9 +23,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static io.github.harishb2k.easy.http.util.EasyHttp.callAsync;
 
+@SuppressWarnings("ResultOfMethodCallIgnored")
 @Slf4j
 public class AsyncRequestProcessorTest extends TestCase {
     private LocalHttpServer localHttpServer;
@@ -207,6 +213,59 @@ public class AsyncRequestProcessorTest extends TestCase {
         wait.await(10, TimeUnit.SECONDS);
         assertEquals(6, overflowExceptionCount.get());
         assertEquals(4, successCount.get());
+    }
+
+    public void testSyncPostRequest() {
+        AtomicReference<StringObjectMap> data = new AtomicReference<>();
+        Payload payload = Payload.createPayload();
+        EasyHttp.callAsync(
+                Call.builder(StringObjectMap.class)
+                        .withServerAndApi("testServer", "post_api_with_delay_2000")
+                        .addQueryParam("delay", 1)
+                        .withBody(payload)
+                        .addHeaders("int_header", 67, "string_header", "str_89")
+                        .build()
+        ).subscribe(data::set);
+        assertNotNull(data.get());
+        StringObjectMap response = data.get();
+        assertEquals("post", response.get("method"));
+        assertFalse(Strings.isNullOrEmpty(response.getString("request_body")));
+        assertFalse(Strings.isNullOrEmpty(response.getString("headers")));
+
+        Payload responseBody = JsonUtils.readObject(response.getString("request_body"), Payload.class);
+        assertNotNull(responseBody);
+        assertEquals(payload, responseBody);
+
+        StringObjectMap headers = JsonUtils.convertAsStringObjectMap(response.getString("headers"));
+        assertEquals("67", headers.getList("Int_header", String.class).get(0));
+        assertEquals("str_89", headers.getList("String_header", String.class).get(0));
+    }
+
+    public void testSyncPutRequest() {
+        AtomicReference<StringObjectMap> data = new AtomicReference<>();
+        Payload payload = Payload.createPayload();
+        EasyHttp.callAsync(
+                Call.builder(StringObjectMap.class)
+                        .withServerAndApi("testServer", "put_api_with_delay_2000")
+                        .addQueryParam("delay", 1)
+                        .withBody(payload)
+                        .addHeaders("int_header", 67, "string_header", "str_89")
+                        .build()
+        ).subscribe(data::set);
+        assertNotNull(data.get());
+        StringObjectMap response = data.get();
+        assertEquals("put", response.get("method"));
+        assertFalse(Strings.isNullOrEmpty(response.getString("request_body")));
+        assertFalse(Strings.isNullOrEmpty(response.getString("headers")));
+
+        Payload responseBody = JsonUtils.readObject(response.getString("request_body"), Payload.class);
+        assertNotNull(responseBody);
+        assertEquals(payload, responseBody);
+
+        StringObjectMap headers = JsonUtils.convertAsStringObjectMap(response.getString("headers"));
+        assertEquals("67", headers.getList("Int_header", String.class).get(0));
+        assertEquals("str_89", headers.getList("String_header", String.class).get(0));
+
     }
 
     @Override

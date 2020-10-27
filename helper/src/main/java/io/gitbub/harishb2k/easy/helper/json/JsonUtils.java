@@ -7,13 +7,16 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
+import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 
+import java.util.List;
 import java.util.Map;
 
 public class JsonUtils {
     private static final JsonUtil jsonUtil = new JsonUtil();
 
     private static final JsonUtil camelCaseJsonUtil;
+    private static final StringHelper stringHelper;
 
     static {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -21,6 +24,8 @@ public class JsonUtils {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         camelCaseJsonUtil = new JsonUtil(objectMapper);
+
+        stringHelper = new StringHelper(jsonUtil);
     }
 
     public static JsonUtil getCamelCase() {
@@ -60,5 +65,22 @@ public class JsonUtils {
      */
     public static StringObjectMap convertAsStringObjectMap(byte[] bytes) {
         return jsonUtil.convertAsStringObjectMap(bytes);
+    }
+
+    /**
+     * Convert object to json string
+     *
+     * @param object object to convert
+     * @return json string
+     */
+    public static String asJson(Object object) {
+        return stringHelper.stringify(object);
+    }
+
+    /**
+     * Convert string to List
+     */
+    public static <T> List<T> readList(String str, Class<T> cls) {
+        return jsonUtil.readList(str, cls);
     }
 }

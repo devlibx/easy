@@ -1,5 +1,7 @@
 package io.github.harishb2k.easy.http.sync;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
@@ -13,9 +15,11 @@ import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilience
 import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -136,9 +140,76 @@ public class SyncRequestTest extends TestCase {
         assertTrue(gotException.get());
     }
 
+    public void testSyncPostRequest() {
+        Payload payload = Payload.createPayload();
+        StringObjectMap response = EasyHttp.callSync(
+                Call.builder(StringObjectMap.class)
+                        .withServerAndApi("testServer", "post_api_with_delay_2000")
+                        .addQueryParam("delay", 1)
+                        .withBody(payload)
+                        .addHeaders("int_header", 67, "string_header", "str_89")
+                        .build()
+        );
+        assertEquals("post", response.get("method"));
+        assertFalse(Strings.isNullOrEmpty(response.getString("request_body")));
+        assertFalse(Strings.isNullOrEmpty(response.getString("headers")));
+
+        Payload responseBody = JsonUtils.readObject(response.getString("request_body"), Payload.class);
+        assertNotNull(responseBody);
+        assertEquals(payload, responseBody);
+
+        StringObjectMap headers = JsonUtils.convertAsStringObjectMap(response.getString("headers"));
+        assertEquals("67", headers.getList("Int_header", String.class).get(0));
+        assertEquals("str_89", headers.getList("String_header", String.class).get(0));
+    }
+
+    public void testSyncPutRequest() {
+        Payload payload = Payload.createPayload();
+        StringObjectMap response = EasyHttp.callSync(
+                Call.builder(StringObjectMap.class)
+                        .withServerAndApi("testServer", "put_api_with_delay_2000")
+                        .addQueryParam("delay", 1)
+                        .withBody(payload)
+                        .addHeaders("int_header", 67, "string_header", "str_89")
+                        .build()
+        );
+        assertEquals("put", response.get("method"));
+        assertFalse(Strings.isNullOrEmpty(response.getString("request_body")));
+        assertFalse(Strings.isNullOrEmpty(response.getString("headers")));
+
+        Payload responseBody = JsonUtils.readObject(response.getString("request_body"), Payload.class);
+        assertNotNull(responseBody);
+        assertEquals(payload, responseBody);
+
+        StringObjectMap headers = JsonUtils.convertAsStringObjectMap(response.getString("headers"));
+        assertEquals("67", headers.getList("Int_header", String.class).get(0));
+        assertEquals("str_89", headers.getList("String_header", String.class).get(0));
+
+    }
+
     @Override
     protected void tearDown() throws Exception {
         super.tearDown();
         localHttpServer.stopServer();
+    }
+
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Payload {
+        private int intValue;
+        private String stringValue;
+        private StringObjectMap mapValue;
+
+        public static Payload createPayload() {
+            StringObjectMap m = new StringObjectMap();
+            m.put("key1", "value1");
+            Payload payload = new Payload();
+            payload.intValue = 11;
+            payload.stringValue = UUID.randomUUID().toString();
+            payload.mapValue = new StringObjectMap();
+            payload.mapValue.put("key_int", 34, "key_map", m);
+            return payload;
+        }
     }
 }

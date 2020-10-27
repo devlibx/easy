@@ -6,10 +6,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
 import lombok.Getter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
@@ -64,6 +67,17 @@ public class JsonUtil {
     }
 
     /**
+     * Convert string to List
+     */
+    public <T> List<T> readList(String str, Class<T> cls) {
+        try {
+            return objectMapper.readValue(str, TypeFactory.defaultInstance().constructCollectionType(ArrayList.class, cls));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to convert string to List<cls>");
+        }
+    }
+
+    /**
      * Convert string to Map
      */
     public Map<String, Object> convertAsMap(String str) {
@@ -84,4 +98,6 @@ public class JsonUtil {
         String str = new String(bytes);
         return readObject(str, StringObjectMap.class);
     }
+
+
 }

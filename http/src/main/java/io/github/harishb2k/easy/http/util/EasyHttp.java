@@ -70,6 +70,7 @@ public class EasyHttp {
 
                 // Key to be used for this API
                 String key = serverName + "-" + apiName;
+                log.debug("Add {} to EasyHttp", key);
 
                 // Build a request processor
                 IRequestProcessor requestProcessor = null;
@@ -235,7 +236,7 @@ public class EasyHttp {
         requestObject.setPathParam(call.getPathParams());
         requestObject.setQueryParam(call.getQueryParam());
         requestObject.setHeaders(call.getHeaders());
-        requestObject.setBody(call.getBody());
+        requestObject.setBody(call.getBodyAsByteArray());
 
         // Build a Observable and process it to give final response (in flat map)
         Observable<T> observable = requestProcessors.get(server + "-" + api)

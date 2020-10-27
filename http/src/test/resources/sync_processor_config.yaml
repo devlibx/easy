@@ -45,34 +45,18 @@ apis:
     timeout: 5000
     concurrency: 3
     queueSize: 1
-
-delay_timeout_10:
-  path: /delay
-  server: testServer
-  timeout: 10
-  concurrency: 3
-  delay_timeout_20:
+  post_api_with_delay_2000:
+    method: POST
     path: /delay
     server: testServer
-    timeout: 20
-  delay_timeout_50:
+    timeout: 2000
+  put_api_with_delay_2000:
+    method: PUT
     path: /delay
     server: testServer
-    timeout: 50
-  delay_timeout_100:
+    timeout: 2000
+  delete_api_with_delay_2000:
+    method: DELETE
     path: /delay
     server: testServer
-    timeout: 100
-    concurrency: 3
-  delay_timeout_1000:
-    path: /delay
-    server: testServer
-    timeout: 1000
-    concurrency: 3
-    queueSize: 1
-  delay_timeout_5000:
-    path: /delay
-    server: testServer
-    timeout: 5000
-    concurrency: 3
-    queueSize: 1
+    timeout: 2000

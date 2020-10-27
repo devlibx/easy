@@ -1,9 +1,11 @@
 package io.gitbub.harishb2k.easy.helper;
 
 import com.google.common.base.Strings;
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -113,6 +115,14 @@ public class LocalHttpServer {
                 } catch (Exception e) {
                 }
 
+                Headers headers = t.getRequestHeaders();
+                String headerString = null;
+                if (headers != null) {
+                    Map<String, Object> h = new HashMap<>();
+                    headers.forEach(h::put);
+                    headerString = JsonUtils.asJson(h);
+                }
+
                 String response = null;
                 if ("GET".equals(t.getRequestMethod())) {
                     Map<String, Object> data = new HashMap<>();
@@ -120,6 +130,9 @@ public class LocalHttpServer {
                     data.put("data", "some data");
                     if (!Strings.isNullOrEmpty(requestBody)) {
                         data.put("request_body", requestBody);
+                    }
+                    if (!Strings.isNullOrEmpty(headerString)) {
+                        data.put("headers", headerString);
                     }
                     data.putAll(qp);
                     response = new StringHelper().stringify(data);
@@ -130,6 +143,9 @@ public class LocalHttpServer {
                     if (!Strings.isNullOrEmpty(requestBody)) {
                         data.put("request_body", requestBody);
                     }
+                    if (!Strings.isNullOrEmpty(headerString)) {
+                        data.put("headers", headerString);
+                    }
                     data.putAll(qp);
                     response = new StringHelper().stringify(data);
                 } else if ("PUT".equals(t.getRequestMethod())) {
@@ -139,6 +155,9 @@ public class LocalHttpServer {
                     if (!Strings.isNullOrEmpty(requestBody)) {
                         data.put("request_body", requestBody);
                     }
+                    if (!Strings.isNullOrEmpty(headerString)) {
+                        data.put("headers", headerString);
+                    }
                     data.putAll(qp);
                     response = new StringHelper().stringify(data);
                 } else if ("DELETE".equals(t.getRequestMethod())) {
@@ -147,6 +166,9 @@ public class LocalHttpServer {
                     data.put("data", "some data");
                     if (!Strings.isNullOrEmpty(requestBody)) {
                         data.put("request_body", requestBody);
+                    }
+                    if (!Strings.isNullOrEmpty(headerString)) {
+                        data.put("headers", headerString);
                     }
                     data.putAll(qp);
                     response = new StringHelper().stringify(data);

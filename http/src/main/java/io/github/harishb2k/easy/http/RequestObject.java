@@ -22,7 +22,7 @@ public class RequestObject {
     private Map<String, Object> headers;
     private Map<String, Object> pathParam;
     private MultivaluedMap<String, Object> queryParam;
-    private Object body;
+    private byte[] body;
 
     public void preProcessHeaders() {
         if (headers == null) {

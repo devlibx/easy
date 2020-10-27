@@ -1,6 +1,9 @@
 package io.gitbub.harishb2k.easy.helper.map;
 
+import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -136,6 +139,22 @@ public class StringObjectMap extends HashMap<String, Object> {
         }
         throw new RuntimeException("Value with key " + key + " is not a uuid");
     }
+
+    /**
+     * @return get value as list if type T
+     */
+    public <T> List<T> getList(String key, Class<T> cls) {
+        Object value = get(key);
+        if (value == null) {
+            return null;
+        } else if (value instanceof List) {
+            return (List<T>) value;
+        } else if (value instanceof String) {
+            return JsonUtils.readList((String) value, cls);
+        }
+        throw new RuntimeException("Value with key " + key + " is not a uuid");
+    }
+
 
     /**
      * Convenience method to add more than one key value pair

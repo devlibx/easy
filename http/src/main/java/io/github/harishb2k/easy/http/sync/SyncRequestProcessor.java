@@ -23,6 +23,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
@@ -116,24 +117,34 @@ public class SyncRequestProcessor implements IRequestProcessor {
         });
     }
 
-    @SuppressWarnings("Convert2MethodRef")
+    @SuppressWarnings({"Convert2MethodRef", "UnnecessaryLocalVariable"})
     private ResponseObject internalProcess(Server server, Api api, RequestObject requestObject) {
         switch (requestObject.getMethod()) {
             case "GET":
                 return internalProcess(server, api, requestObject, uri -> {
-                    return new HttpGet(uri);
+                    HttpGet get = new HttpGet(uri);
+                    return get;
                 }, HttpGet.class);
             case "POST":
                 return internalProcess(server, api, requestObject, uri -> {
-                    return new HttpPost(uri);
+                    HttpPost post = new HttpPost(uri);
+                    if (requestObject.getBody() != null) {
+                        post.setEntity(new ByteArrayEntity(requestObject.getBody()));
+                    }
+                    return post;
                 }, HttpPost.class);
             case "PUT":
                 return internalProcess(server, api, requestObject, uri -> {
-                    return new HttpPut(uri);
+                    HttpPut put = new HttpPut(uri);
+                    if (requestObject.getBody() != null) {
+                        put.setEntity(new ByteArrayEntity(requestObject.getBody()));
+                    }
+                    return put;
                 }, HttpPut.class);
             case "DELETE":
                 return internalProcess(server, api, requestObject, uri -> {
-                    return new HttpDelete(uri);
+                    HttpDelete delete = new HttpDelete(uri);
+                    return delete;
                 }, HttpDelete.class);
         }
         return null;
@@ -161,7 +172,7 @@ public class SyncRequestProcessor implements IRequestProcessor {
             requestBase.addHeader(key, stringHelper.stringify(value));
         });
 
-        System.out.println("Calling HTTP client...");
+
         // Request server
         ResponseObject responseObject;
         CloseableHttpClient client = apiRegistry.getClient(server, api, CloseableHttpClient.class);
