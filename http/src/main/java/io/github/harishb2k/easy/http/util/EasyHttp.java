@@ -70,8 +70,10 @@ public class EasyHttp {
 
         // Setup all request processors
         serverRegistry.getServerMap().forEach((serverName, server) -> {
+            server.setName(serverName);
             apiRegistry.getApiMap().forEach((apiName, api) -> {
-
+                api.setName(apiName);
+                
                 // Key to be used for this API
                 String key = serverName + "-" + apiName;
 
