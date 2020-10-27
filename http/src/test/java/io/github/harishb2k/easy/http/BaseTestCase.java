@@ -6,14 +6,17 @@ import com.google.inject.Injector;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.LoggingHelper;
+import io.gitbub.harishb2k.easy.helper.file.FileHelper;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
+import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.module.EasyHttpModule;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
+import org.apache.http.HttpClientConnection;
 import org.apache.log4j.Logger;
 
-import static org.apache.log4j.Level.TRACE;
+import static org.apache.log4j.Level.OFF;
 
 public abstract class BaseTestCase extends TestCase {
     protected LocalHttpServer localHttpServer;
@@ -25,7 +28,10 @@ public abstract class BaseTestCase extends TestCase {
 
         // Setup logging
         LoggingHelper.setupLogging();
-        Logger.getLogger(LocalHttpServer.class).setLevel(TRACE);
+        Logger.getLogger(LocalHttpServer.class).setLevel(OFF);
+        Logger.getLogger(FileHelper.class).setLevel(OFF);
+        Logger.getLogger(HttpClientConnection.class).setLevel(OFF);
+        Logger.getLogger(AsyncRequestProcessor.class).setLevel(OFF);
 
         // Start server
         localHttpServer = new LocalHttpServer();
@@ -54,5 +60,6 @@ public abstract class BaseTestCase extends TestCase {
     public void tearDown() throws Exception {
         super.tearDown();
         localHttpServer.stopServer();
+        EasyHttp.shutdown();
     }
 }

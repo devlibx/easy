@@ -47,6 +47,9 @@ public class EasyHttp {
      */
     public static void shutdown() {
         requestProcessors.forEach((key, requestProcessor) -> Safe.safe(requestProcessor::shutdown));
+        requestProcessors.clear();
+        resilienceProcessors.clear();
+        resilienceManager = null;
     }
 
     /**
@@ -71,7 +74,6 @@ public class EasyHttp {
 
                 // Key to be used for this API
                 String key = serverName + "-" + apiName;
-                log.debug("Add {} to EasyHttp", key);
 
                 // Build a request processor
                 IRequestProcessor requestProcessor = null;
