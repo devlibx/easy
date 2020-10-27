@@ -5,9 +5,9 @@ import io.gitbub.harishb2k.easy.helper.Safe;
 import io.github.harishb2k.easy.http.config.Api;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.config.Server;
-import io.github.harishb2k.easy.http.helper.AsyncHttpClientBuilder;
-import io.github.harishb2k.easy.http.helper.HttpClientBuilder;
 import io.github.harishb2k.easy.http.helper.IClientBuilder;
+import io.github.harishb2k.easy.http.module.Async;
+import io.github.harishb2k.easy.http.module.Sync;
 import lombok.Getter;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -19,15 +19,13 @@ import java.util.Optional;
 public class ApiRegistry {
     @Getter
     private final Map<String, Api> apiMap;
-
-    @SuppressWarnings("FieldMayBeFinal")
-    @Inject
-    private IClientBuilder httpClientBuilder = new HttpClientBuilder();
+    private final IClientBuilder httpClientBuilder;
+    private final IClientBuilder asyncHttpClientBuilder;
 
     @Inject
-    private IClientBuilder asyncHttpClientBuilder = new AsyncHttpClientBuilder();
-
-    public ApiRegistry() {
+    public ApiRegistry(@Sync IClientBuilder httpClientBuilder, @Async IClientBuilder asyncHttpClientBuilder) {
+        this.httpClientBuilder = httpClientBuilder;
+        this.asyncHttpClientBuilder = asyncHttpClientBuilder;
         this.apiMap = new HashMap<>();
     }
 

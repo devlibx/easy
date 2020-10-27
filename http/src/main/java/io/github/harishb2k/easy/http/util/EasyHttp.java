@@ -1,10 +1,10 @@
 package io.github.harishb2k.easy.http.util;
 
+import com.google.inject.Key;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.Safe;
 import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
-import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyBadRequestException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
@@ -12,9 +12,10 @@ import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyInternalSe
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
+import io.github.harishb2k.easy.http.module.Async;
+import io.github.harishb2k.easy.http.module.Sync;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
-import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
 import io.github.harishb2k.easy.resilience.IResilienceManager;
 import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
 import io.github.harishb2k.easy.resilience.IResilienceProcessor;
@@ -54,11 +55,11 @@ public class EasyHttp {
     public static void setup(Config config) {
 
         // Make server registry
-        ServerRegistry serverRegistry = new ServerRegistry();
+        ServerRegistry serverRegistry = ApplicationContext.getInstance(ServerRegistry.class);
         serverRegistry.configure(config);
 
         // Make api registry
-        ApiRegistry apiRegistry = new ApiRegistry();
+        ApiRegistry apiRegistry = ApplicationContext.getInstance(ApiRegistry.class);
         apiRegistry.configure(config);
 
         // Make sure we have resilienceManager object created
@@ -75,21 +76,10 @@ public class EasyHttp {
                 // Build a request processor
                 IRequestProcessor requestProcessor = null;
                 if (api.isAsync()) {
-                    try {
-                        // requestProcessor = ApplicationContext.getInstance(AsyncRequestProcessor.class);
-                    } catch (Exception e) {
-                    }
-                    if (requestProcessor == null) {
-                        requestProcessor = new AsyncRequestProcessor(serverRegistry, apiRegistry);
-                    }
+                    requestProcessor = ApplicationContext.getInstance(Key.get(IRequestProcessor.class, Async.class));
                 } else {
-                    try {
-                        // requestProcessor = ApplicationContext.getInstance(SyncRequestProcessor.class);
-                    } catch (Exception e) {
-                    }
-                    if (requestProcessor == null) {
-                        requestProcessor = new SyncRequestProcessor(serverRegistry, apiRegistry);
-                    }
+                    requestProcessor = ApplicationContext.getInstance(Key.get(IRequestProcessor.class, Sync.class));
+
                 }
                 requestProcessors.put(key, requestProcessor);
 

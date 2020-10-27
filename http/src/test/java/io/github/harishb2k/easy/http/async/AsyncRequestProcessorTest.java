@@ -1,12 +1,10 @@
 package io.github.harishb2k.easy.http.async;
 
 import com.google.common.base.Strings;
-import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
-import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
-import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
+import io.github.harishb2k.easy.http.BaseTestCase;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
@@ -14,7 +12,6 @@ import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilience
 import io.github.harishb2k.easy.http.sync.SyncRequestTest.Payload;
 import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
-import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -29,28 +26,19 @@ import static io.github.harishb2k.easy.http.util.EasyHttp.callAsync;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @Slf4j
-public class AsyncRequestProcessorTest extends TestCase {
-    private LocalHttpServer localHttpServer;
+public class AsyncRequestProcessorTest extends BaseTestCase {
 
     @Override
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         super.setUp();
+        Thread.sleep(1000);
+    }
 
-        // Setup logging
-        LoggingHelper.setupLogging();
-
-        // Start server
-        localHttpServer = new LocalHttpServer();
-        localHttpServer.startServerInThread();
-
-        // Read config and setup EasyHttp
-        Config config = YamlUtils.readYamlCamelCase("sync_processor_config.yaml", Config.class);
-        config.getServers().get("testServer").setPort(localHttpServer.port);
-        config.getApis().forEach((apiName, api) -> {
-            api.setAsync(true);
-        });
-
-        EasyHttp.setup(config);
+    @Override
+    protected Config getConfig() {
+        Config config = super.getConfig();
+        config.getApis().forEach((apiName, api) -> api.setAsync(true));
+        return config;
     }
 
     public void testSuccessGet() {
@@ -215,9 +203,10 @@ public class AsyncRequestProcessorTest extends TestCase {
         assertEquals(4, successCount.get());
     }
 
-    public void testSyncPostRequest() {
+    public void testAsyncPostRequest() throws Exception {
         AtomicReference<StringObjectMap> data = new AtomicReference<>();
         Payload payload = Payload.createPayload();
+        CountDownLatch wait = new CountDownLatch(1);
         EasyHttp.callAsync(
                 Call.builder(StringObjectMap.class)
                         .withServerAndApi("testServer", "post_api_with_delay_2000")
@@ -225,7 +214,13 @@ public class AsyncRequestProcessorTest extends TestCase {
                         .withBody(payload)
                         .addHeaders("int_header", 67, "string_header", "str_89")
                         .build()
-        ).subscribe(data::set);
+        ).subscribe(stringObjectMap -> {
+            data.set(stringObjectMap);
+            wait.countDown();
+        }, throwable -> {
+            wait.countDown();
+        });
+        wait.await(100, TimeUnit.SECONDS);
         assertNotNull(data.get());
         StringObjectMap response = data.get();
         assertEquals("post", response.get("method"));
@@ -241,9 +236,10 @@ public class AsyncRequestProcessorTest extends TestCase {
         assertEquals("str_89", headers.getList("String_header", String.class).get(0));
     }
 
-    public void testSyncPutRequest() {
+    public void testAsyncPutRequest() throws InterruptedException {
         AtomicReference<StringObjectMap> data = new AtomicReference<>();
         Payload payload = Payload.createPayload();
+        CountDownLatch wait = new CountDownLatch(1);
         EasyHttp.callAsync(
                 Call.builder(StringObjectMap.class)
                         .withServerAndApi("testServer", "put_api_with_delay_2000")
@@ -251,7 +247,14 @@ public class AsyncRequestProcessorTest extends TestCase {
                         .withBody(payload)
                         .addHeaders("int_header", 67, "string_header", "str_89")
                         .build()
-        ).subscribe(data::set);
+        ).subscribe(stringObjectMap -> {
+            data.set(stringObjectMap);
+            wait.countDown();
+        }, throwable -> {
+            log.debug("Unexpected exception - ", throwable);
+            wait.countDown();
+        });
+        wait.await(100, TimeUnit.SECONDS);
         assertNotNull(data.get());
         StringObjectMap response = data.get();
         assertEquals("put", response.get("method"));
@@ -266,11 +269,5 @@ public class AsyncRequestProcessorTest extends TestCase {
         assertEquals("67", headers.getList("Int_header", String.class).get(0));
         assertEquals("str_89", headers.getList("String_header", String.class).get(0));
 
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        localHttpServer.stopServer();
     }
 }

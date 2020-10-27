@@ -12,7 +12,6 @@ import io.github.harishb2k.easy.http.exception.EasyHttpExceptions;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
 import io.github.harishb2k.easy.http.registry.ApiRegistry;
 import io.github.harishb2k.easy.http.registry.ServerRegistry;
-import io.github.harishb2k.easy.http.sync.DefaultHttpResponseProcessor;
 import io.github.harishb2k.easy.http.sync.IHttpResponseProcessor;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
@@ -27,14 +26,13 @@ public class AsyncRequestProcessor implements IRequestProcessor {
     private final ServerRegistry serverRegistry;
     private final ApiRegistry apiRegistry;
     private final StringHelper stringHelper;
-
-    @com.google.inject.Inject(optional = true)
-    private IHttpResponseProcessor httpResponseProcessor = new DefaultHttpResponseProcessor();
+    private final IHttpResponseProcessor httpResponseProcessor;
 
     @Inject
-    public AsyncRequestProcessor(ServerRegistry serverRegistry, ApiRegistry apiRegistry) {
+    public AsyncRequestProcessor(ServerRegistry serverRegistry, ApiRegistry apiRegistry, IHttpResponseProcessor httpResponseProcessor) {
         this.serverRegistry = serverRegistry;
         this.apiRegistry = apiRegistry;
+        this.httpResponseProcessor = httpResponseProcessor;
         this.stringHelper = ApplicationContext.getOptionalInstance(StringHelper.class).orElse(new StringHelper());
     }
 
@@ -99,6 +97,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
             }
 
             case "PUT": {
+                System.out.println("Putting data " + new String(requestObject.getBody()));
                 webClient
                         .put()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))

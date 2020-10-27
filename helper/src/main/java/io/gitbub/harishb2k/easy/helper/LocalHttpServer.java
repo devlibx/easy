@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -102,7 +103,7 @@ public class LocalHttpServer {
     private static class DelayHttpHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange t) {
-            try {
+            try (OutputStream os = t.getResponseBody(); InputStream in = t.getRequestBody()) {
                 Map<String, String> qp = splitQuery(t.getRequestURI().getQuery());
 
                 int sleep = Integer.parseInt(qp.get("delay"));
@@ -111,7 +112,7 @@ public class LocalHttpServer {
 
                 String requestBody = null;
                 try {
-                    requestBody = IOUtils.toString(t.getRequestBody(), Charset.defaultCharset());
+                    requestBody = IOUtils.toString(in, Charset.defaultCharset());
                 } catch (Exception e) {
                 }
 
@@ -180,9 +181,7 @@ public class LocalHttpServer {
                     t.sendResponseHeaders(200, response.length());
                 }
                 t.getResponseHeaders().add("Content-Type", "application/json");
-                OutputStream os = t.getResponseBody();
                 os.write(response.getBytes());
-                os.close();
             } catch (Exception e) {
                 if (e instanceof IOException) {
                     log.error("Got some IOException error in http server");

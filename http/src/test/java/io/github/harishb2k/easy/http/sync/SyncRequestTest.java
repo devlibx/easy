@@ -2,19 +2,15 @@ package io.github.harishb2k.easy.http.sync;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Strings;
-import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
-import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
-import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
-import io.github.harishb2k.easy.http.config.Config;
+import io.github.harishb2k.easy.http.BaseTestCase;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
 import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
 import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
-import junit.framework.TestCase;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,27 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("rawtypes")
 @Slf4j
-public class SyncRequestTest extends TestCase {
-    private LocalHttpServer localHttpServer;
-
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-
-        // Setup logging
-        LoggingHelper.setupLogging();
-
-        // Start server
-        localHttpServer = new LocalHttpServer();
-        localHttpServer.startServerInThread();
-
-        // Read config and setup EasyHttp
-        Config config = YamlUtils.readYamlCamelCase("sync_processor_config.yaml", Config.class);
-        config.getServers().get("testServer").setPort(localHttpServer.port);
-        EasyHttp.setup(config);
-
-        Thread.sleep(5000);
-    }
+public class SyncRequestTest extends BaseTestCase {
 
     /**
      * Test a simple http call (with success)
@@ -186,13 +162,6 @@ public class SyncRequestTest extends TestCase {
         assertEquals("str_89", headers.getList("String_header", String.class).get(0));
 
     }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-        localHttpServer.stopServer();
-    }
-
 
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
