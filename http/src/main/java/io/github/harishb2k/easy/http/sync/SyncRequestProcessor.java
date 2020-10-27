@@ -3,6 +3,7 @@ package io.github.harishb2k.easy.http.sync;
 import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.Safe;
+import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
 import io.gitbub.harishb2k.easy.helper.string.StringHelper;
 import io.github.harishb2k.easy.http.IRequestProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
@@ -40,14 +41,15 @@ public class SyncRequestProcessor implements IRequestProcessor {
     private final ServerRegistry serverRegistry;
     private final ApiRegistry apiRegistry;
     private final StringHelper stringHelper;
-
-    @com.google.inject.Inject(optional = true)
-    private IHttpResponseProcessor httpResponseProcessor = new DefaultHttpResponseProcessor();
+    private final IHttpResponseProcessor httpResponseProcessor;
+    private final IMetrics metrics;
 
     @Inject
-    public SyncRequestProcessor(ServerRegistry serverRegistry, ApiRegistry apiRegistry) {
+    public SyncRequestProcessor(ServerRegistry serverRegistry, ApiRegistry apiRegistry, IHttpResponseProcessor httpResponseProcessor, IMetrics metrics) {
         this.serverRegistry = serverRegistry;
         this.apiRegistry = apiRegistry;
+        this.httpResponseProcessor = httpResponseProcessor;
+        this.metrics = metrics;
         this.stringHelper = ApplicationContext.getOptionalInstance(StringHelper.class).orElse(new StringHelper());
     }
 
@@ -172,16 +174,16 @@ public class SyncRequestProcessor implements IRequestProcessor {
             requestBase.addHeader(key, stringHelper.stringify(value));
         });
 
-
         // Request server
-        ResponseObject responseObject;
         CloseableHttpClient client = apiRegistry.getClient(server, api, CloseableHttpClient.class);
-        try (CloseableHttpResponse response = client.execute(requestBase)) {
-            responseObject = httpResponseProcessor.process(serverRegistry.get(api.getServer()), api, response);
-        } catch (Exception e) {
-            log.error("Unknown issue: request={}", requestObject, e);
-            responseObject = httpResponseProcessor.processException(server, api, e);
-        }
+        ResponseObject responseObject = metrics.time(server.getName() + "_" + api.getName() + "_http_client", () -> {
+            try (CloseableHttpResponse response = client.execute(requestBase)) {
+                return httpResponseProcessor.process(serverRegistry.get(api.getServer()), api, response);
+            } catch (Exception e) {
+                log.error("Unknown issue: request={}", requestObject, e);
+                return httpResponseProcessor.processException(server, api, e);
+            }
+        });
 
         log.debug("Request={} Response={}", requestObject, responseObject.convertAsMap());
 

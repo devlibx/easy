@@ -3,10 +3,12 @@ package io.github.harishb2k.easy.http;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Scopes;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.file.FileHelper;
+import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
 import io.github.harishb2k.easy.http.config.Config;
@@ -41,6 +43,7 @@ public abstract class BaseTestCase extends TestCase {
         injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
+                bind(IMetrics.class).to(IMetrics.ConsoleOutputMetrics.class).in(Scopes.SINGLETON);
             }
         }, new EasyHttpModule());
         ApplicationContext.setInjector(injector);

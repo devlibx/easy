@@ -1,10 +1,14 @@
 package io.github.harishb2k.easy.http;
 
+import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Scopes;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.LoggingHelper;
+import io.gitbub.harishb2k.easy.helper.file.FileHelper;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
+import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.module.EasyHttpModule;
@@ -30,9 +34,16 @@ public class DemoApplication extends TestCase {
         super.setUp();
         LoggingHelper.setupLogging();
         Logger.getLogger(SyncRequestProcessor.class).setLevel(TRACE);
+        Logger.getLogger(FileHelper.class).setLevel(TRACE);
+        Logger.getLogger(IMetrics.ConsoleOutputMetrics.class).setLevel(TRACE);
 
         // Setup injector (Onetime MUST setup before we call EasyHttp.setup())
-        injector = Guice.createInjector(new EasyHttpModule());
+        injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(IMetrics.class).to(IMetrics.ConsoleOutputMetrics.class).in(Scopes.SINGLETON);
+            }
+        }, new EasyHttpModule());
         ApplicationContext.setInjector(injector);
 
         // Read config and setup EasyHttp

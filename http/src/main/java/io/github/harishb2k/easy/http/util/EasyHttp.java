@@ -73,7 +73,7 @@ public class EasyHttp {
             server.setName(serverName);
             apiRegistry.getApiMap().forEach((apiName, api) -> {
                 api.setName(apiName);
-                
+
                 // Key to be used for this API
                 String key = serverName + "-" + apiName;
 

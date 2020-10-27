@@ -24,7 +24,8 @@ public class LoggingHelper {
 
     private static void setupLoggingApacheLog4j() {
         ConsoleAppender console = new ConsoleAppender();
-        String PATTERN = "%d [%p|%c|%C{1}] %m%n";
+        // String PATTERN = "%d [%p|%c|%C{1}] %m%n";
+        String PATTERN = "%d [%C{1}] %m%n";
         console.setLayout(new PatternLayout(PATTERN));
         console.setThreshold(DEBUG);
         console.activateOptions();
