@@ -126,7 +126,7 @@ public class ResilienceProcessor implements IResilienceProcessor {
                         .withTimeLimiter(timeLimiter, scheduler)
                         .decorate()
                         .get()
-                        .whenComplete(whenComplete(observableEmitter));
+                        .whenCompleteAsync(whenComplete(observableEmitter));
             }
         });
     }
