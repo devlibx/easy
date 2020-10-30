@@ -101,7 +101,9 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
                 .retrieve()
                 .bodyToMono(String.class)
                 .doOnError(throwable -> {
-                    if (throwable instanceof ReadTimeoutException) {
+                    if (throwable.getCause() instanceof ReadTimeoutException) {
+                        gotExpected.set(true);
+                    } else if (throwable instanceof ReadTimeoutException) {
                         gotExpected.set(true);
                     } else {
                         System.out.println("Got " + throwable + " this is not expected exception");
@@ -178,7 +180,9 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
                 .retrieve()
                 .bodyToMono(String.class)
                 .doOnError(throwable -> {
-                    if (throwable instanceof ReadTimeoutException) {
+                    if (throwable.getCause() instanceof ReadTimeoutException) {
+                        gotExpected.set(true);
+                    } else if (throwable instanceof ReadTimeoutException) {
                         gotExpected.set(true);
                     } else {
                         System.out.println("Got " + throwable + " this is not expected exception");
