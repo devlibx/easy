@@ -16,7 +16,7 @@ public class DataSourceProxy implements DataSource {
         this.dataSourceFactory = dataSourceFactory;
     }
 
-    private DataSource getDataSource() {
+    public DataSource getDataSource() {
         return dataSourceFactory.getDataSource();
     }
 
