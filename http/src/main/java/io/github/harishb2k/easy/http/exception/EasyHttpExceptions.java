@@ -214,6 +214,8 @@ public class EasyHttpExceptions {
         // Check if this is a timeout issues
         if (throwable instanceof ReadTimeoutException || throwable instanceof SocketTimeoutException) {
             return new EasyRequestTimeOutException(responseObject);
+        } else if (throwable.getCause() instanceof ReadTimeoutException) {
+            return new EasyRequestTimeOutException(responseObject);
         }
 
         // If we got WebClientResponseException use status code from WebClientResponseException
@@ -221,7 +223,7 @@ public class EasyHttpExceptions {
             WebClientResponseException ex = (WebClientResponseException) throwable;
             statusCode = ex.getRawStatusCode();
         }
-
+        
         // Try to build exceptions from status code
         if (statusCode == Response.Status.GATEWAY_TIMEOUT.getStatusCode()) {
             exception = new EasyGatewayTimeoutException(responseObject);
