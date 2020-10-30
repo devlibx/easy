@@ -1,6 +1,9 @@
 package io.github.harishb2k.easy.database.mysql;
 
+import com.google.common.base.Strings;
 import com.zaxxer.hikari.HikariDataSource;
+import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext;
+import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
@@ -8,6 +11,7 @@ import javax.inject.Named;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 public class DataSourceFactory {
@@ -42,7 +46,12 @@ public class DataSourceFactory {
     }
 
     public DataSource getDataSource() {
-        return dataSourceMap.get("default");
+        Context context = TransactionContext.getInstance().getContext();
+        if (context == null || Strings.isNullOrEmpty(context.getDatasourceName()) || Objects.equals("default", context.getDatasourceName())) {
+            return dataSourceMap.get("default");
+        } else {
+            return dataSourceMap.get(context.getDatasourceName());
+        }
     }
 
     public void shutdown() {

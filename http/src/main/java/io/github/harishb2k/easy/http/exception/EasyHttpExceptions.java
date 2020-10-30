@@ -223,7 +223,7 @@ public class EasyHttpExceptions {
             WebClientResponseException ex = (WebClientResponseException) throwable;
             statusCode = ex.getRawStatusCode();
         }
-        
+
         // Try to build exceptions from status code
         if (statusCode == Response.Status.GATEWAY_TIMEOUT.getStatusCode()) {
             exception = new EasyGatewayTimeoutException(responseObject);
