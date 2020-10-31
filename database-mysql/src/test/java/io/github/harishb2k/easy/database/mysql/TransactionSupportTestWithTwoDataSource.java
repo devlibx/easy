@@ -2,6 +2,7 @@ package io.github.harishb2k.easy.database.mysql;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import io.github.harishb2k.easy.database.DatabaseConstant;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.springframework.transaction.annotation.Propagation;
@@ -12,6 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.UUID;
+
+import static io.github.harishb2k.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
 
 @Slf4j
 public abstract class TransactionSupportTestWithTwoDataSource {
@@ -30,7 +33,7 @@ public abstract class TransactionSupportTestWithTwoDataSource {
         helper.testPersistToSecondDb();
 
         DataSourceFactory dataSourceFactory = injector.getInstance(DataSourceFactory.class);
-        DataSource defaultDataSource = dataSourceFactory.getDataSource("default");
+        DataSource defaultDataSource = dataSourceFactory.getDataSource(DATASOURCE_DEFAULT);
         DataSource secondaryDataSource = dataSourceFactory.getDataSource("secondary");
 
         String dataFromDefaultDataSource = getResult("testPersistToFirstDb", defaultDataSource);

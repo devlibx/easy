@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.github.harishb2k.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
+
 @Slf4j
 public class DataSourceFactory {
     private final Map<String, DataSource> dataSourceMap;
@@ -27,9 +29,9 @@ public class DataSourceFactory {
 
     public void register(DataSource dataSource) {
         if (transactionAwareDatasource) {
-            dataSourceMap.put("default", new TransactionAwareDataSourceProxy(dataSource));
+            dataSourceMap.put(DATASOURCE_DEFAULT, new TransactionAwareDataSourceProxy(dataSource));
         } else {
-            dataSourceMap.put("default", dataSource);
+            dataSourceMap.put(DATASOURCE_DEFAULT, dataSource);
         }
     }
 
@@ -47,8 +49,8 @@ public class DataSourceFactory {
 
     public DataSource getDataSource() {
         Context context = TransactionContext.getInstance().getContext();
-        if (context == null || Strings.isNullOrEmpty(context.getDatasourceName()) || Objects.equals("default", context.getDatasourceName())) {
-            return dataSourceMap.get("default");
+        if (context == null || Strings.isNullOrEmpty(context.getDatasourceName()) || Objects.equals(DATASOURCE_DEFAULT, context.getDatasourceName())) {
+            return dataSourceMap.get(DATASOURCE_DEFAULT);
         } else {
             return dataSourceMap.get(context.getDatasourceName());
         }

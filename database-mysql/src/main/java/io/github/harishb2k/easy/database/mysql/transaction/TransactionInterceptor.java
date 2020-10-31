@@ -1,6 +1,5 @@
 package io.github.harishb2k.easy.database.mysql.transaction;
 
-import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.github.harishb2k.easy.database.mysql.DataSourceFactory;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext.Context;
@@ -23,6 +22,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TransactionInterceptor implements MethodInterceptor {
     private final Map<String, DataSourceTransactionManager> transactionManagerMap;
     private final int defaultTimeout;
+    private ITransactionManagerResolver transactionManagerResolver;
 
     public TransactionInterceptor(int defaultTimeout) {
         this.transactionManagerMap = new ConcurrentHashMap<>();
@@ -78,12 +78,12 @@ public class TransactionInterceptor implements MethodInterceptor {
     }
 
     public void resolveTransactionManagerByName(Transactional transactional) {
-        Context context = TransactionContext.getInstance().getContext();
-        context.setDatasourceName("default");
-
-        if (!Strings.isNullOrEmpty(transactional.value())) {
-            context.setDatasourceName(transactional.value());
+        if (transactionManagerResolver == null) {
+            transactionManagerResolver = ApplicationContext.getInstance(ITransactionManagerResolver.class);
         }
+        String transactionManagerToUse = transactionManagerResolver.resolveTransactionManager(transactional);
+        Context context = TransactionContext.getInstance().getContext();
+        context.setDatasourceName(transactionManagerToUse);
     }
 
     public void resolveName(Transactional transactional, DefaultTransactionDefinition definition) {
