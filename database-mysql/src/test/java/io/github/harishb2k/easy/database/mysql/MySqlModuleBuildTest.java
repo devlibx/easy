@@ -22,4 +22,11 @@ public class MySqlModuleBuildTest extends TestCase {
         ITransactionManagerResolver transactionManagerResolver = injector.getInstance(ITransactionManagerResolver.class);
         assertNotNull(transactionManagerResolver);
     }
+
+    public void testMySqlEndToEndTestIfDockerMySqlIsAvailable() {
+        ExampleApp exampleApp = new ExampleApp() {
+        };
+        ExampleApp.useDockerMySql = true;
+        exampleApp.runIfDockerMySqlIsAvaliable();
+    }
 }

@@ -39,7 +39,7 @@ public abstract class ExampleApp extends TestCase {
     private static Injector injector;
     private static String uniqueString = UUID.randomUUID().toString();
 
-    private static boolean useDockerMySql = false;
+    public static boolean useDockerMySql = false;
     private static boolean testMultiDb = true;
 
     public static void startMySQL() throws RuntimeException {
@@ -130,6 +130,13 @@ public abstract class ExampleApp extends TestCase {
         databaseService.startDatabase();
     }
 
+    public void runIfDockerMySqlIsAvaliable() {
+        DockerMySqlIsAvaliable dockerMySqlIsAvaliable = new DockerMySqlIsAvaliable();
+        if (dockerMySqlIsAvaliable.canRun()) {
+            main(null);
+        }
+    }
+
     public static void main(String[] args) {
         // Setup logging
         try {
@@ -178,5 +185,31 @@ public abstract class ExampleApp extends TestCase {
         TransactionSupportTestWithTwoDataSource transactionSupportTestWithTwoDataSource = new TransactionSupportTestWithTwoDataSource(injector) {
         };
         transactionSupportTestWithTwoDataSource.runTest();
+    }
+
+    public static class DockerMySqlIsAvaliable {
+        public boolean canRun() {
+            MySQLContainer testContainer = null;
+            try {
+                testContainer = (MySQLContainer) new MySQLContainer("mysql:5.5")
+                        .withDatabaseName("users")
+                        .withUsername("test")
+                        .withPassword("test")
+                        .withEnv("MYSQL_ROOT_HOST", "%")
+                        .withExposedPorts(3306);
+
+                testContainer.start();
+                log.error("MySQLContainer is avaliable - so run this test");
+                return true;
+            } catch (Exception e) {
+                log.error("MySQLContainer is not avaliable - so do not run this test");
+                return false;
+            } finally {
+                MySQLContainer _testContainer = testContainer;
+                Safe.safe(() -> {
+                    _testContainer.stop();
+                });
+            }
+        }
     }
 }

@@ -1,15 +1,21 @@
 package io.github.harishb2k.easy.database.mysql;
 
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
+import io.gitbub.harishb2k.easy.helper.Safe;
 import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public abstract class TransactionTest extends TestCase {
@@ -36,6 +42,10 @@ public abstract class TransactionTest extends TestCase {
         assertEquals(2, results.size());
         assertEquals("persistRecordSecond-" + uniqueString, results.get(0));
         assertEquals("persistRecordForth-" + uniqueString, results.get(1));
+        assertNull(transactionTestClass.getAfterCommitCalled().get("persistRecordFirst"));
+        assertNull(transactionTestClass.getAfterCommitCalled().get("persistRecordThird"));
+        assertTrue(transactionTestClass.getAfterCommitCalled().get("persistRecordSecond").get());
+        assertTrue(transactionTestClass.getAfterCommitCalled().get("persistRecordForth").get());
 
         results.forEach(s -> {
             log.info("Result after transaction = " + s);
@@ -65,20 +75,42 @@ public abstract class TransactionTest extends TestCase {
         Long persistRecordForth();
 
         Long persistWithoutTransaction();
+
+        Map<String, AtomicBoolean> getAfterCommitCalled();
     }
 
 
     public static class TransactionTestClass implements ITransactionTestClass {
         private final IMysqlHelper mysqlHelper;
+        private final Map<String, AtomicBoolean> getAfterCommitCalled;
 
         @Inject
         public TransactionTestClass(IMysqlHelper mysqlHelper) {
             this.mysqlHelper = mysqlHelper;
+            this.getAfterCommitCalled = new HashMap<>();
+        }
+
+        @Override
+        public Map<String, AtomicBoolean> getAfterCommitCalled() {
+            return getAfterCommitCalled;
+        }
+
+        private void setupAfterCommitHook(String name) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    Safe.safe(() -> {
+                        getAfterCommitCalled.put(name, new AtomicBoolean(true));
+                    }, "got error after commit");
+                }
+            });
         }
 
         @Override
         @Transactional(propagation = Propagation.REQUIRED, label = {"name=persistRecordFirst"})
         public Long persistRecordFirst() {
+            setupAfterCommitHook("persistRecordFirst");
+
             mysqlHelper.persist(
                     "none",
                     "INSERT INTO users(name) VALUES(?)",
@@ -98,6 +130,8 @@ public abstract class TransactionTest extends TestCase {
         @Override
         @Transactional(propagation = Propagation.REQUIRES_NEW, label = {"name=persistRecordSecond"})
         public Long persistRecordSecond() {
+            setupAfterCommitHook("persistRecordSecond");
+
             return mysqlHelper.persist(
                     "none",
                     "INSERT INTO users(name) VALUES(?)",
@@ -110,6 +144,8 @@ public abstract class TransactionTest extends TestCase {
         @Override
         @Transactional(propagation = Propagation.REQUIRED, label = {"name=persistRecordThird"})
         public Long persistRecordThird() {
+            setupAfterCommitHook("persistRecordThird");
+
             return mysqlHelper.persist(
                     "none",
                     "INSERT INTO users(name) VALUES(?)",
@@ -122,6 +158,8 @@ public abstract class TransactionTest extends TestCase {
         @Override
         @Transactional(propagation = Propagation.REQUIRES_NEW, label = {"name=persistRecordForth"})
         public Long persistRecordForth() {
+            setupAfterCommitHook("persistRecordForth");
+
             return mysqlHelper.persist(
                     "none",
                     "INSERT INTO users(name) VALUES(?)",
