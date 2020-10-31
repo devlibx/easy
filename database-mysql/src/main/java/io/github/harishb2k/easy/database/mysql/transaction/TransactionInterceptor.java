@@ -50,7 +50,7 @@ public class TransactionInterceptor implements MethodInterceptor {
 
         // Do not do anything if we do not have transaction manager
         if (transactionManager == null) {
-            log.trace("Execute method without transaction - method is marked with Transactional, but we do not have transaction manager");
+            log.trace("Execute method without transaction - method is marked with Transactional, but we do not have transaction manager with name={}", context.getDatasourceName());
             return invocation.proceed();
         }
 
@@ -77,7 +77,10 @@ public class TransactionInterceptor implements MethodInterceptor {
         }
     }
 
-    public void resolveTransactionManagerByName(Transactional transactional) {
+    /**
+     * @param transactional - instance of @{@link Transactional} from the method which was invoked
+     */
+    private void resolveTransactionManagerByName(Transactional transactional) {
         if (transactionManagerResolver == null) {
             transactionManagerResolver = ApplicationContext.getInstance(ITransactionManagerResolver.class);
         }
@@ -86,7 +89,10 @@ public class TransactionInterceptor implements MethodInterceptor {
         context.setDatasourceName(transactionManagerToUse);
     }
 
-    public void resolveName(Transactional transactional, DefaultTransactionDefinition definition) {
+    /**
+     * Helper method to set the name for this transaction for debugging.
+     */
+    private void resolveName(Transactional transactional, DefaultTransactionDefinition definition) {
         if (transactional.label().length == 0) return;
         for (String label : transactional.label()) {
             StringTokenizer st = new StringTokenizer(label, "=");
@@ -97,6 +103,10 @@ public class TransactionInterceptor implements MethodInterceptor {
         }
     }
 
+    /**
+     * Make sure we have a instance of @{@link DataSourceTransactionManager} with us to handle this transaction. If not
+     * then make a new instance.
+     */
     private synchronized DataSourceTransactionManager ensureDataSourceTransactionManager() {
         Context context = TransactionContext.getInstance().getContext();
         String dataSourceName = context.getDatasourceName();
