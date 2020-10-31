@@ -7,6 +7,7 @@ import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext.Co
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.sql.DataSource;
 import java.util.HashMap;
@@ -18,12 +19,11 @@ import static io.github.harishb2k.easy.database.DatabaseConstant.DATASOURCE_DEFA
 @Slf4j
 public class DataSourceFactory {
     private final Map<String, DataSource> dataSourceMap;
+    private final boolean transactionAwareDatasource;
 
-    @com.google.inject.Inject(optional = true)
-    @Named("transaction-aware-datasource")
-    private boolean transactionAwareDatasource = false;
-
-    public DataSourceFactory() {
+    @Inject
+    public DataSourceFactory(@Named("enable-transaction-aware-datasource") boolean transactionAwareDatasource) {
+        this.transactionAwareDatasource = transactionAwareDatasource;
         this.dataSourceMap = new HashMap<>();
     }
 
