@@ -1,5 +1,6 @@
 package io.github.harishb2k.easy.database.mysql.transaction;
 
+import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.github.harishb2k.easy.database.mysql.DataSourceFactory;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext.Context;
@@ -14,6 +15,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 
 import javax.sql.DataSource;
 import java.util.Map;
+import java.util.Objects;
 import java.util.StringTokenizer;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,7 +39,7 @@ public class TransactionInterceptor implements MethodInterceptor {
 
         // Process labels provided in Transactional
         TransactionContext.getInstance().clear();
-        processLabels(transactional);
+        resolveTransactionManagerByName(transactional);
 
         // Keep a clone copy of context. This is needed because we can have recursive call of  Transactional methods
         // Those methods will update the context
@@ -57,6 +59,9 @@ public class TransactionInterceptor implements MethodInterceptor {
         definition.setTimeout(transactional.timeout() > 0 ? transactional.timeout() : 10);
         DefaultTransactionStatus transactionStatus = (DefaultTransactionStatus) transactionManager.getTransaction(definition);
 
+        // Set the user provided name - it is useful in debugging
+        resolveName(transactional, definition);
+
         Object result;
         try {
             result = invocation.proceed();
@@ -72,20 +77,22 @@ public class TransactionInterceptor implements MethodInterceptor {
         }
     }
 
-    public void processLabels(Transactional transactional) {
+    public void resolveTransactionManagerByName(Transactional transactional) {
         Context context = TransactionContext.getInstance().getContext();
         context.setDatasourceName("default");
 
-        if (transactional == null || transactional.label().length == 0) {
-            return;
+        if (!Strings.isNullOrEmpty(transactional.value())) {
+            context.setDatasourceName(transactional.value());
         }
+    }
 
+    public void resolveName(Transactional transactional, DefaultTransactionDefinition definition) {
+        if (transactional.label().length == 0) return;
         for (String label : transactional.label()) {
-            if (label.startsWith("dataSourceName")) {
-                StringTokenizer st = new StringTokenizer(label, "=");
-                st.nextToken();
-                String dataSourceName = st.nextToken();
-                context.setDatasourceName(dataSourceName);
+            StringTokenizer st = new StringTokenizer(label, "=");
+            String token = st.nextToken();
+            if (Objects.equals("name", token)) {
+                definition.setName(st.nextToken());
             }
         }
     }

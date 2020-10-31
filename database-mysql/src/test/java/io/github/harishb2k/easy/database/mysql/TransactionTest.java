@@ -77,7 +77,7 @@ public abstract class TransactionTest extends TestCase {
         }
 
         @Override
-        @Transactional(value = "persistRecordFirst", propagation = Propagation.REQUIRED)
+        @Transactional(propagation = Propagation.REQUIRED, label = {"name=persistRecordFirst"})
         public Long persistRecordFirst() {
             mysqlHelper.persist(
                     "none",
@@ -96,7 +96,7 @@ public abstract class TransactionTest extends TestCase {
         }
 
         @Override
-        @Transactional(value = "persistRecordSecond", propagation = Propagation.REQUIRES_NEW)
+        @Transactional(propagation = Propagation.REQUIRES_NEW, label = {"name=persistRecordSecond"})
         public Long persistRecordSecond() {
             return mysqlHelper.persist(
                     "none",
@@ -108,7 +108,7 @@ public abstract class TransactionTest extends TestCase {
         }
 
         @Override
-        @Transactional(value = "persistRecordThird", propagation = Propagation.REQUIRED, label = {})
+        @Transactional(propagation = Propagation.REQUIRED, label = {"name=persistRecordThird"})
         public Long persistRecordThird() {
             return mysqlHelper.persist(
                     "none",
@@ -120,7 +120,7 @@ public abstract class TransactionTest extends TestCase {
         }
 
         @Override
-        @Transactional(value = "persistRecordForth", propagation = Propagation.REQUIRES_NEW)
+        @Transactional(propagation = Propagation.REQUIRES_NEW, label = {"name=persistRecordForth"})
         public Long persistRecordForth() {
             return mysqlHelper.persist(
                     "none",

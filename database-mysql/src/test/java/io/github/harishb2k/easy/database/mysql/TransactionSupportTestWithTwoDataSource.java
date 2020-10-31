@@ -73,7 +73,7 @@ public abstract class TransactionSupportTestWithTwoDataSource {
         }
 
         @Override
-        @Transactional(label = {"dataSourceName=default"}, propagation = Propagation.REQUIRES_NEW)
+        @Transactional(propagation = Propagation.REQUIRES_NEW)
         public Long testPersistToFirstDb() {
             return mysqlHelper.persist(
                     "none",
@@ -85,7 +85,7 @@ public abstract class TransactionSupportTestWithTwoDataSource {
         }
 
         @Override
-        @Transactional(label = {"dataSourceName=secondary"}, propagation = Propagation.REQUIRES_NEW)
+        @Transactional(value = "secondary", propagation = Propagation.REQUIRES_NEW)
         public Long testPersistToSecondDb() {
             return mysqlHelper.persist(
                     "none",

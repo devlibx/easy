@@ -364,7 +364,7 @@ public class ResilienceManagerTest extends TestCase {
 
         Observable<String> observable = Observable.create(observableEmitter -> {
             // Thread.sleep(1);
-            Thread.sleep(10);
+            Thread.sleep(1);
             throw new CustomException();
         });
 
@@ -383,7 +383,7 @@ public class ResilienceManagerTest extends TestCase {
                                 waitForSuccessOrError.countDown();
                             });
         }
-        waitForSuccessOrError.await(5, TimeUnit.SECONDS);
+        waitForSuccessOrError.await(20, TimeUnit.SECONDS);
         assertTrue("Expected a CircuitOpenException", gotCircuitOpenException.get());
 
         boolean gotSuccess = false;
