@@ -78,6 +78,6 @@ public class DatabaseMySQLModule extends AbstractModule {
      * @return TransactionInterceptor which will handle method annotated with @{@link Transactional}
      */
     protected TransactionInterceptor transactionInterceptor() {
-        return new TransactionInterceptor(defaultTimeout);
+        return new TransactionInterceptor(defaultTimeout, getProvider(ITransactionManagerResolver.class));
     }
 }

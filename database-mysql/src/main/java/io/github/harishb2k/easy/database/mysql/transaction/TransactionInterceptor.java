@@ -1,5 +1,6 @@
 package io.github.harishb2k.easy.database.mysql.transaction;
 
+import com.google.inject.Provider;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.github.harishb2k.easy.database.mysql.DataSourceFactory;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext.Context;
@@ -22,9 +23,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class TransactionInterceptor implements MethodInterceptor {
     private final Map<String, DataSourceTransactionManager> transactionManagerMap;
     private final int defaultTimeout;
-    private ITransactionManagerResolver transactionManagerResolver;
+    private final Provider<ITransactionManagerResolver> transactionManagerResolver;
 
-    public TransactionInterceptor(int defaultTimeout) {
+    public TransactionInterceptor(int defaultTimeout, Provider<ITransactionManagerResolver> transactionManagerResolver) {
+        this.transactionManagerResolver = transactionManagerResolver;
         this.transactionManagerMap = new ConcurrentHashMap<>();
         this.defaultTimeout = defaultTimeout;
     }
@@ -81,10 +83,7 @@ public class TransactionInterceptor implements MethodInterceptor {
      * @param transactional - instance of @{@link Transactional} from the method which was invoked
      */
     private void resolveTransactionManagerByName(Transactional transactional) {
-        if (transactionManagerResolver == null) {
-            transactionManagerResolver = ApplicationContext.getInstance(ITransactionManagerResolver.class);
-        }
-        String transactionManagerToUse = transactionManagerResolver.resolveTransactionManager(transactional);
+        String transactionManagerToUse = transactionManagerResolver.get().resolveTransactionManager(transactional);
         Context context = TransactionContext.getInstance().getContext();
         context.setDatasourceName(transactionManagerToUse);
     }
