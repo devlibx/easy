@@ -5,14 +5,17 @@ import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.matcher.Matchers;
+import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Names;
+import io.gitbub.harishb2k.easy.helper.healthcheck.IHealthCheckProvider;
 import io.github.harishb2k.easy.database.IDatabaseService;
 import io.github.harishb2k.easy.database.mysql.DataSourceFactory;
 import io.github.harishb2k.easy.database.mysql.DataSourceProxy;
 import io.github.harishb2k.easy.database.mysql.DatabaseService;
 import io.github.harishb2k.easy.database.mysql.IMysqlHelper;
 import io.github.harishb2k.easy.database.mysql.MySqlHelper;
+import io.github.harishb2k.easy.database.mysql.healthcheck.MySqlHealthCheckProvider;
 import io.github.harishb2k.easy.database.mysql.transaction.ITransactionManagerResolver;
 import io.github.harishb2k.easy.database.mysql.transaction.ITransactionManagerResolver.DefaultTransactionManagerResolver;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionInterceptor;
@@ -74,6 +77,15 @@ public class DatabaseMySQLModule extends AbstractModule {
         if (enableTransactionInterceptor) {
             bindInterceptor(Matchers.any(), Matchers.annotatedWith(Transactional.class), transactionInterceptor());
         }
+
+        // Provide health check implementation
+        MapBinder<String, IHealthCheckProvider> healthCheckProviderMultiBinder = MapBinder.newMapBinder(binder(), String.class, IHealthCheckProvider.class);
+        healthCheckProviderMultiBinder.permitDuplicates();
+        healthCheckProviderMultiBinder.addBinding(healthCheckRegistrationName()).to(MySqlHealthCheckProvider.class);
+    }
+
+    protected String healthCheckRegistrationName() {
+        return "MySQL";
     }
 
     @Provides

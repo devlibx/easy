@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.zaxxer.hikari.HikariDataSource;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext.Context;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
@@ -18,6 +19,7 @@ import static io.github.harishb2k.easy.database.DatabaseConstant.DATASOURCE_DEFA
 
 @Slf4j
 public class DataSourceFactory {
+    @Getter
     private final Map<String, DataSource> dataSourceMap;
     private final boolean transactionAwareDatasource;
 
