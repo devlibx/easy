@@ -1,5 +1,6 @@
 package io.github.harishb2k.easy.resilience;
 
+import io.gitbub.harishb2k.easy.helper.CommonBaseTestCase;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
@@ -9,7 +10,6 @@ import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.exceptions.CompositeException;
 import io.reactivex.rxjava3.schedulers.Schedulers;
-import junit.framework.TestCase;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
-public class RxJavaTest extends TestCase {
+public class RxJavaTest extends CommonBaseTestCase {
 
     /**
      * A "subscribe" method runs in same thread.

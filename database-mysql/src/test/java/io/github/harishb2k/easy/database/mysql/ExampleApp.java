@@ -1,5 +1,7 @@
 package io.github.harishb2k.easy.database.mysql;
 
+import ch.qos.logback.classic.Level;
+import com.github.dockerjava.core.command.AbstrDockerCmd;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -7,6 +9,7 @@ import com.google.inject.Scopes;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.pool.HikariPool;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
+import io.gitbub.harishb2k.easy.helper.CommonBaseTestCase;
 import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.Safe;
 import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
@@ -20,18 +23,17 @@ import io.github.harishb2k.easy.database.mysql.config.MySqlConfigs;
 import io.github.harishb2k.easy.database.mysql.module.DatabaseMySQLModule;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionInterceptor;
-import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.MySQLContainer;
 
 import java.util.UUID;
 
+import static ch.qos.logback.classic.Level.INFO;
+
 @SuppressWarnings({"all"})
 @Slf4j
-public abstract class ExampleApp extends TestCase {
+public abstract class ExampleApp extends CommonBaseTestCase {
     private static String jdbcUrl = "jdbc:mysql://localhost:3306/users?useSSL=false";
     private static String secondaryJdbcUrl = "jdbc:mysql://localhost:3306/test_me?useSSL=false";
     private static MySQLContainer container;
@@ -39,7 +41,7 @@ public abstract class ExampleApp extends TestCase {
     private static Injector injector;
     private static String uniqueString = UUID.randomUUID().toString();
 
-    public static boolean useDockerMySql = false;
+    public static boolean useDockerMySql = true;
     private static boolean testMultiDb = true;
 
     public static void startMySQL() throws RuntimeException {
@@ -141,10 +143,13 @@ public abstract class ExampleApp extends TestCase {
         // Setup logging
         try {
             LoggingHelper.setupLogging();
-            Logger.getLogger(TransactionInterceptor.class).setLevel(Level.TRACE);
-            Logger.getLogger(HikariPool.class).setLevel(Level.OFF);
-            Logger.getLogger(HikariConfig.class).setLevel(Level.OFF);
+            LoggingHelper.getLogger(TransactionInterceptor.class).setLevel(INFO);
+            LoggingHelper.getLogger(HikariPool.class).setLevel(Level.OFF);
+            LoggingHelper.getLogger(HikariConfig.class).setLevel(Level.OFF);
+            LoggingHelper.getLogger(AbstrDockerCmd.class).setLevel(INFO);
+            LoggingHelper.getLogger("org.testcontainser").setLevel(INFO);
         } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
 
         // Start MySQL

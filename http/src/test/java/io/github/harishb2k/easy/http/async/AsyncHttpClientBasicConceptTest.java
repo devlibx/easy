@@ -1,5 +1,6 @@
 package io.github.harishb2k.easy.http.async;
 
+import ch.qos.logback.classic.Level;
 import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.LocalHttpServer;
 import io.gitbub.harishb2k.easy.helper.LoggingHelper;
@@ -8,8 +9,6 @@ import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.github.harishb2k.easy.http.BaseTestCase;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -249,7 +248,7 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
     }
 
     public void testParallelRequests_Get() throws Exception {
-        Logger.getLogger(LocalHttpServer.class).setLevel(Level.INFO);
+        LoggingHelper.getLogger(LocalHttpServer.class).setLevel(Level.INFO);
 
         httpClient = HttpClient.create(ConnectionProvider.create(service, 100))
                 .tcpConfiguration(tcpClient ->

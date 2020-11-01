@@ -3,6 +3,7 @@ package io.github.harishb2k.easy.resilience;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
+import io.gitbub.harishb2k.easy.helper.CommonBaseTestCase;
 import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
 import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
 import io.github.harishb2k.easy.resilience.exception.OverflowException;
@@ -11,7 +12,6 @@ import io.github.harishb2k.easy.resilience.exception.ResilienceException;
 import io.github.harishb2k.easy.resilience.exception.UnknownException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
 import io.reactivex.rxjava3.core.Observable;
-import junit.framework.TestCase;
 
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
-public class ResilienceManagerTest extends TestCase {
+public class ResilienceManagerTest extends CommonBaseTestCase {
     private Injector injector;
     private IResilienceManager resilienceManager;
 

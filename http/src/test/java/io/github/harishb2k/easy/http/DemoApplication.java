@@ -17,13 +17,12 @@ import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.log4j.Logger;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.apache.log4j.Level.TRACE;
+import static ch.qos.logback.classic.Level.TRACE;
 
 @Slf4j
 public class DemoApplication extends TestCase {
@@ -33,9 +32,9 @@ public class DemoApplication extends TestCase {
     protected void setUp() throws Exception {
         super.setUp();
         LoggingHelper.setupLogging();
-        Logger.getLogger(SyncRequestProcessor.class).setLevel(TRACE);
-        Logger.getLogger(FileHelper.class).setLevel(TRACE);
-        Logger.getLogger(IMetrics.ConsoleOutputMetrics.class).setLevel(TRACE);
+        LoggingHelper.getLogger(SyncRequestProcessor.class).setLevel(TRACE);
+        LoggingHelper.getLogger(FileHelper.class).setLevel(TRACE);
+        LoggingHelper.getLogger(IMetrics.ConsoleOutputMetrics.class).setLevel(TRACE);
 
         // Setup injector (Onetime MUST setup before we call EasyHttp.setup())
         injector = Guice.createInjector(new AbstractModule() {

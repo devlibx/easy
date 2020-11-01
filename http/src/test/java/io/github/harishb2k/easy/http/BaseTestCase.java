@@ -16,9 +16,8 @@ import io.github.harishb2k.easy.http.module.EasyHttpModule;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
 import org.apache.http.HttpClientConnection;
-import org.apache.log4j.Logger;
 
-import static org.apache.log4j.Level.OFF;
+import static ch.qos.logback.classic.Level.OFF;
 
 public abstract class BaseTestCase extends TestCase {
     protected LocalHttpServer localHttpServer;
@@ -30,10 +29,10 @@ public abstract class BaseTestCase extends TestCase {
 
         // Setup logging
         LoggingHelper.setupLogging();
-        Logger.getLogger(LocalHttpServer.class).setLevel(OFF);
-        Logger.getLogger(FileHelper.class).setLevel(OFF);
-        Logger.getLogger(HttpClientConnection.class).setLevel(OFF);
-        Logger.getLogger(AsyncRequestProcessor.class).setLevel(OFF);
+        LoggingHelper.getLogger(LocalHttpServer.class).setLevel(OFF);
+        LoggingHelper.getLogger(FileHelper.class).setLevel(OFF);
+        LoggingHelper.getLogger(HttpClientConnection.class).setLevel(OFF);
+        LoggingHelper.getLogger(AsyncRequestProcessor.class).setLevel(OFF);
 
         // Start server
         localHttpServer = new LocalHttpServer();

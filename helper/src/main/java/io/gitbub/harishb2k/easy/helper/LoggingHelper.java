@@ -1,16 +1,11 @@
 package io.gitbub.harishb2k.easy.helper;
 
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
-import org.checkerframework.checker.units.qual.A;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static org.apache.log4j.Level.DEBUG;
-import static org.apache.log4j.Level.INFO;
-import static org.apache.log4j.Level.OFF;
-import static org.apache.log4j.Level.TRACE;
 
 public class LoggingHelper {
     private static final AtomicBoolean initDone = new AtomicBoolean(false);
@@ -20,9 +15,13 @@ public class LoggingHelper {
      */
     public static void setupLogging() {
         try {
-            setupLoggingApacheLog4j();
+            setupLoggingLogbackClassic();
         } catch (Exception e) {
-            e.printStackTrace();
+            try {
+                setupLoggingApacheLog4j();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
         }
     }
 
@@ -31,7 +30,7 @@ public class LoggingHelper {
             if (initDone.get()) return;
             initDone.set(true);
 
-            ConsoleAppender console = new ConsoleAppender();
+           /* ConsoleAppender console = new ConsoleAppender();
             // String PATTERN = "%d [%p|%c|%C{1}] %m%n";
             String PATTERN = "%d [%C{1}] %m%n";
             console.setLayout(new PatternLayout(PATTERN));
@@ -40,7 +39,23 @@ public class LoggingHelper {
             // Logger.getRootLogger().addAppender(console);
             Logger.getRootLogger().setLevel(INFO);
             Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(OFF);
-            Logger.getLogger(LocalHttpServer.class).setLevel(INFO);
+            Logger.getLogger(LocalHttpServer.class).setLevel(INFO);*/
         }
+    }
+
+    private static void setupLoggingLogbackClassic() {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        loggerContext.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(Level.INFO);
+        // loggerContext.getLogger("com.github.dockerjava.core.command").setLevel(Level.OFF);
+    }
+
+    public static Logger getLogger(Class<?> clazz) {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        return loggerContext.getLogger(clazz);
+    }
+
+    public static Logger getLogger(String name) {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        return loggerContext.getLogger(name);
     }
 }

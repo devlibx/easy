@@ -3,6 +3,7 @@ package io.github.harishb2k.easy.resilience;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
+import io.gitbub.harishb2k.easy.helper.CommonBaseTestCase;
 import io.gitbub.harishb2k.easy.helper.ParallelThread;
 import io.github.harishb2k.easy.resilience.ResilienceManagerTest.CustomException;
 import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
@@ -19,7 +20,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @SuppressWarnings("ResultOfMethodCallIgnored")
-public class ResilienceManagerObservableTest extends TestCase {
+public class ResilienceManagerObservableTest extends CommonBaseTestCase {
     private Injector injector;
     private IResilienceManager resilienceManager;
 
