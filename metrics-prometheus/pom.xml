@@ -5,7 +5,7 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.harishb2k.easy</groupId>
-        <version>0.0.26</version>
+        <version>0.0.27-SNAPSHOT</version>
     </parent>
     <artifactId>metrics-prometheus</artifactId>
     <name>metrics-prometheus</name>
