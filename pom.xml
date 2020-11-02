@@ -51,6 +51,7 @@
         <resilience4j.version>1.6.1</resilience4j.version>
         <reactor-netty.version>0.9.12.RELEASE</reactor-netty.version>
         <spring.version>5.3.0</spring.version>
+        <guava.version>27.1-jre</guava.version>
     </properties>
 
     <dependencyManagement>
@@ -88,6 +89,11 @@
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
                 <version>${guice.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>joda-time</groupId>
