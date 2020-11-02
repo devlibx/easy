@@ -3,13 +3,17 @@ package io.github.harishb2k.easy.http.config;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.string.StringHelper;
+import io.github.harishb2k.easy.http.IApiConfigPreProcessor;
 import io.github.harishb2k.easy.http.RequestObject;
+import io.github.harishb2k.easy.http.helper.ConcurrencyApiConfigPreProcessor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrSubstitutor;
 
 import javax.ws.rs.core.MultivaluedMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +23,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Slf4j
 public class Api {
 
     /**
@@ -92,7 +97,7 @@ public class Api {
      * <p>
      * This means that we can take burst of 102 requests.
      */
-    private int queueSize = 100;
+    private int queueSize = 10;
 
     /**
      * If server took > timeout to complete a request then this timeout will occure.
@@ -100,6 +105,14 @@ public class Api {
      * 1 sec is default.
      */
     private int timeout = 1000;
+
+    /**
+     * RPS of this API. If this is set to non-zero then "ConcurrencyApiConfigPreProcessor" will execute and will
+     * update you concurrency to optimize your required threads/semaphore.
+     */
+    private int rps = 0;
+
+    private List<String> configPreProcessors = Collections.singletonList(ConcurrencyApiConfigPreProcessor.class.getCanonicalName());
 
     /**
      * We add this extra time to overall request. This is to account for time consumed in other activities
@@ -144,5 +157,24 @@ public class Api {
         }
         String qp = sb.toString();
         return uri + (Strings.isNullOrEmpty(qp) ? "" : "?" + qp);
+    }
+
+    /**
+     * @return list of config pre-processors
+     */
+    public List<IApiConfigPreProcessor> getConfigPreProcessorList() {
+        List<IApiConfigPreProcessor> items = new ArrayList<>();
+        if (configPreProcessors != null) {
+            configPreProcessors.forEach(name -> {
+                try {
+                    Class<IApiConfigPreProcessor> cls = (Class<IApiConfigPreProcessor>) Class.forName(name);
+                    items.add(cls.newInstance());
+                    log.debug("Create instance of - {}", name);
+                } catch (Exception e) {
+                    log.error("Failed to create IApiConfigPreProcessor from: {}", name, e);
+                }
+            });
+        }
+        return items;
     }
 }

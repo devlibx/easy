@@ -365,6 +365,7 @@
                         <configuration>
                             <source>1.8</source>
                             <target>1.8</target>
+                            <skip>true</skip>
                             <annotationProcessorPaths>
                                 <path>
                                     <groupId>org.projectlombok</groupId>

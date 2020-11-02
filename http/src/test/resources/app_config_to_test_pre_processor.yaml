@@ -1,0 +1,39 @@
+servers:
+  jsonplaceholder:
+    host: jsonplaceholder.typicode.com
+    port: 443
+    https: true
+    connectTimeout: 1000
+    connectionRequestTimeout: 1000
+
+apis:
+  getPosts:
+    method: GET
+    path: /posts/${id}
+    server: jsonplaceholder
+    timeout: 10000
+  getPostsAsync:
+    method: GET
+    path: /posts/${id}
+    server: jsonplaceholder
+    timeout: 1000
+    async: true
+  getPostsAsync_Test:
+    method: GET
+    path: /posts/${id}
+    server: jsonplaceholder
+    timeout: 500
+    concurrency: 10000
+    rps: 300
+    async: true
+  getPostsAsync_Test_1:
+    method: GET
+    path: /posts/${id}
+    server: jsonplaceholder
+    timeout: 500
+    concurrency: 10000
+    rps: 300
+    async: true
+    configPreProcessors:
+      - io.github.harishb2k.easy.http.TestApiConfigPreProcessor
+      - io.github.harishb2k.easy.http.helper.ConcurrencyApiConfigPreProcessor

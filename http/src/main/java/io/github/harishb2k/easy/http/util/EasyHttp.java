@@ -54,10 +54,17 @@ public class EasyHttp {
         resilienceManager = null;
     }
 
+    public static IResilienceProcessor get(String service, String api) {
+        return resilienceProcessors.get(service + "-" + api);
+    }
+
     /**
      * Setup EasyHttp to make HTTP requests
      */
     public static void setup(Config config) {
+
+        // Clear existing setup - if exist (just to be safe)
+        Safe.safe(EasyHttp::shutdown);
 
         // Get metrics class if provided
         try {
@@ -85,6 +92,11 @@ public class EasyHttp {
 
                 // Key to be used for this API
                 String key = serverName + "-" + apiName;
+
+                // Pre-Process configs
+                api.getConfigPreProcessorList().forEach(processor -> {
+                    processor.process(apiName, api);
+                });
 
                 // Build a request processor
                 IRequestProcessor requestProcessor = null;

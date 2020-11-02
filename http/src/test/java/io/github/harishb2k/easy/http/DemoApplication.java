@@ -10,6 +10,7 @@ import io.gitbub.harishb2k.easy.helper.file.FileHelper;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
 import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
+import io.github.harishb2k.easy.http.config.Api;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.module.EasyHttpModule;
 import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
@@ -84,5 +85,21 @@ public class DemoApplication extends TestCase {
                     waitForComplete.countDown();
                 });
         waitForComplete.await(5, TimeUnit.SECONDS);
+    }
+
+    public void testConfigProcessor() {
+        // Read config and setup EasyHttp
+        Config config = YamlUtils.readYamlCamelCase("app_config_to_test_pre_processor.yaml", Config.class);
+
+        EasyHttp.setup(config);
+
+        Api api = config.getApis().get("getPostsAsync_Test");
+        assertEquals(500, api.getTimeout());
+        assertEquals(150, api.getConcurrency());
+
+        api = config.getApis().get("getPostsAsync_Test_1");
+        assertEquals(500, api.getTimeout());
+        assertEquals(150, api.getConcurrency());
+        assertEquals(123, api.getQueueSize());
     }
 }
