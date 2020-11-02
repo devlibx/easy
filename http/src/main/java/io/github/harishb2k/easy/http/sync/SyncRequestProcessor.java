@@ -189,7 +189,15 @@ public class SyncRequestProcessor implements IRequestProcessor {
             responseObject = httpResponseProcessor.processException(server, api, e);
         }
 
-        log.debug("Request={} Response={}", requestObject, responseObject.convertAsMap());
+        if (requestObject.getResponseBuilder() == null) {
+            log.debug("Request={} Response={}", requestObject, responseObject.convertAsMap());
+        } else {
+            try {
+                log.debug("Request={} Response={}", requestObject, requestObject.getResponseBuilder().apply(responseObject.getBody()));
+            } catch (Exception e) {
+                log.debug("Request={} Response={}", requestObject, "Failed to build response from body using responseBuilder function", e);
+            }
+        }
 
         // Throw correct exception if required
         httpResponseProcessor.processResponseForException(responseObject);

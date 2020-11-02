@@ -1,6 +1,9 @@
 package io.github.harishb2k.easy.http;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.github.harishb2k.easy.http.util.Call;
+import io.github.harishb2k.easy.http.util.Call.IResponseBuilderFunc;
+import io.vavr.Function1;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,6 +26,7 @@ public class RequestObject {
     private Map<String, Object> pathParam;
     private MultivaluedMap<String, Object> queryParam;
     private byte[] body;
+    private IResponseBuilderFunc<?> responseBuilder;
 
     public void preProcessHeaders() {
         if (headers == null) {

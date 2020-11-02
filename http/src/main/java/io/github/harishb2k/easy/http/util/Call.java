@@ -3,7 +3,7 @@ package io.github.harishb2k.easy.http.util;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
-import io.vavr.Function1;
+import io.vavr.Function0;
 import lombok.Data;
 
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -21,14 +21,14 @@ public class Call<R> {
     private MultivaluedMap<String, Object> queryParam;
     private Object body;
     private Class<R> responseClass;
-    private Function1<byte[], R> responseBuilder;
-    private Function1<Object, byte[]> requestBodyFunc;
+    private IResponseBuilderFunc<R> responseBuilder;
+    private Function0<byte[]> requestBodyFunc;
 
     private Call() {
     }
 
     public byte[] getBodyAsByteArray() {
-        return requestBodyFunc.apply(body);
+        return requestBodyFunc.apply();
     }
 
     /**
@@ -49,14 +49,14 @@ public class Call<R> {
         private MultivaluedMap<String, Object> queryParam;
         private Object body;
         private final Class<R> responseClass;
-        private Function1<byte[], R> responseBuilder;
-        private Function1<Object, byte[]> requestBodyFunc;
+        private IResponseBuilderFunc<R> responseBuilder;
+        private Function0<byte[]> requestBodyFunc;
 
         public Builder(Class<R> responseClass) {
             this.responseClass = responseClass;
 
             // Default response builder
-            this.responseBuilder = (Function1<byte[], R>) bytes -> {
+            this.responseBuilder = bytes -> {
                 if (bytes != null) {
                     String str = new String(bytes);
                     return JsonUtils.readObject(str, responseClass);
@@ -65,22 +65,25 @@ public class Call<R> {
             };
 
             // Default method to convert body to byte array
-            this.requestBodyFunc = object -> {
-                if (object == null) {
+            this.requestBodyFunc = () -> {
+                if (body == null) {
                     return null;
-                } else if (object instanceof byte[]) {
-                    return (byte[]) object;
+                } else if (body instanceof byte[]) {
+                    return (byte[]) body;
                 } else {
-                    String body = JsonUtils.asJson(object);
-                    if (body != null) {
-                        return body.getBytes();
+                    String _body = JsonUtils.asJson(body);
+                    if (_body != null) {
+                        return _body.getBytes();
                     }
                 }
                 return null;
             };
         }
 
-        public Builder<R> withResponseBuilder(Function1<byte[], R> responseBuilder) {
+        /**
+         * @param responseBuilder a build from byte array to desired type
+         */
+        public Builder<R> withResponseBuilder(IResponseBuilderFunc<R> responseBuilder) {
             this.responseBuilder = responseBuilder;
             return this;
         }
@@ -125,7 +128,11 @@ public class Call<R> {
             return this;
         }
 
-        private Builder<R> withRequestBodyFunc(Function1<Object, byte[]> requestBodyFunc) {
+        /**
+         * @param requestBodyFunc a function to return byte array - used when user wants to write custom object to
+         *                        byte array implementation
+         */
+        public Builder<R> withRequestBodyFunc(Function0<byte[]> requestBodyFunc) {
             this.requestBodyFunc = requestBodyFunc;
             return this;
         }
@@ -140,20 +147,22 @@ public class Call<R> {
         }
 
         /**
-         * @param bodyFunc a function which returns the body object to be passed in request
-         * @return builder object
-         */
-        public Builder<R> withBodyFunc(Function1<Object, byte[]> bodyFunc) {
-            return this;
-        }
-
-        /**
          * Sets request content-type header as application/json
          *
          * @return builder object
          */
         public Builder<R> asContentTypeJson() {
             getHeaders().put("Content-Type", "application/json");
+            return this;
+        }
+
+        /**
+         * Sets request content-type header as application/x-protobuf
+         *
+         * @return builder object
+         */
+        public Builder<R> asContentTypeProtoBuffer() {
+            getHeaders().put("Content-Type", "application/x-protobuf");
             return this;
         }
 
@@ -298,5 +307,9 @@ public class Call<R> {
             }
             return queryParam;
         }
+    }
+
+    public interface IResponseBuilderFunc<R> {
+        R apply(byte[] bytes) throws Exception;
     }
 }

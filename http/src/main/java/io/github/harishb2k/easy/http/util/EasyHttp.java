@@ -265,6 +265,7 @@ public class EasyHttp {
         requestObject.setQueryParam(call.getQueryParam());
         requestObject.setHeaders(call.getHeaders());
         requestObject.setBody(call.getBodyAsByteArray());
+        requestObject.setResponseBuilder(call.getResponseBuilder());
 
         // Build a Observable and process it to give final response (in flat map)
         Observable<T> observable = requestProcessors.get(server + "-" + api)
