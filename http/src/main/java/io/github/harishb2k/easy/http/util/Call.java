@@ -167,6 +167,16 @@ public class Call<R> {
         }
 
         /**
+         * Sets request content-type header as application/x-protobuf
+         *
+         * @return builder object
+         */
+        public Builder<R> asContentTypeProtoBufferJson() {
+            getHeaders().put("Content-Type", "application/x-protobuf-json-format");
+            return this;
+        }
+
+        /**
          * Add a key-value for path param
          *
          * @return builder object

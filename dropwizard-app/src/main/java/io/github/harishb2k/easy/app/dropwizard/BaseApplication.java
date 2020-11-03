@@ -11,6 +11,7 @@ import io.dropwizard.setup.Environment;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
 import io.gitbub.harishb2k.easy.helper.metrics.IMetrics.InvalidRegistryTypeFoundException;
+import io.github.harishb2k.easy.app.dropwizard.proto.ProtobufBundle;
 import io.github.harishb2k.easy.metrics.prometheus.PrometheusMetrics;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
@@ -32,6 +33,11 @@ public class BaseApplication<T extends Configuration> extends Application<T> {
                         new EnvironmentVariableSubstitutor(false)
                 )
         );
+
+        // Enabled protocol buffer support if it is enabled
+        if (enableProtobufSupport()) {
+            bootstrap.addBundle(new ProtobufBundle<>());
+        }
     }
 
     @Override
@@ -67,5 +73,14 @@ public class BaseApplication<T extends Configuration> extends Application<T> {
         } else {
             log.error("Failed to registered prometheus - IMetrics instance is of PrometheusMetrics type");
         }
+    }
+
+    /**
+     * Support proto buffer support. By default it is disabled.
+     *
+     * @return if true then this dropwizard app will also support proto-buffer.
+     */
+    protected boolean enableProtobufSupport() {
+        return false;
     }
 }
