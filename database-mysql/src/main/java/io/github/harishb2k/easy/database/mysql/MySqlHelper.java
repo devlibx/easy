@@ -40,6 +40,9 @@ public class MySqlHelper implements IMysqlHelper {
             statementBuilder.prepare(statement);
             return metrics.time(metricsName, statement::execute);
         } catch (Exception e) {
+            if (log.isErrorEnabled()) {
+                e.printStackTrace();
+            }
             throw new ExecuteException(sql, e);
         }
     }

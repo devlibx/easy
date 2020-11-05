@@ -14,6 +14,7 @@ import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static io.github.harishb2k.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
 
@@ -23,6 +24,9 @@ public class DataSourceFactory {
     private final Map<String, DataSource> dataSourceMap;
     private final boolean transactionAwareDatasource;
 
+    private boolean initialized = false;
+    private final Object LOCK = new Object();
+
     @Inject
     public DataSourceFactory(@Named("enable-transaction-aware-datasource") boolean transactionAwareDatasource) {
         this.transactionAwareDatasource = transactionAwareDatasource;
@@ -30,26 +34,44 @@ public class DataSourceFactory {
     }
 
     public void register(DataSource dataSource) {
-        if (transactionAwareDatasource) {
-            dataSourceMap.put(DATASOURCE_DEFAULT, new TransactionAwareDataSourceProxy(dataSource));
-        } else {
-            dataSourceMap.put(DATASOURCE_DEFAULT, dataSource);
+        synchronized (LOCK) {
+            if (transactionAwareDatasource) {
+                dataSourceMap.put(DATASOURCE_DEFAULT, new TransactionAwareDataSourceProxy(dataSource));
+            } else {
+                dataSourceMap.put(DATASOURCE_DEFAULT, dataSource);
+            }
+            initialized = true;
         }
     }
 
     public void register(String dataSourceName, DataSource dataSource) {
-        if (transactionAwareDatasource) {
-            dataSourceMap.put(dataSourceName, new TransactionAwareDataSourceProxy(dataSource));
-        } else {
-            dataSourceMap.put(dataSourceName, dataSource);
+        synchronized (LOCK) {
+            if (transactionAwareDatasource) {
+                dataSourceMap.put(dataSourceName, new TransactionAwareDataSourceProxy(dataSource));
+            } else {
+                dataSourceMap.put(dataSourceName, dataSource);
+            }
+            initialized = true;
+        }
+    }
+
+    private void ensureInitialization() {
+        if (!initialized) {
+            synchronized (LOCK) {
+                if (!initialized) {
+                    throw new RuntimeException("Datasource(s) are not initialized as of now. You must call IDatabaseService.startDatabase() before requesting for datasource");
+                }
+            }
         }
     }
 
     public DataSource getDataSource(String dataSourceName) {
+        ensureInitialization();
         return dataSourceMap.get(dataSourceName);
     }
 
     public DataSource getDataSource() {
+        ensureInitialization();
         Context context = TransactionContext.getInstance().getContext();
         if (context == null || Strings.isNullOrEmpty(context.getDatasourceName()) || Objects.equals(DATASOURCE_DEFAULT, context.getDatasourceName())) {
             return dataSourceMap.get(DATASOURCE_DEFAULT);
@@ -59,18 +81,26 @@ public class DataSourceFactory {
     }
 
     public void shutdown() {
+        int count = dataSourceMap.size();
+        AtomicLong closed = new AtomicLong();
         dataSourceMap.forEach((name, dataSource) -> {
             log.info("Close Datasource Begin: {}", name);
             if (dataSource instanceof HikariDataSource) {
                 ((HikariDataSource) dataSource).close();
+                closed.incrementAndGet();
             } else if (dataSource instanceof TransactionAwareDataSourceProxy) {
                 TransactionAwareDataSourceProxy proxy = (TransactionAwareDataSourceProxy) dataSource;
                 DataSource underLyingDataSource = proxy.getTargetDataSource();
                 if (underLyingDataSource instanceof HikariDataSource) {
                     ((HikariDataSource) underLyingDataSource).close();
+                    closed.incrementAndGet();
                 }
             }
         });
         dataSourceMap.clear();
+
+        if (closed.get() != count) {
+            throw new RuntimeException("We had " + count + " datasource registered, but only " + closed.get() + " are closed. This will cause connection leak. Please check.");
+        }
     }
 }

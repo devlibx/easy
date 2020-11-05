@@ -71,6 +71,15 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
         }
     }
 
+    private void setupLockTable(IMysqlHelper mysqlHelper) {
+        boolean executeResult = mysqlHelper.execute(
+                "",
+                "CREATE TABLE IF NOT EXISTS locks (ID int NOT NULL PRIMARY KEY AUTO_INCREMENT, lock_id varchar(255)); ",
+                preparedStatement -> {
+                }
+        );
+    }
+
     public void testMySqlLock() {
 
         // Do not run test if MySQL is not running
@@ -104,6 +113,9 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 dbConfig.setPassword(mySQLHelperAtomicReference.get().getMySqlConfig().getPassword());
                 dbConfig.setMaxPoolSize(2);
                 dbConfig.setShowSql(false);
+                MySqlConfigs mySqlConfigs = new MySqlConfigs();
+                mySqlConfigs.addConfig(dbConfig);
+                bind(MySqlConfigs.class).toInstance(mySqlConfigs);
 
                 // Set data source to lock
                 OptionalBinder.newOptionalBinder(binder(), Key.get(DataSource.class, Names.named("lock_table_data_source")))
@@ -122,6 +134,10 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
         IDistributedLockService distributedLockService = injector.getInstance(IDistributedLockService.class);
         distributedLockService.initialize();
 
+        // Setup required table
+        IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
+        databaseService.startDatabase();
+        setupLockTable(injector.getInstance(IMysqlHelper.class));
 
         // Get the lock
         IDistributedLock lock = distributedLockService.getLock("test-" + uniqueName);
@@ -183,6 +199,9 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
 
         IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
         databaseService.startDatabase();
+
+        // Setup required table
+        setupLockTable(injector.getInstance(IMysqlHelper.class));
 
         // Setup lock service
         IDistributedLockService distributedLockService = injector.getInstance(IDistributedLockService.class);
@@ -259,6 +278,9 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
 
         IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
         databaseService.startDatabase();
+
+        // Setup required table
+        setupLockTable(injector.getInstance(IMysqlHelper.class));
 
         // Setup lock service
         IDistributedLockService distributedLockService = injector.getInstance(IDistributedLockService.class);

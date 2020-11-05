@@ -22,7 +22,9 @@ public class DataSourceProxy implements DataSource {
 
     @Override
     public Connection getConnection() throws SQLException {
-        return getDataSource().getConnection();
+        DataSource dataSource = getDataSource();
+        System.out.println("->> DS " +  dataSource);
+        return dataSource.getConnection();
     }
 
     @Override

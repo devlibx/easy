@@ -20,7 +20,8 @@ public class DatabaseService implements IDatabaseService {
     @Override
     public void startDatabase() {
         if (dbConfigs == null || dbConfigs.getConfigs() == null || dbConfigs.getConfigs().isEmpty()) {
-            throw new RuntimeException("MySqlConfigs is null or empty");
+            throw new RuntimeException("MySqlConfigs is null or empty. " +
+                    "(If using Guice) Please check if you forgot to call bind(MySqlConfigs.class).toInstance(yourConfigs)");
         }
         dbConfigs.getConfigs().forEach((name, mySqlConfig) -> {
             dataSourceFactory.register(name, mySqlConfig.buildHikariDataSource());

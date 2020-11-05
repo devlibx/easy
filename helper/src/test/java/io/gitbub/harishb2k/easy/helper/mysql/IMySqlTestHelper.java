@@ -6,7 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 public interface IMySqlTestHelper {
-    String DEFAULT_TEST_DATABASE_URL = "jdbc:mysql://localhost:3306/users?useSSL=false";
+    String DEFAULT_TEST_DATABASE_NAME = "users";
+    String DEFAULT_TEST_DATABASE_URL = "jdbc:mysql://localhost:3306/" + DEFAULT_TEST_DATABASE_NAME + "?useSSL=false";
     String DEFAULT_TEST_DATABASE_USER = "test";
     String DEFAULT_TEST_DATABASE_PASSWORD = "test";
 
@@ -34,6 +35,7 @@ public interface IMySqlTestHelper {
         public static TestMySqlConfig withDefaults() {
             return TestMySqlConfig.builder()
                     .jdbcUrl(DEFAULT_TEST_DATABASE_URL)
+                    .database(DEFAULT_TEST_DATABASE_NAME)
                     .user(DEFAULT_TEST_DATABASE_USER)
                     .password(DEFAULT_TEST_DATABASE_PASSWORD)
                     .build();

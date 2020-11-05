@@ -42,7 +42,7 @@ public class MySQLHelperPlugin implements IMySqlTestHelper {
         try (Connection connection = dataSource.getConnection(); PreparedStatement preparedStatement = connection.prepareStatement("SELECT 1;")) {
             preparedStatement.executeQuery();
         } catch (Exception e) {
-            log.error("Failed ", e);
+            log.error("(Ignore this error ) MySQLHelperPlugin - (checking MySql is running in your system - to run test cases) - {}", e.getMessage());
             return false;
         }
         return true;

@@ -34,8 +34,8 @@ import static ch.qos.logback.classic.Level.TRACE;
 @SuppressWarnings({"all"})
 @Slf4j
 public class MySqlEndToEndTestCase extends CommonBaseTestCase {
-    private static String jdbcUrl = "jdbc:mysql://localhost:3306/users?useSSL=false";
-    private static String secondaryJdbcUrl = "jdbc:mysql://localhost:3306/test_me?useSSL=false";
+    // private static String jdbcUrl = "SET_URL_IN_TEST";// "jdbc:mysql://localhost:3306/users?useSSL=false";
+    // private static String secondaryJdbcUrl = "SET_URL_IN_TEST"; // "jdbc:mysql://localhost:3306/test_me?useSSL=false";
     private static Injector injector;
     private static IMySqlTestHelper primaryMySqlTestHelper;
     private static IMySqlTestHelper secondaryMySqlTestHelper;
@@ -52,6 +52,7 @@ public class MySqlEndToEndTestCase extends CommonBaseTestCase {
         secondaryMySqlTestHelper = new MySqlTestHelper();
         secondaryMySqlTestHelper.installCustomMySqlTestHelper(new MySQLHelperPlugin());
         TestMySqlConfig secondartMySqlConfig = TestMySqlConfig.withDefaults();
+        secondartMySqlConfig.setDatabase("test_me");
         secondaryMySqlTestHelper.startMySql(secondartMySqlConfig);
     }
 
@@ -65,18 +66,18 @@ public class MySqlEndToEndTestCase extends CommonBaseTestCase {
         // Setup DB - datasource
         MySqlConfig dbConfig = new MySqlConfig();
         dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
-        dbConfig.setJdbcUrl(jdbcUrl);
-        dbConfig.setUsername("test");
-        dbConfig.setPassword("test");
+        dbConfig.setJdbcUrl(primaryMySqlTestHelper.getMySqlConfig().getJdbcUrl());
+        dbConfig.setUsername(primaryMySqlTestHelper.getMySqlConfig().getUser());
+        dbConfig.setPassword(primaryMySqlTestHelper.getMySqlConfig().getPassword());
         dbConfig.setShowSql(false);
         MySqlConfigs mySqlConfigs = new MySqlConfigs();
         mySqlConfigs.addConfig(dbConfig);
 
         MySqlConfig dbConfigSecondary = new MySqlConfig();
         dbConfigSecondary.setDriverClassName("com.mysql.jdbc.Driver");
-        dbConfigSecondary.setJdbcUrl(secondaryJdbcUrl);
-        dbConfigSecondary.setUsername("test");
-        dbConfigSecondary.setPassword("test");
+        dbConfigSecondary.setJdbcUrl(secondaryMySqlTestHelper.getMySqlConfig().getJdbcUrl());
+        dbConfigSecondary.setUsername(secondaryMySqlTestHelper.getMySqlConfig().getUser());
+        dbConfigSecondary.setPassword(secondaryMySqlTestHelper.getMySqlConfig().getPassword());
         dbConfigSecondary.setShowSql(false);
         mySqlConfigs.addConfig("secondary", dbConfigSecondary);
 

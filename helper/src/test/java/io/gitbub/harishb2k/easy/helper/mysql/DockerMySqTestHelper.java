@@ -22,7 +22,7 @@ public class DockerMySqTestHelper implements IMySqlTestHelper {
                 .withExposedPorts(3306);
         try {
             container.start();
-            this.config.setJdbcUrl(config.getJdbcUrl());
+            this.config.setJdbcUrl(container.getJdbcUrl());
         } catch (ContainerLaunchException e) {
             log.error("Failed to start MySQLContainer - {}", e.getMessage());
         }
@@ -41,6 +41,6 @@ public class DockerMySqTestHelper implements IMySqlTestHelper {
     @Override
     public boolean isMySqlRunning() {
         if (container == null) return false;
-        return container.isHealthy();
+        return container.isRunning();
     }
 }
