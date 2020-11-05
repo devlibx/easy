@@ -4,6 +4,7 @@ import com.google.inject.ImplementedBy;
 import io.github.harishb2k.easy.lock.IDistributedLock.LockRequest;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.aopalliance.intercept.MethodInvocation;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -110,7 +111,7 @@ public interface IDistributedLockService {
      */
     class NoOpDistributedLockIdResolver implements IDistributedLockIdResolver {
         @Override
-        public LockRequest createLockRequest(Object[] arguments) {
+        public IDistributedLock.LockRequest createLockRequest(MethodInvocation invocation, Object[] arguments) {
             return LockRequest.builder()
                     .lockId(UUID.randomUUID().toString())
                     .build();

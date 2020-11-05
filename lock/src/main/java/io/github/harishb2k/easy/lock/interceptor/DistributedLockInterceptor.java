@@ -44,7 +44,7 @@ public class DistributedLockInterceptor implements MethodInterceptor {
 
         // Find a lock ID resolver
         IDistributedLockIdResolver distributedLockIdResolver = ApplicationContext.getInstance(distributedLock.lockIdResolver());
-        LockRequest lockRequest = distributedLockIdResolver.createLockRequest(invocation.getArguments());
+        LockRequest lockRequest = distributedLockIdResolver.createLockRequest(invocation, invocation.getArguments());
         log.debug("Lock Request = {}, distributedLockAnnotation={}", lockRequest, distributedLock);
 
         // Acquire lock for given id

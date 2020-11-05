@@ -29,6 +29,7 @@ import io.github.harishb2k.easy.lock.config.LockConfigs;
 import io.github.harishb2k.easy.lock.interceptor.DistributedLockInterceptor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
@@ -219,12 +220,12 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 "",
                 "SELECT lock_id from locks WHERE lock_id=?",
                 statement -> {
-                    statement.setString(1, r.createLockRequest(new Object[]{id, 10}).getUniqueLockIdForLocking());
+                    statement.setString(1, r.createLockRequest(null, new Object[]{id, 10}).getUniqueLockIdForLocking());
                 },
                 rs -> rs.getString(1),
                 String.class
         ).orElse(null);
-        assertEquals(lockId, r.createLockRequest(new Object[]{id, 10}).getUniqueLockIdForLocking());
+        assertEquals(lockId, r.createLockRequest(null, new Object[]{id, 10}).getUniqueLockIdForLocking());
     }
 
     public void testMySqlLockAnnotation_WithThread_10_times() throws InterruptedException {
@@ -358,12 +359,12 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 "",
                 "SELECT lock_id from locks WHERE lock_id=?",
                 statement -> {
-                    statement.setString(1, r.createLockRequest(new Object[]{id, 10}).getUniqueLockIdForLocking());
+                    statement.setString(1, r.createLockRequest(null,new Object[]{id, 10}).getUniqueLockIdForLocking());
                 },
                 rs -> rs.getString(1),
                 String.class
         ).orElse(null);
-        assertEquals(lockId, r.createLockRequest(new Object[]{id, 10}).getUniqueLockIdForLocking());
+        assertEquals(lockId, r.createLockRequest(null,new Object[]{id, 10}).getUniqueLockIdForLocking());
         assertTrue(lockGetByNextWorker.get() > lockReleasedAt.get());
 
 
@@ -416,9 +417,8 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
     }
 
     private static class MyIDistributedLockIdResolver implements IDistributedLockIdResolver {
-
         @Override
-        public IDistributedLock.LockRequest createLockRequest(Object[] arguments) {
+        public IDistributedLock.LockRequest createLockRequest(MethodInvocation invocation, Object[] arguments) {
             return IDistributedLock.LockRequest.builder()
                     .name("default")
                     .lockId(arguments[0].toString() + "--" + arguments[1].toString())
@@ -428,7 +428,7 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
 
     private static class LockInsideLockDistributedLockIdResolver implements IDistributedLockIdResolver {
         @Override
-        public IDistributedLock.LockRequest createLockRequest(Object[] arguments) {
+        public IDistributedLock.LockRequest createLockRequest(MethodInvocation invocation, Object[] arguments) {
             return IDistributedLock.LockRequest.builder()
                     .name("default")
                     .lockId(arguments[0].toString())

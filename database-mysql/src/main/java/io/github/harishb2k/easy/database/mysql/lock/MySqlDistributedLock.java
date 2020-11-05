@@ -20,7 +20,7 @@ import java.util.concurrent.locks.Lock;
 
 @Slf4j
 public class MySqlDistributedLock implements IDistributedLock {
-    private static ThreadLocal<InternalLock> lockInCurrentThread = new InheritableThreadLocal<>();
+    private static final ThreadLocal<InternalLock> lockInCurrentThread = new ThreadLocal<>();
     private final DataSource dataSource;
     private final String lockTableName;
     private LockConfig lockConfig;
