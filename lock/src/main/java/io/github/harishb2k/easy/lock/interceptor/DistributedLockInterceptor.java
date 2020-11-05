@@ -25,8 +25,18 @@ public class DistributedLockInterceptor implements MethodInterceptor {
         }
 
         // Get the lock
-        IDistributedLockService distributedLockService = ApplicationContext.getInstance(IDistributedLockService.class);
-        IDistributedLock lock = distributedLockService.getLock(distributedLock.name());
+        IDistributedLock lock = null;
+        try {
+            IDistributedLockService distributedLockService = ApplicationContext.getInstance(IDistributedLockService.class);
+            lock = distributedLockService.getLock(distributedLock.name());
+        } catch (Exception e) {
+            if (log.isErrorEnabled()) {
+                e.printStackTrace();
+            }
+            throw new RuntimeException("Field to find lock with name=" + distributedLock.name() + ": Make suer you added a LockConfig with this name", e);
+        }
+
+        // Make sure lock is not null
         if (lock == null) {
             throw new RuntimeException("Field to find lock with name=" + distributedLock.name() + ": Make suer you added a LockConfig with this name");
         }

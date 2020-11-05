@@ -50,6 +50,7 @@ public abstract class TransactionTest extends TestCase {
         try {
             transactionTestClass.persistRecordFirst();
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("Expected error - " + e.getMessage());
         }
 
@@ -149,7 +150,7 @@ public abstract class TransactionTest extends TestCase {
             transactionTestClass.persistRecordThird();
             transactionTestClass.persistRecordForth();
 
-            throw new RuntimeException("Expected error - Generate exception to fail this transaction");
+            throw new RuntimeException("Expected error - Generate exception to fail this transaction to test REQUIRES_NEW works or no - Ignore this error");
         }
 
         @Override
