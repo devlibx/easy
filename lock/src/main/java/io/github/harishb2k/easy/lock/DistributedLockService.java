@@ -6,6 +6,7 @@ import io.github.harishb2k.easy.lock.config.LockConfigs;
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class DistributedLockService implements IDistributedLockService {
     private final Map<String, IDistributedLock> lockMap;
@@ -40,6 +41,9 @@ public class DistributedLockService implements IDistributedLockService {
 
     @Override
     public IDistributedLock getLock(String name) {
+        if (Objects.equals(NO_OP_LOCK_NAME, name)) {
+            return new NoOpDistributedLock();
+        }
         return lockMap.get(name);
     }
 }

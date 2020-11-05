@@ -25,31 +25,23 @@ import io.github.harishb2k.easy.database.mysql.config.MySqlConfigs;
 import io.github.harishb2k.easy.database.mysql.module.DatabaseMySQLModule;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionInterceptor;
+import io.github.harishb2k.easy.lock.interceptor.DistributedLockInterceptor;
 import lombok.extern.slf4j.Slf4j;
-import org.testcontainers.containers.MySQLContainer;
-
-import java.util.UUID;
 
 import static ch.qos.logback.classic.Level.INFO;
+import static ch.qos.logback.classic.Level.TRACE;
 
 @SuppressWarnings({"all"})
 @Slf4j
-public class ExampleApp extends CommonBaseTestCase {
+public class MySqlEndToEndTestCase extends CommonBaseTestCase {
     private static String jdbcUrl = "jdbc:mysql://localhost:3306/users?useSSL=false";
     private static String secondaryJdbcUrl = "jdbc:mysql://localhost:3306/test_me?useSSL=false";
-    private static MySQLContainer container;
-    private static MySQLContainer containerSecondary;
     private static Injector injector;
-    private static String uniqueString = UUID.randomUUID().toString();
-
-    public static boolean useDockerMySql = true;
-    private static boolean testMultiDb = true;
-
     private static IMySqlTestHelper primaryMySqlTestHelper;
     private static IMySqlTestHelper secondaryMySqlTestHelper;
 
-    public static void startMySQL() throws RuntimeException {
 
+    public static void startMySQL() throws RuntimeException {
         // Primary setup
         primaryMySqlTestHelper = new MySqlTestHelper();
         primaryMySqlTestHelper.installCustomMySqlTestHelper(new MySQLHelperPlugin());
@@ -107,6 +99,13 @@ public class ExampleApp extends CommonBaseTestCase {
         databaseService.startDatabase();
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+        IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
+        databaseService.stopDatabase();
+    }
+
     public void testMySQL() throws Exception {
         main(null);
     }
@@ -116,6 +115,7 @@ public class ExampleApp extends CommonBaseTestCase {
         try {
             LoggingHelper.setupLogging();
             LoggingHelper.getLogger(TransactionInterceptor.class).setLevel(INFO);
+            LoggingHelper.getLogger(DistributedLockInterceptor.class).setLevel(TRACE);
             LoggingHelper.getLogger(HikariPool.class).setLevel(Level.OFF);
             LoggingHelper.getLogger(HikariConfig.class).setLevel(Level.OFF);
             LoggingHelper.getLogger(AbstrDockerCmd.class).setLevel(INFO);

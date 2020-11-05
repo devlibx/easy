@@ -2,6 +2,8 @@ package io.github.harishb2k.easy.database.mysql;
 
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.Safe;
+import io.github.harishb2k.easy.lock.DistributedLock;
+import io.github.harishb2k.easy.lock.IDistributedLockService.NoOpDistributedLockIdResolver;
 import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Propagation;
@@ -18,6 +20,8 @@ import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static io.github.harishb2k.easy.lock.IDistributedLockService.NO_OP_LOCK_NAME;
 
 @Slf4j
 public abstract class TransactionTest extends TestCase {
@@ -128,6 +132,7 @@ public abstract class TransactionTest extends TestCase {
 
         @Override
         @Transactional(propagation = Propagation.REQUIRED, label = {"name=persistRecordFirst"})
+        @DistributedLock(name = NO_OP_LOCK_NAME, lockIdResolver = NoOpDistributedLockIdResolver.class)
         public Long persistRecordFirst() {
             setupAfterCommitHook("persistRecordFirst");
 
