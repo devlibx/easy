@@ -65,8 +65,9 @@ public abstract class SimpleMysqlHelperTest extends TestCase {
         // Step 2 - Read from DB
         String result = mysqlHelper.findOne(
                 "",
-                "SELECT name from users",
+                "SELECT name from users WHERE id=?",
                 statement -> {
+                    statement.setLong(1, id);
                 },
                 rs -> rs.getString(1),
                 String.class

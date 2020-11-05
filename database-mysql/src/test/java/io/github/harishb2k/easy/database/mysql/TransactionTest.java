@@ -25,7 +25,7 @@ public abstract class TransactionTest extends TestCase {
 
     public void testTransactionBulk() throws Exception {
         ITransactionTestClass transactionTestClass = ApplicationContext.getInstance(ITransactionTestClass.class);
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 10; i++) {
             log.info("Running testTransactionBulk = {}", i);
             CountDownLatch latch = new CountDownLatch(20);
             for (int j = 0; j < 20; j++) {

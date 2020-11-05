@@ -10,7 +10,8 @@ import com.google.inject.name.Names;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.CommonBaseTestCase;
 import io.gitbub.harishb2k.easy.helper.LoggingHelper;
-import io.gitbub.harishb2k.easy.helper.MySQLHelper;
+import io.gitbub.harishb2k.easy.helper.mysql.IMySqlTestHelper;
+import io.gitbub.harishb2k.easy.helper.mysql.MySqlTestHelper;
 import io.github.harishb2k.easy.database.IDatabaseService;
 import io.github.harishb2k.easy.database.mysql.IMysqlHelper;
 import io.github.harishb2k.easy.database.mysql.MySQLHelperPlugin;
@@ -39,13 +40,12 @@ import java.util.concurrent.locks.Lock;
 
 @Slf4j
 public class MySqlLockBuilderTest extends CommonBaseTestCase {
-    private static final AtomicReference<MySQLHelper> mySQLHelperAtomicReference = new AtomicReference<>();
+    private static final AtomicReference<MySqlTestHelper> mySQLHelperAtomicReference = new AtomicReference<>();
     private static final AtomicBoolean isIsMySqlRunningCheckDone = new AtomicBoolean(false);
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-
         LoggingHelper.setupLogging();
         LoggingHelper.getLogger(DistributedLockInterceptor.class).setLevel(Level.TRACE);
         LoggingHelper.getLogger(MySqlDistributedLock.class).setLevel(Level.TRACE);
@@ -60,9 +60,11 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
         synchronized (isIsMySqlRunningCheckDone) {
             if (isIsMySqlRunningCheckDone.get()) return;
             try {
-                MySQLHelper mySqlHelper = new MySQLHelper();
-                mySqlHelper.startMySQL(java.util.Optional.of(new MySQLHelperPlugin()));
-                mySQLHelperAtomicReference.set(mySqlHelper);
+                MySqlTestHelper primaryMySqlTestHelper = new MySqlTestHelper();
+                primaryMySqlTestHelper.installCustomMySqlTestHelper(new MySQLHelperPlugin());
+                IMySqlTestHelper.TestMySqlConfig primaryMySqlConfig = IMySqlTestHelper.TestMySqlConfig.withDefaults();
+                primaryMySqlTestHelper.startMySql(primaryMySqlConfig);
+                mySQLHelperAtomicReference.set(primaryMySqlTestHelper);
             } finally {
                 isIsMySqlRunningCheckDone.set(true);
             }
@@ -72,7 +74,7 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
     public void testMySqlLock() {
 
         // Do not run test if MySQL is not running
-        if (mySQLHelperAtomicReference.get() == null || !mySQLHelperAtomicReference.get().canRunMySQL()) {
+        if (mySQLHelperAtomicReference.get() == null || !mySQLHelperAtomicReference.get().isMySqlRunning()) {
             log.error("Did not run testMySqlLock - MySQL is not running");
             return;
         }
@@ -97,9 +99,10 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 // Setup DB - datasource
                 MySqlConfig dbConfig = new MySqlConfig();
                 dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
-                dbConfig.setJdbcUrl(mySQLHelperAtomicReference.get().getJdbcUrl());
-                dbConfig.setUsername(mySQLHelperAtomicReference.get().getUserName());
-                dbConfig.setPassword(mySQLHelperAtomicReference.get().getPassword());
+                dbConfig.setJdbcUrl(mySQLHelperAtomicReference.get().getMySqlConfig().getJdbcUrl());
+                dbConfig.setUsername(mySQLHelperAtomicReference.get().getMySqlConfig().getUser());
+                dbConfig.setPassword(mySQLHelperAtomicReference.get().getMySqlConfig().getPassword());
+                dbConfig.setMaxPoolSize(2);
                 dbConfig.setShowSql(false);
 
                 // Set data source to lock
@@ -135,7 +138,7 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
 
     public void testMySqlLockAnnotation() {
         // Do not run test if MySQL is not running
-        if (mySQLHelperAtomicReference.get() == null || !mySQLHelperAtomicReference.get().canRunMySQL()) {
+        if (mySQLHelperAtomicReference.get() == null || !mySQLHelperAtomicReference.get().isMySqlRunning()) {
             log.error("Did not run testMySqlLock - MySQL is not running");
             return;
         }
@@ -156,10 +159,11 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 // Setup DB - datasource
                 MySqlConfig dbConfig = new MySqlConfig();
                 dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
-                dbConfig.setJdbcUrl(mySQLHelperAtomicReference.get().getJdbcUrl());
-                dbConfig.setUsername(mySQLHelperAtomicReference.get().getUserName());
-                dbConfig.setPassword(mySQLHelperAtomicReference.get().getPassword());
+                dbConfig.setJdbcUrl(mySQLHelperAtomicReference.get().getMySqlConfig().getJdbcUrl());
+                dbConfig.setUsername(mySQLHelperAtomicReference.get().getMySqlConfig().getUser());
+                dbConfig.setPassword(mySQLHelperAtomicReference.get().getMySqlConfig().getPassword());
                 dbConfig.setShowSql(false);
+                dbConfig.setMaxPoolSize(2);
                 MySqlConfigs mySqlConfigs = new MySqlConfigs();
                 mySqlConfigs.addConfig(dbConfig);
                 bind(MySqlConfigs.class).toInstance(mySqlConfigs);
@@ -203,14 +207,14 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
     }
 
     public void testMySqlLockAnnotation_WithThread_10_times() throws InterruptedException {
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 20; i++) {
             testMySqlLockAnnotation_WithThread();
         }
     }
 
     public void testMySqlLockAnnotation_WithThread() throws InterruptedException {
         // Do not run test if MySQL is not running
-        if (mySQLHelperAtomicReference.get() == null || !mySQLHelperAtomicReference.get().canRunMySQL()) {
+        if (mySQLHelperAtomicReference.get() == null || !mySQLHelperAtomicReference.get().isMySqlRunning()) {
             log.error("Did not run testMySqlLock - MySQL is not running");
             return;
         }
@@ -231,10 +235,11 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 // Setup DB - datasource
                 MySqlConfig dbConfig = new MySqlConfig();
                 dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
-                dbConfig.setJdbcUrl(mySQLHelperAtomicReference.get().getJdbcUrl());
-                dbConfig.setUsername(mySQLHelperAtomicReference.get().getUserName());
-                dbConfig.setPassword(mySQLHelperAtomicReference.get().getPassword());
+                dbConfig.setJdbcUrl(mySQLHelperAtomicReference.get().getMySqlConfig().getJdbcUrl());
+                dbConfig.setUsername(mySQLHelperAtomicReference.get().getMySqlConfig().getUser());
+                dbConfig.setPassword(mySQLHelperAtomicReference.get().getMySqlConfig().getPassword());
                 dbConfig.setShowSql(false);
+                dbConfig.setMaxPoolSize(2);
                 MySqlConfigs mySqlConfigs = new MySqlConfigs();
                 mySqlConfigs.addConfig(dbConfig);
                 bind(MySqlConfigs.class).toInstance(mySqlConfigs);

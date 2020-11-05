@@ -9,6 +9,9 @@ import io.github.harishb2k.easy.database.mysql.module.DatabaseMySQLModule;
 import io.github.harishb2k.easy.database.mysql.transaction.ITransactionManagerResolver;
 
 
+/**
+ * This test is to make sure we do not have issue in our module
+ */
 public class MySqlModuleBuildTest extends CommonBaseTestCase {
 
     public void testMySqlModuleBuildSuccess() {
@@ -21,12 +24,5 @@ public class MySqlModuleBuildTest extends CommonBaseTestCase {
 
         ITransactionManagerResolver transactionManagerResolver = injector.getInstance(ITransactionManagerResolver.class);
         assertNotNull(transactionManagerResolver);
-    }
-
-    public void testMySqlEndToEndTestIfDockerMySqlIsAvailable() throws Exception {
-        ExampleApp exampleApp = new ExampleApp() {
-        };
-        ExampleApp.useDockerMySql = true;
-        exampleApp.runIfDockerMySqlIsAvaliable();
     }
 }
