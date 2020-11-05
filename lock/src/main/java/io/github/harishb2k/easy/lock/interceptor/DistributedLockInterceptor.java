@@ -1,5 +1,6 @@
 package io.github.harishb2k.easy.lock.interceptor;
 
+import com.google.common.base.Strings;
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.github.harishb2k.easy.lock.DistributedLock;
 import io.github.harishb2k.easy.lock.IDistributedLock;
@@ -45,19 +46,30 @@ public class DistributedLockInterceptor implements MethodInterceptor {
         // Find a lock ID resolver
         IDistributedLockIdResolver distributedLockIdResolver = ApplicationContext.getInstance(distributedLock.lockIdResolver());
         LockRequest lockRequest = distributedLockIdResolver.createLockRequest(invocation, invocation.getArguments());
-        log.debug("Lock Request = {}, distributedLockAnnotation={}", lockRequest, distributedLock);
+        log.trace("Lock Request = {}, distributedLockAnnotation={}", lockRequest, distributedLock);
+
+        // Set lock name and group if it is not given
+        if (Strings.isNullOrEmpty(lockRequest.getName())) {
+            lockRequest.setName(distributedLock.name());
+        }
+        if (Strings.isNullOrEmpty(lockRequest.getLockGroup())) {
+            lockRequest.setLockGroup(distributedLock.group());
+        }
 
         // Acquire lock for given id
         Lock underlyingLock = null;
         try {
+            log.trace("Trying to acquire lock - request={}", lockRequest);
             underlyingLock = lock.achieveLock(lockRequest);
             if (underlyingLock instanceof ExistingLockWithNoOp) {
                 log.info("acquired a existing lock: (this is a no-op lock) - lock={}", underlyingLock);
             }
+            log.debug("Lock acquired - request={}", lockRequest);
             return invocation.proceed();
         } finally {
             if (underlyingLock != null) {
                 lock.releaseLock(underlyingLock, lockRequest);
+                log.debug("Lock released - request={}", lockRequest);
             }
         }
     }
