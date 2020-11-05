@@ -47,7 +47,7 @@ public interface IDistributedLock {
         private String lockGroup;
 
         public String getUniqueLockIdForLocking() {
-            return name + "-" + lockId;
+            return lockId;
         }
     }
 }

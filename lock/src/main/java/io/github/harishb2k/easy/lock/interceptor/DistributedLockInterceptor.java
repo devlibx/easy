@@ -6,6 +6,7 @@ import io.github.harishb2k.easy.lock.IDistributedLock;
 import io.github.harishb2k.easy.lock.IDistributedLock.LockRequest;
 import io.github.harishb2k.easy.lock.IDistributedLockIdResolver;
 import io.github.harishb2k.easy.lock.IDistributedLockService;
+import io.github.harishb2k.easy.lock.IDistributedLockService.ExistingLockWithNoOp;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -50,6 +51,9 @@ public class DistributedLockInterceptor implements MethodInterceptor {
         Lock underlyingLock = null;
         try {
             underlyingLock = lock.achieveLock(lockRequest);
+            if (underlyingLock instanceof ExistingLockWithNoOp) {
+                log.info("acquired a existing lock: (this is a no-op lock) - lock={}", underlyingLock);
+            }
             return invocation.proceed();
         } finally {
             if (underlyingLock != null) {

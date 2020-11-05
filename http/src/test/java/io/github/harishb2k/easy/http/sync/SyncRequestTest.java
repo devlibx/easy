@@ -109,7 +109,6 @@ public class SyncRequestTest extends BaseTestCase {
             wait.countDown();
         } catch (Throwable e) {
             log.error("Not expected - error", e);
-            System.out.println("--> " + e);
             wait.countDown();
         }
         wait.await(10, TimeUnit.SECONDS);

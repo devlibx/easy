@@ -2,6 +2,7 @@ package io.github.harishb2k.easy.lock;
 
 import com.google.inject.ImplementedBy;
 import io.github.harishb2k.easy.lock.IDistributedLock.LockRequest;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.UUID;
@@ -89,6 +90,18 @@ public interface IDistributedLockService {
         @Override
         public Condition newCondition() {
             return null;
+        }
+    }
+
+    /**
+     * A no-op implementation which holds existing lock
+     */
+    @Data
+    class ExistingLockWithNoOp extends NoOpLock {
+        private final Lock existingLock;
+
+        public ExistingLockWithNoOp(Lock existingLock) {
+            this.existingLock = existingLock;
         }
     }
 

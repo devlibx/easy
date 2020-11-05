@@ -3,6 +3,7 @@ package io.github.harishb2k.easy.database.mysql.lock;
 import ch.qos.logback.classic.Level;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.multibindings.OptionalBinder;
@@ -26,6 +27,7 @@ import io.github.harishb2k.easy.lock.IDistributedLockService;
 import io.github.harishb2k.easy.lock.config.LockConfig;
 import io.github.harishb2k.easy.lock.config.LockConfigs;
 import io.github.harishb2k.easy.lock.interceptor.DistributedLockInterceptor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -249,6 +251,19 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 lockConfig.setType("MYSQL");
                 lockConfig.setName("dummy-test");
                 lockConfigs.addLockConfig(lockConfig);
+
+                LockConfig lockInsideLock_Parent = new LockConfig();
+                lockInsideLock_Parent.setTimeoutInMs(1000);
+                lockInsideLock_Parent.setType("MYSQL");
+                lockInsideLock_Parent.setName("lockInsideLock_Parent");
+                lockConfigs.addLockConfig(lockInsideLock_Parent);
+
+                LockConfig lockInsideLock_Child = new LockConfig();
+                lockInsideLock_Child.setTimeoutInMs(1000);
+                lockInsideLock_Child.setType("MYSQL");
+                lockInsideLock_Child.setName("lockInsideLock_Child");
+                lockConfigs.addLockConfig(lockInsideLock_Child);
+
                 bind(LockConfigs.class).toInstance(lockConfigs);
 
                 // Setup DB - datasource
@@ -351,12 +366,26 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
         assertEquals(lockId, r.createLockRequest(new Object[]{id, 10}).getUniqueLockIdForLocking());
         assertTrue(lockGetByNextWorker.get() > lockReleasedAt.get());
 
+
+        // Test 2 - Lock inside lock
+        String lockInsideLock_Parent_Lock_Id = UUID.randomUUID().toString();
+        MySQLAnnotationTest testClass = injector.getInstance(MySQLAnnotationTest.class);
+        String result = testClass.lockInsideLock_Parent(lockInsideLock_Parent_Lock_Id);
+        assertEquals("lockInsideLock_Child_" + lockInsideLock_Parent_Lock_Id, result);
+
         databaseService.stopDatabase();
         distributedLockService.shutdown();
     }
 
 
     public static class MySQLAnnotationTest {
+        private final LockInsideLockChildClass lockInsideLockChildClass;
+
+        @Inject
+        public MySQLAnnotationTest(LockInsideLockChildClass lockInsideLockChildClass) {
+            this.lockInsideLockChildClass = lockInsideLockChildClass;
+        }
+
         @DistributedLock(name = "dummy-test", lockIdResolver = MyIDistributedLockIdResolver.class)
         public void lockMe(String param1, int param2) {
 
@@ -368,6 +397,22 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
             if (gotLock != null) gotLock.run();
             work.run();
         }
+
+        @DistributedLock(name = "lockInsideLock_Parent", lockIdResolver = LockInsideLockDistributedLockIdResolver.class)
+        public String lockInsideLock_Parent(String param) {
+            log.info("Inside lockInsideLock_Parent");
+            return lockInsideLockChildClass.lockInsideLock_Child(param);
+        }
+    }
+
+    public static class LockInsideLockChildClass {
+        @SneakyThrows
+        @DistributedLock(name = "lockInsideLock_Child", lockIdResolver = LockInsideLockDistributedLockIdResolver.class)
+        public String lockInsideLock_Child(String param) {
+            log.info("Inside lockInsideLock_Child");
+            Thread.sleep(100);
+            return "lockInsideLock_Child_" + param;
+        }
     }
 
     private static class MyIDistributedLockIdResolver implements IDistributedLockIdResolver {
@@ -377,6 +422,16 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
             return IDistributedLock.LockRequest.builder()
                     .name("default")
                     .lockId(arguments[0].toString() + "--" + arguments[1].toString())
+                    .build();
+        }
+    }
+
+    private static class LockInsideLockDistributedLockIdResolver implements IDistributedLockIdResolver {
+        @Override
+        public IDistributedLock.LockRequest createLockRequest(Object[] arguments) {
+            return IDistributedLock.LockRequest.builder()
+                    .name("default")
+                    .lockId(arguments[0].toString())
                     .build();
         }
     }
