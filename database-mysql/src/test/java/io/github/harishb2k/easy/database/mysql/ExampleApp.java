@@ -132,14 +132,14 @@ public abstract class ExampleApp extends CommonBaseTestCase {
         databaseService.startDatabase();
     }
 
-    public void runIfDockerMySqlIsAvaliable() {
+    public void runIfDockerMySqlIsAvaliable() throws Exception {
         DockerMySqlIsAvaliable dockerMySqlIsAvaliable = new DockerMySqlIsAvaliable();
         if (dockerMySqlIsAvaliable.canRun()) {
             main(null);
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         // Setup logging
         try {
             LoggingHelper.setupLogging();
@@ -181,6 +181,10 @@ public abstract class ExampleApp extends CommonBaseTestCase {
         if (testMultiDb) {
             validateMultiDb();
         }
+
+        // Test 5 - Test transaction code
+        transactionTest.testTransactionBulk();
+
 
         // Close MySQL
         stopMySQL();

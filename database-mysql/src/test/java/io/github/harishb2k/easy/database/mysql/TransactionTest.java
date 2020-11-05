@@ -15,11 +15,31 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public abstract class TransactionTest extends TestCase {
     private static String uniqueString = UUID.randomUUID().toString();
+
+    public void testTransactionBulk() throws Exception {
+        ITransactionTestClass transactionTestClass = ApplicationContext.getInstance(ITransactionTestClass.class);
+        for (int i = 0; i < 20; i++) {
+            log.info("Running testTransactionBulk = {}", i);
+            CountDownLatch latch = new CountDownLatch(20);
+            for (int j = 0; j < 20; j++) {
+                new Thread(() -> {
+                    try {
+                        transactionTestClass.persistWithoutTransaction(100);
+                    } finally {
+                        latch.countDown();
+                    }
+                }).start();
+            }
+            latch.await(10, TimeUnit.SECONDS);
+        }
+    }
 
     public void testTransaction() {
         ITransactionTestClass transactionTestClass = ApplicationContext.getInstance(ITransactionTestClass.class);
@@ -51,7 +71,7 @@ public abstract class TransactionTest extends TestCase {
             log.info("Result after transaction = " + s);
         });
 
-        transactionTestClass.persistWithoutTransaction();
+        transactionTestClass.persistWithoutTransaction(1);
         results = mysqlHelper.findAll(
                 "na",
                 "SELECT name from users where name like ?",
@@ -74,7 +94,7 @@ public abstract class TransactionTest extends TestCase {
 
         Long persistRecordForth();
 
-        Long persistWithoutTransaction();
+        Long persistWithoutTransaction(int sleep);
 
         Map<String, AtomicBoolean> getAfterCommitCalled();
     }
@@ -170,7 +190,13 @@ public abstract class TransactionTest extends TestCase {
         }
 
         @Override
-        public Long persistWithoutTransaction() {
+        public Long persistWithoutTransaction(int sleep) {
+            try {
+                if (sleep > 0) {
+                    Thread.sleep(sleep);
+                }
+            } catch (InterruptedException ignored) {
+            }
             return mysqlHelper.persist(
                     "none",
                     "INSERT INTO users(name) VALUES(?)",

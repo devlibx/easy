@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 public class Safe {
     private static final Logger logger = Logger.getLogger("safe");
 
-    public static void safe(Runnable r, String errorString) {
+    public static void safe(RunnableWithException r, String errorString) {
         try {
             r.run();
         } catch (Throwable e) {
@@ -15,11 +15,15 @@ public class Safe {
         }
     }
 
-    public static void safe(Runnable r) {
+    public static void safe(RunnableWithException r) {
         try {
             r.run();
         } catch (Throwable e) {
             e.printStackTrace();
         }
+    }
+
+    public interface RunnableWithException {
+        public abstract void run() throws Exception;
     }
 }

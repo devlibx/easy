@@ -23,7 +23,7 @@ public class MySqlModuleBuildTest extends CommonBaseTestCase {
         assertNotNull(transactionManagerResolver);
     }
 
-    public void testMySqlEndToEndTestIfDockerMySqlIsAvailable() {
+    public void testMySqlEndToEndTestIfDockerMySqlIsAvailable() throws Exception {
         ExampleApp exampleApp = new ExampleApp() {
         };
         ExampleApp.useDockerMySql = true;

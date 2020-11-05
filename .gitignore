@@ -9,3 +9,4 @@ database-mysql/target
 dropwizard-app/target
 http/target
 resilience/target
+lock/target

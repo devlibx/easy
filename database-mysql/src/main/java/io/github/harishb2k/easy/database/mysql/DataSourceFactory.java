@@ -63,6 +63,12 @@ public class DataSourceFactory {
             log.info("Close Datasource Begin: {}", name);
             if (dataSource instanceof HikariDataSource) {
                 ((HikariDataSource) dataSource).close();
+            } else if (dataSource instanceof TransactionAwareDataSourceProxy) {
+                TransactionAwareDataSourceProxy proxy = (TransactionAwareDataSourceProxy) dataSource;
+                DataSource underLyingDataSource = proxy.getTargetDataSource();
+                if (underLyingDataSource instanceof HikariDataSource) {
+                    ((HikariDataSource) underLyingDataSource).close();
+                }
             }
         });
         dataSourceMap.clear();

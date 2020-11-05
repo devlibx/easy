@@ -1,6 +1,5 @@
 package io.github.harishb2k.easy.database.mysql.module;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
@@ -16,9 +15,12 @@ import io.github.harishb2k.easy.database.mysql.DatabaseService;
 import io.github.harishb2k.easy.database.mysql.IMysqlHelper;
 import io.github.harishb2k.easy.database.mysql.MySqlHelper;
 import io.github.harishb2k.easy.database.mysql.healthcheck.MySqlHealthCheckProvider;
+import io.github.harishb2k.easy.database.mysql.lock.MySqlLockBuilder;
 import io.github.harishb2k.easy.database.mysql.transaction.ITransactionManagerResolver;
 import io.github.harishb2k.easy.database.mysql.transaction.ITransactionManagerResolver.DefaultTransactionManagerResolver;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionInterceptor;
+import io.github.harishb2k.easy.lock.ILockBuilder;
+import io.github.harishb2k.easy.lock.module.LockModule;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Singleton;
@@ -47,7 +49,7 @@ import javax.sql.DataSource;
  *
  * Also use DatabaseMySQLModule(false) to disable transaction manager.
  */
-public class DatabaseMySQLModule extends AbstractModule {
+public class DatabaseMySQLModule extends LockModule {
     private final boolean enableTransactionInterceptor;
     private final int defaultTimeout;
 
@@ -63,6 +65,7 @@ public class DatabaseMySQLModule extends AbstractModule {
 
     @Override
     protected void configure() {
+        super.configure();
 
         bind(DataSource.class).to(DataSourceProxy.class).in(Scopes.SINGLETON);
         bind(DataSourceFactory.class).in(Scopes.SINGLETON);
@@ -82,6 +85,17 @@ public class DatabaseMySQLModule extends AbstractModule {
         MapBinder<String, IHealthCheckProvider> healthCheckProviderMultiBinder = MapBinder.newMapBinder(binder(), String.class, IHealthCheckProvider.class);
         healthCheckProviderMultiBinder.permitDuplicates();
         healthCheckProviderMultiBinder.addBinding(healthCheckRegistrationName()).to(MySqlHealthCheckProvider.class);
+
+        // Provide mysql lock builder check implementation
+        MapBinder<String, ILockBuilder> lockBuilderMapBinder = MapBinder.newMapBinder(binder(), String.class, ILockBuilder.class);
+        lockBuilderMapBinder.permitDuplicates();
+        lockBuilderMapBinder.addBinding("MYSQL").to(MySqlLockBuilder.class);
+
+        // Set default lock table name
+        OptionalBinder.newOptionalBinder(binder(), Key.get(String.class, Names.named("lock_table_name"))).setDefault().toInstance("locks");
+
+        // Set default datasource table name
+        OptionalBinder.newOptionalBinder(binder(), Key.get(DataSource.class, Names.named("lock_table_data_source"))).setDefault().to(DataSourceProxy.class);
     }
 
     protected String healthCheckRegistrationName() {
