@@ -15,6 +15,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
@@ -22,7 +24,7 @@ import java.util.concurrent.locks.Lock;
 
 @Slf4j
 public class MySqlDistributedLockV2 implements IDistributedLock {
-    private static final ThreadLocal<InternalLock> lockInCurrentThread = new ThreadLocal<>();
+    private static final ThreadLockStore lockStore = new ThreadLockStore();
     private final DataSource dataSource;
     private final String lockTableName;
     private LockConfig lockConfig;
@@ -54,15 +56,14 @@ public class MySqlDistributedLockV2 implements IDistributedLock {
     public Lock achieveLock(LockRequest request) {
 
         // If we already have a lock in this thread and same request id made - then just give a no-op lock
-        if (lockInCurrentThread.get() != null) {
-            if (Objects.equals(lockInCurrentThread.get().request, request)) {
-                return new ExistingLockWithNoOp(lockInCurrentThread.get());
-            }
+        InternalLock existingLock = lockStore.hasExistingRequest(request);
+        if (existingLock != null) {
+            return new ExistingLockWithNoOp(existingLock);
         }
 
         InternalLock internalLock = new InternalLock(dataSource, request, lockTableName, lockConfig);
         internalLock.lock();
-        lockInCurrentThread.set(internalLock);
+        lockStore.set(request, internalLock);
 
         return internalLock;
     }
@@ -72,7 +73,13 @@ public class MySqlDistributedLockV2 implements IDistributedLock {
         try {
             lock.unlock();
         } finally {
-            lockInCurrentThread.set(null);
+            if (!(lock instanceof ExistingLockWithNoOp)) {
+                if (lock instanceof InternalLock) {
+                    lockStore.remove(((InternalLock) lock).getRequest());
+                } else {
+                    lockStore.remove(lockRequest);
+                }
+            }
         }
     }
 
@@ -237,6 +244,50 @@ public class MySqlDistributedLockV2 implements IDistributedLock {
         @Override
         public Condition newCondition() {
             throw new RuntimeException("Not implemented");
+        }
+    }
+
+    private static class ThreadLockStore {
+        private static final ThreadLocal<Map<String, InternalLock>> locksInCurrentThread = new ThreadLocal<>();
+
+        public InternalLock hasExistingRequest(LockRequest request) {
+
+            if (locksInCurrentThread.get() == null) return null;
+
+            // Dump error if we see a leak, and somehow we have > 10 locks. It is not very common that you see
+            // call stack of > 10 and each method has a lock
+            if (locksInCurrentThread.get().size() > 10) {
+                Thread.dumpStack();
+                log.error("Potential leak in MySqlDistributedLockV2 class: thread local has > 10 locks. It could only happen if your " +
+                        "call stack is > 10 and more than 10 method in call stack are taking distributed lock with different lock IDs. " +
+                        "If this is not the case then this is a bug in MySqlDistributedLockV2 implementation.");
+            }
+
+            Map.Entry<String, InternalLock> key = locksInCurrentThread.get().entrySet().stream()
+                    .filter(entry -> Objects.equals(entry.getKey(), request.getUniqueLockIdForLocking()))
+                    .findFirst()
+                    .orElse(null);
+            return key != null ? key.getValue() : null;
+        }
+
+        public void set(LockRequest request, InternalLock lock) {
+            if (locksInCurrentThread.get() == null) {
+                locksInCurrentThread.set(new HashMap<>());
+            }
+            Map<String, InternalLock> locks = locksInCurrentThread.get();
+            locks.put(request.getUniqueLockIdForLocking(), lock);
+        }
+
+        public void remove(LockRequest lockRequest) {
+            if (locksInCurrentThread.get() != null) {
+                try {
+                    locksInCurrentThread.get().remove(lockRequest.getUniqueLockIdForLocking());
+                } catch (Exception e) {
+                    System.out.println(locksInCurrentThread.get());
+                    System.out.println(lockRequest);
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }
