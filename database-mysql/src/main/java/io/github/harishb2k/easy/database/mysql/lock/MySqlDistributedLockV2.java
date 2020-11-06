@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 
@@ -90,6 +91,8 @@ public class MySqlDistributedLockV2 implements IDistributedLock {
 
     @Data
     private static class InternalLock implements Lock {
+        private static AtomicLong COUNTER = new AtomicLong();
+        private final long uniqueId;
         private final DataSource dataSource;
         private final LockRequest request;
         private final String lockTableName;
@@ -98,6 +101,7 @@ public class MySqlDistributedLockV2 implements IDistributedLock {
         private PreparedStatement selectStatement;
 
         private InternalLock(DataSource dataSource, LockRequest request, String lockTableName, LockConfig lockConfig) {
+            this.uniqueId = COUNTER.incrementAndGet();
             this.dataSource = dataSource;
             this.request = request;
             this.lockTableName = lockTableName;
@@ -249,6 +253,15 @@ public class MySqlDistributedLockV2 implements IDistributedLock {
         @Override
         public Condition newCondition() {
             throw new RuntimeException("Not implemented");
+        }
+
+        @Override
+        public String toString() {
+            if (log.isTraceEnabled()) {
+                return super.toString();
+            } else {
+                return String.format("UniqueId=%d, LockId=%s", uniqueId, request.getUniqueLockIdForLocking());
+            }
         }
     }
 
