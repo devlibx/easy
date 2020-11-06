@@ -35,6 +35,12 @@ public interface IDistributedLock {
     void releaseLock(Lock lock, LockRequest lockRequest);
 
     /**
+     * Release all resources
+     */
+    default void releaseResources() {
+    }
+
+    /**
      * Request to take a lock
      */
     @Data

@@ -53,6 +53,11 @@ public class MySqlDistributedLockV2 implements IDistributedLock {
     }
 
     @Override
+    public void releaseResources() {
+        lockStore.reset();
+    }
+
+    @Override
     public Lock achieveLock(LockRequest request) {
 
         // If we already have a lock in this thread and same request id made - then just give a no-op lock
@@ -280,14 +285,15 @@ public class MySqlDistributedLockV2 implements IDistributedLock {
 
         public void remove(LockRequest lockRequest) {
             if (locksInCurrentThread.get() != null) {
-                try {
-                    locksInCurrentThread.get().remove(lockRequest.getUniqueLockIdForLocking());
-                } catch (Exception e) {
-                    System.out.println(locksInCurrentThread.get());
-                    System.out.println(lockRequest);
-                    e.printStackTrace();
-                }
+                locksInCurrentThread.get().remove(lockRequest.getUniqueLockIdForLocking());
             }
+        }
+
+        public void reset() {
+            if (locksInCurrentThread.get() != null) {
+                locksInCurrentThread.get().clear();
+            }
+            locksInCurrentThread.remove();
         }
     }
 }
