@@ -7,6 +7,6 @@ import lombok.Data;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class LockConfig {
     private String name;
-    private int timeoutInSec = 5;
+    private int timeoutInSec = 60;
     private String type;
 }
