@@ -8,6 +8,6 @@ import io.github.harishb2k.easy.lock.config.LockConfig;
 public class MySqlLockBuilder implements ILockBuilder {
     @Override
     public IDistributedLock create(LockConfig lockConfig) {
-        return ApplicationContext.getInstance(MySqlDistributedLock.class);
+        return ApplicationContext.getInstance(MySqlDistributedLockV2.class);
     }
 }

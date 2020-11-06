@@ -99,7 +99,7 @@ public class MySqlDistributedLock implements IDistributedLock {
                 // Make sure we do have a entry in table for locking
                 log.debug("Try to insert lock: id={}", lockIdToUse);
                 try (Connection connection = dataSource.getConnection(); PreparedStatement statement = connection.prepareStatement(String.format("INSERT IGNORE INTO %s(lock_id) VALUES(?)", lockTableName))) {
-                    statement.setQueryTimeout(lockConfig.getTimeoutInMs());
+                    statement.setQueryTimeout(lockConfig.getTimeoutInSec());
                     statement.setString(1, lockIdToUse);
                     statement.execute();
                     log.debug("Inserted lock: id={}", lockIdToUse);
@@ -111,7 +111,7 @@ public class MySqlDistributedLock implements IDistributedLock {
                 connection = dataSource.getConnection();
                 connection.setAutoCommit(false);
                 lockStatement = connection.prepareStatement(String.format("SELECT * FROM %s WHERE lock_id=? FOR UPDATE", lockTableName));
-                lockStatement.setQueryTimeout(lockConfig.getTimeoutInMs());
+                lockStatement.setQueryTimeout(lockConfig.getTimeoutInSec());
                 lockStatement.setString(1, lockIdToUse);
                 lockStatement.executeQuery();
                 log.debug("Lock taken with select for update: id={}", lockIdToUse);

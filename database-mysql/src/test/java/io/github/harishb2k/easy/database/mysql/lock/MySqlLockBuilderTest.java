@@ -52,6 +52,7 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
         LoggingHelper.setupLogging();
         LoggingHelper.getLogger(DistributedLockInterceptor.class).setLevel(Level.TRACE);
         LoggingHelper.getLogger(MySqlDistributedLock.class).setLevel(Level.TRACE);
+        LoggingHelper.getLogger(MySqlDistributedLockV2.class).setLevel(Level.TRACE);
         LoggingHelper.getLogger(TransactionInterceptor.class).setLevel(Level.TRACE);
         tryToSetupMySQLToRunTests();
     }
@@ -102,7 +103,7 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 // Create a lock
                 LockConfigs lockConfigs = new LockConfigs();
                 LockConfig lockConfig = new LockConfig();
-                lockConfig.setTimeoutInMs(2000);
+                lockConfig.setTimeoutInSec(2000);
                 lockConfig.setType("MYSQL");
                 lockConfig.setName("test-" + uniqueName);
                 lockConfigs.addLockConfig(lockConfig);
@@ -169,7 +170,7 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 // Create a lock
                 LockConfigs lockConfigs = new LockConfigs();
                 LockConfig lockConfig = new LockConfig();
-                lockConfig.setTimeoutInMs(2000);
+                lockConfig.setTimeoutInSec(2000);
                 lockConfig.setType("MYSQL");
                 lockConfig.setName("dummy-test");
                 lockConfigs.addLockConfig(lockConfig);
@@ -248,19 +249,19 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 // Create a lock
                 LockConfigs lockConfigs = new LockConfigs();
                 LockConfig lockConfig = new LockConfig();
-                lockConfig.setTimeoutInMs(10000);
+                lockConfig.setTimeoutInSec(2);
                 lockConfig.setType("MYSQL");
                 lockConfig.setName("dummy-test");
                 lockConfigs.addLockConfig(lockConfig);
 
                 LockConfig lockInsideLock_Parent = new LockConfig();
-                lockInsideLock_Parent.setTimeoutInMs(1000);
+                lockInsideLock_Parent.setTimeoutInSec(10);
                 lockInsideLock_Parent.setType("MYSQL");
                 lockInsideLock_Parent.setName("lockInsideLock_Parent");
                 lockConfigs.addLockConfig(lockInsideLock_Parent);
 
                 LockConfig lockInsideLock_Child = new LockConfig();
-                lockInsideLock_Child.setTimeoutInMs(1000);
+                lockInsideLock_Child.setTimeoutInSec(10);
                 lockInsideLock_Child.setType("MYSQL");
                 lockInsideLock_Child.setName("lockInsideLock_Child");
                 lockConfigs.addLockConfig(lockInsideLock_Child);
@@ -350,7 +351,7 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 latch.countDown();
             }
         }).start();
-        latch.await(10, TimeUnit.SECONDS);
+        latch.await(1000, TimeUnit.SECONDS);
 
 
         MyIDistributedLockIdResolver r = new MyIDistributedLockIdResolver();
@@ -359,12 +360,12 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
                 "",
                 "SELECT lock_id from locks WHERE lock_id=?",
                 statement -> {
-                    statement.setString(1, r.createLockRequest(null,new Object[]{id, 10}).getUniqueLockIdForLocking());
+                    statement.setString(1, r.createLockRequest(null, new Object[]{id, 10}).getUniqueLockIdForLocking());
                 },
                 rs -> rs.getString(1),
                 String.class
         ).orElse(null);
-        assertEquals(lockId, r.createLockRequest(null,new Object[]{id, 10}).getUniqueLockIdForLocking());
+        assertEquals(lockId, r.createLockRequest(null, new Object[]{id, 10}).getUniqueLockIdForLocking());
         assertTrue(lockGetByNextWorker.get() > lockReleasedAt.get());
 
 
