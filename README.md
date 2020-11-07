@@ -1,34 +1,183 @@
-Helper Module
-===
 
-Convert Java object to JSON string
+> Latest Maven Dependency
 ```xml
-<!-- POM Dependency -->
+<properties>
+  <easy.version>1.0.40</adrastea.version>
+</properties>
+
+<!-- Get the latest version from https://mvnrepository.com/artifact/io.github.harishb2k.easy/http -->
+```
+
+## Easy Http 
+Http Module provides API to make HTTP calls. It ensures that APIs are called with circuit-breaker, time limit. 
+
+> Maven Dependency
+```xml
 <dependency>
   <groupId>io.github.harishb2k.easy</groupId>
-  <artifactId>helper</artifactId>
-  <version>0.0.6</version>
+  <artifactId>http</artifactId>
+  <version>${easy.version}</version>
 </dependency>
 ```
-```shell script
 
-// A pojo object to stringify
-@Data
-public class PojoClass {
-    private String str;
-    private int anInt;
-}
-
-    
-PojoClass testClass = new PojoClass();
-testClass.setStr("some string");
-testClass.setAnInt(11);
-
-StringHelper stringHelper = new StringHelper();
-stringHelper.stringify(testClass); 
-
-// Output - {"str":"some string","an_int":11} 
+> Calling http in Sync
+```shell
+ Map result = EasyHttp.callSync(
+                Call.builder(Map.class)
+                        .withServerAndApi("jsonplaceholder", "getPosts")
+                        .addPathParam("id", 1)
+                        .withBody("Any object - it will be converted to json string internally")
+                        .build()
+              );
 ```
+
+> Calling http in Async
+```shell
+EasyHttp.callAsync(
+                Call.builder(Map.class)
+                        .withServerAndApi("jsonplaceholder", "getPostsAsync")
+                        .addPathParam("id", 1)
+                        .withBody("Any object - it will be converted to json string internally")
+                        .build()
+        ).subscribe(
+                result -> {
+                    log.info("Print Result as Json String = " + JsonUtils.asJson(result));
+                    // Result = {"userId":1,"id":1,"title":"some text ..."}
+                },
+                throwable -> {
+                    // throwable is a EasyHttpRequestException
+                    // You can visit sub-classes EasyHttpRequestException to get catch exact issue 
+                    // e.g. EasyNotFoundException - for Http 404
+                });
+```
+> Custom request and response body function. e.g. proto-buf API (over HTTP)
+```shell script
+AddUserRequest request = AddUserRequest.newBuilder()
+                .setNameProvided(name)
+                .build();
+AddUserResponse response = EasyHttp.callSync(
+        Call.builder(AddUserResponse.class)
+                .withServerAndApi("someService", "someApi")
+                .asContentTypeProtoBuffer()
+                .withResponseBuilder(AddUserResponse::parseFrom)
+                .withRequestBodyFunc(request::toByteArray)
+                .build()
+);
+``` 
+
+##### Example
+
+```java
+package io.github.harishb2k.easy.http;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import io.gitbub.harishb2k.easy.helper.ApplicationContext;
+import io.gitbub.harishb2k.easy.helper.LoggingHelper;
+import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
+import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
+import io.github.harishb2k.easy.http.config.Config;
+import io.github.harishb2k.easy.http.module.EasyHttpModule;
+import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
+import io.github.harishb2k.easy.http.util.Call;
+import io.github.harishb2k.easy.http.util.EasyHttp;
+import junit.framework.TestCase;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.log4j.Logger;
+
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
+import static org.apache.log4j.Level.TRACE;
+
+@Slf4j
+public class DemoApplication extends TestCase {
+    private Injector injector;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();       
+        LoggingHelper.setupLogging();
+        Logger.getLogger(SyncRequestProcessor.class).setLevel(TRACE);
+
+        // Setup injector (Onetime MUST setup before we call EasyHttp.setup())
+        injector = Guice.createInjector(new EasyHttpModule());
+        ApplicationContext.setInjector(injector);
+
+        // Read config and setup EasyHttp
+        Config config = YamlUtils.readYamlCamelCase("demo_app_config.yaml", Config.class);
+        EasyHttp.setup(config);
+    }
+
+    public void testSyncApiCall() {
+        Map result = EasyHttp.callSync(
+                Call.builder(Map.class)
+                        .withServerAndApi("jsonplaceholder", "getPosts")
+                        .addPathParam("id", 1)
+                        .build()
+        );
+
+        log.info("Print Result as Json String = " + JsonUtils.asJson(result));
+        // Result = {"userId":1,"id":1,"title":"some text ..."}
+    }
+
+    public void testAsyncApiCall() throws Exception {
+        CountDownLatch waitForComplete = new CountDownLatch(1);
+        EasyHttp.callAsync(
+                Call.builder(Map.class)
+                        .withServerAndApi("jsonplaceholder", "getPostsAsync")
+                        .addPathParam("id", 1)
+                        .build()
+        ).subscribe(
+                result -> {
+                    log.info("Print Result as Json String = " + JsonUtils.asJson(result));
+                    // Result = {"userId":1,"id":1,"title":"some text ..."}
+                },
+                throwable -> {
+
+                });
+        waitForComplete.await(5, TimeUnit.SECONDS);
+        // Or you can use blockingSubscribe(); 
+    }  
+}
+```
+###### YAML File to configure all APIs and Server URL for above example
+demo_app_config.yaml
+```yaml
+servers:
+  jsonplaceholder:
+    host: jsonplaceholder.typicode.com
+    port: 443
+    https: true
+    connectTimeout: 1000
+    connectionRequestTimeout: 1000
+
+apis:
+  getPosts:
+    method: GET
+    path: /posts/${id}
+    server: jsonplaceholder
+    timeout: 10000
+    concurrency: 3
+  getPostsAsync:
+    method: GET
+    path: /posts/${id}
+    server: jsonplaceholder
+    timeout: 1000
+    concurrency: 3
+    async: true
+```
+
+##### Details of parameters 
+1. timeout - timeout for the API. Your EasyHttp.call**() Api will timeout after the given time
+2. concurrency - how many parallel calls can be made to this API. 
+3. rps - if you know "rps" of API call, then you should set `rps` e.g. rps: 100. The EasyHttp will automatically setup required threads to support concurrent calls. You don't need to set `concurrency` manually. For example, if timeout=20 and rps=100 then EasyHttp will set `concurrency=2`  
+
+When you set `rps` then you have to consider `rps` from the single node i.e. how many requests this single node is going to call. For example, if you call an external API with 1000 `rps`; and you run 10 nodes, then a single node has rps=100
+
+---
+
 
 MySQL Helper
 ===
@@ -41,7 +190,7 @@ See "io.github.harishb2k.easy.database.mysql.ExampleApp" example
 <dependency>
   <groupId>io.github.harishb2k.easy</groupId>
   <artifactId>database-mysql</artifactId>
-  <version>0.0.6</version>
+  <version>${easy.version}</version>
 </dependency>
 ```
 You must setup IMysqlHelper before using it. A sample setup is als given below.
@@ -96,6 +245,37 @@ IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
 databaseService.startDatabase();
 ```
 
-Http Module
+---
+
+Helper Module
 ===
-[Http Module Wiki] (https://github.com/harishb2k/easy/wiki/Http-Module)
+
+
+Convert Java object to JSON string
+```xml
+<!-- POM Dependency -->
+<dependency>
+  <groupId>io.github.harishb2k.easy</groupId>
+  <artifactId>helper</artifactId>
+  <version>${easy.version}</version>
+</dependency>
+```
+```shell script
+
+// A pojo object to stringify
+@Data
+public class PojoClass {
+    private String str;
+    private int anInt;
+}
+
+    
+PojoClass testClass = new PojoClass();
+testClass.setStr("some string");
+testClass.setAnInt(11);
+
+StringHelper stringHelper = new StringHelper();
+stringHelper.stringify(testClass); 
+
+// Output - {"str":"some string","an_int":11} 
+```
