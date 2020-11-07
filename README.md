@@ -247,6 +247,108 @@ databaseService.startDatabase();
 
 ---
 
+Distributed Lock
+===
+This module provides a distributed lock e.g. a MySQL based distributed lock is implemented by easy libs. 
+    This example shows a class `ResourceWithLocking` with a method which should take a lock before it is called. 
+
+Note - you will see MySQL and database dependency in the example code.  
+ 
+```java
+package com.harishb2k.pack.resources.lock;
+
+import io.github.harishb2k.easy.lock.DistributedLock;
+import io.github.harishb2k.easy.lock.IDistributedLock;
+import io.github.harishb2k.easy.lock.IDistributedLockIdResolver;
+import lombok.extern.slf4j.Slf4j;
+import org.aopalliance.intercept.MethodInvocation;
+
+import javax.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
+@Slf4j
+public class ResourceWithLocking {
+    private static final AtomicLong COUNTER = new AtomicLong();
+
+    // When this method is called - it will first take a distributed lock
+    //
+    // MySQL based lock:
+    // ================
+    // For example if we use MySQL lock provider then we take a lock using the "lockId" in MySQL.
+    // 
+    // A implementation of IDistributedLockIdResolver class (InternalDistributedLockIdResolver in this case)
+    // will be called to get the value of "lockId".
+    // "createLockRequest()" method os called with the method arguments. You can extract the ID to lock against.
+    //
+    @DistributedLock(lockIdResolver = InternalDistributedLockIdResolver.class)
+    public Map<String, Object> methodWhichShouldBeLocked(String someId) {
+        try {
+            Thread.sleep(1);
+        } catch (InterruptedException ignored) {
+        }
+        log.trace("Called method methodWhichShouldBeLocked - id={}", someId);
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("counter", COUNTER.incrementAndGet());
+        result.put("id", someId);
+        return result;
+    }
+
+    @Singleton
+    public static class InternalDistributedLockIdResolver implements IDistributedLockIdResolver {
+        @Override
+        public IDistributedLock.LockRequest createLockRequest(MethodInvocation invocation, Object[] arguments) {
+            return IDistributedLock.LockRequest.builder()
+                    .lockId(arguments[0].toString())
+                    .build();
+        }
+    }
+}
+
+public class Application {
+    public static void main(String[] args) {
+
+        // Setup DB - datasource
+        DbConfig dbConfig = new DbConfig();
+        dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
+        dbConfig.setJdbcUrl("YOUR JDBC URL");
+        dbConfig.setUsername("username");
+        dbConfig.setPassword("password");
+        MySqlConfigs mySqlConfigs = new MySqlConfigs();
+        mySqlConfigs.addConfig(dbConfig);
+        
+        // Setup module
+        injector = Guice.createInjector(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(IMetrics.class).to(IMetrics.NoOpMetrics.class);
+                bind(MySqlConfigs.class).toInstance(mySqlConfigs);
+            }
+        }, new DatabaseMySQLModule());
+        ApplicationContext.setInjector(injector);
+        
+        // Start DB
+        IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
+        databaseService.startDatabase();      
+
+        // Setup lock service
+        IDistributedLockService distributedLockService = injector.getInstance(IDistributedLockService.class);
+        distributedLockService.initialize();
+       
+        // Example ResourceWithLocking
+        ResourceWithLocking resourceWithLocking = injector.getInstance(ResourceWithLocking.class);
+        
+        // This API call will lock before running
+        // For example if you run this method concurrently in many threads, then all execution 
+        // will be sequential (for same lock id) 
+        Map<String, Object> response = resourceWithLocking.methodWhichShouldBeLocked("1234");
+        System.out.println(response);     
+    }
+}
+```
+
 Helper Module
 ===
 
