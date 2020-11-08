@@ -12,6 +12,8 @@ import io.github.harishb2k.easy.resilience.exception.ResilienceException;
 import io.github.harishb2k.easy.resilience.exception.UnknownException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
 import io.reactivex.rxjava3.core.Observable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -22,15 +24,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class ResilienceManagerTest extends CommonBaseTestCase {
-    private Injector injector;
     private IResilienceManager resilienceManager;
 
-    @Override
+    @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        injector = Guice.createInjector(new ResilienceModule());
+        Injector injector = Guice.createInjector(new ResilienceModule());
         ApplicationContext.setInjector(injector);
         resilienceManager = injector.getInstance(IResilienceManager.class);
     }
@@ -38,6 +43,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
     /**
      * Run processor N times with concurrency=N, we expect success for all calls.
      */
+    @Test
     public void testResilienceManager() throws Exception {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
@@ -79,6 +85,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
      *  we add 4 more requests
      *      So we should get 4 overflow (or reject) requests
      */
+    @Test
     public void testResilienceManager_Overflow_Simulation() throws Exception {
         int concurrency = 10;
         int queueSize = 1;
@@ -131,13 +138,14 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
         totalSuccessLatch.await(15, TimeUnit.SECONDS);
         allCallLatch.await(15, TimeUnit.SECONDS);
 
-        assertEquals("We expect success for these requests", totalSuccessExpected, success.get());
-        assertEquals("We expect error for these requests", extraCalls, bulkheadFullError.get());
+        assertEquals(totalSuccessExpected, success.get(), "We expect success for these requests");
+        assertEquals(extraCalls, bulkheadFullError.get(), "We expect error for these requests");
     }
 
     /**
      * Run overflow test 10 times
      */
+    @Test
     public void testResilienceManager_Overflow_Simulation_10_times() throws Exception {
         for (int i = 0; i < 3; i++) {
             System.out.println("Iteration - " + i);
@@ -148,6 +156,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
     /**
      * Generate a timeout from execution
      */
+    @Test
     public void testResilienceManager_Timeout_Simulation() throws Exception {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
@@ -176,6 +185,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
     /**
      * Generate a open circuit due to many errors
      */
+    @Test
     public void testResilienceManager_CircuitOpen_Simulation() {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
@@ -213,6 +223,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
     /**
      * Test a observable with success
      */
+    @Test
     public void testResilienceManager_Observable() throws Exception {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
@@ -242,6 +253,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
     /**
      * Test a observable with timeout
      */
+    @Test
     public void testResilienceManager_Observable_Timeout_Error() throws Exception {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
@@ -275,6 +287,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
     /**
      * This is when Resilience timed out
      */
+    @Test
     public void testResilienceManager_Observable_With_Observable_Timeout__ResilienceTimedOut() throws InterruptedException {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
@@ -313,6 +326,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
     /**
      * This is when Resilience timed out
      */
+    @Test
     public void testResilienceManager_Observable_With_Observable_Timeout__ObservableTimedOut() throws InterruptedException {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
@@ -350,6 +364,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
     /**
      * This is when Resilience timed out
      */
+    @Test
     public void testResilienceManager_Observable_With_Observable_CircuitOpen_Simulation() throws InterruptedException {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
@@ -384,7 +399,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
                             });
         }
         waitForSuccessOrError.await(20, TimeUnit.SECONDS);
-        assertTrue("Expected a CircuitOpenException", gotCircuitOpenException.get());
+        assertTrue(gotCircuitOpenException.get(), "Expected a CircuitOpenException");
 
         boolean gotSuccess = false;
         Thread.sleep(2);

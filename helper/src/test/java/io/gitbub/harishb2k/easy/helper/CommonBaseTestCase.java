@@ -1,10 +1,10 @@
 package io.gitbub.harishb2k.easy.helper;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
 
-public abstract class CommonBaseTestCase extends TestCase {
+public abstract class CommonBaseTestCase {
 
-    @Override
+    @BeforeEach
     public void setUp() throws Exception {
         try {
             LoggingHelper.setupLogging();

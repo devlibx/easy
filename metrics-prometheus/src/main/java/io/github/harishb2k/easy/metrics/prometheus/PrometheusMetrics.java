@@ -1,6 +1,5 @@
 package io.github.harishb2k.easy.metrics.prometheus;
 
-import com.google.inject.Inject;
 import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
@@ -8,25 +7,21 @@ import io.prometheus.client.Summary;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 @SuppressWarnings({"rawtypes", "unchecked", "FieldMayBeFinal"})
+@Slf4j
 public class PrometheusMetrics implements IMetrics {
     private final Map<String, SummaryHolder> summaryMap = new HashMap<>();
     private final Map<String, CounterHolder> counterMap = new HashMap<>();
-    private final Logger logger = Logger.getLogger("PrometheusMetrics");
 
     @Getter
     private final CollectorRegistry collectorRegistry = new CollectorRegistry();
-
-    @Inject(optional = true)
-    private IMetricsLogger metricsLogger = new NoOpMetricsLogger();
 
     @Override
     public <T> T getRegistry(Class<T> cls) {
@@ -45,10 +40,10 @@ public class PrometheusMetrics implements IMetrics {
             }
             counterMap.get(name).inc(labels);
         } catch (RuntimeException e) {
-            metricsLogger.printf("error in metrics inc method (runtime exception) - e=%s", e);
+            log.error("error in metrics inc method (runtime exception) - e={}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            metricsLogger.printf("error in metrics inc method (exception) - e=%s", e);
+            log.error("error in metrics inc method (exception) - e={}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -62,10 +57,10 @@ public class PrometheusMetrics implements IMetrics {
             }
             return (T) summaryMap.get(name).time(callable, labels);
         } catch (RuntimeException e) {
-            metricsLogger.printf("error in timing method (runtime exception) - e=%s", e);
+            log.error("error in timing method (runtime exception) - e={}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            metricsLogger.printf("error in timing method (exception) - e=%s", e);
+            log.error("error in timing method (exception) - e={}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -79,10 +74,10 @@ public class PrometheusMetrics implements IMetrics {
             }
             summaryMap.get(name).observe(amt);
         } catch (RuntimeException e) {
-            metricsLogger.printf("error in timing method (runtime exception) - e=%s", e);
+            log.error("error in timing method (runtime exception) - e={}", e.getMessage());
             throw e;
         } catch (Exception e) {
-            metricsLogger.printf("error in timing method (exception) - e=%s", e);
+            log.error("error in timing method (exception) - e={}", e.getMessage());
             throw new RuntimeException(e);
         }
     }
@@ -99,7 +94,7 @@ public class PrometheusMetrics implements IMetrics {
             collectorRegistry.register(requests);
             counterMap.put(name, new CounterHolder(name, requests, labels != null ? labels.length : 0));
         } catch (Exception e) {
-            logger.log(Level.WARNING, "failed to register counter - " + name, e);
+            log.error("failed to register counter - name={}, error={}", name, e.getMessage());
         }
     }
 
@@ -123,7 +118,7 @@ public class PrometheusMetrics implements IMetrics {
             collectorRegistry.register(requests);
             summaryMap.put(name, new SummaryHolder(name, requests, labels != null ? labels.length : 0));
         } catch (Exception e) {
-            logger.log(Level.WARNING, "failed to register timer - " + name, e);
+            log.error("failed to register timer - name={}, error={}", name, e.getMessage());
         }
     }
 

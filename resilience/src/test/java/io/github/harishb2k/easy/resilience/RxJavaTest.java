@@ -10,6 +10,9 @@ import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.exceptions.CompositeException;
 import io.reactivex.rxjava3.schedulers.Schedulers;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -20,13 +23,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class RxJavaTest extends CommonBaseTestCase {
 
     /**
      * A "subscribe" method runs in same thread.
      */
-    public void test_Subscribe_Method_Runs_In_Same_Thread() {
+    @Test
+    @DisplayName("Rx Test - Subscribe method must run in same thread")
+    public void subscribeMethodMustRunInSameThread() {
 
         long currentThreadId = Thread.currentThread().getId();
         Observable<Long> observable = Observable.create(emitter -> {
@@ -45,10 +55,12 @@ public class RxJavaTest extends CommonBaseTestCase {
     /**
      * Here heavy work of thread block is happening on "subscribeOn" thread.
      * <p>
-     * blockingSubscribe - this will execute on main thread. E.g. in android you dont use
+     * blockingSubscribe - this will execute on main thread. E.g. in android you don't use
      * blockingSubscribe but observeOn(Android.MainThread())
      */
-    public void test_ObserveOn_SubscribeOn() throws Exception {
+    @Test
+    @DisplayName("Rx Test - expensive work happens in thread given in subscribeOn()")
+    public void heavyWorkMustRunInNewThreadWhichIsGivenInSubscribeOn() throws Exception {
         long currentThreadId = Thread.currentThread().getId();
         Observable<Long> observable = Observable.create(emitter -> {
             long currentThreadIdInsideObservable = Thread.currentThread().getId();
@@ -68,6 +80,7 @@ public class RxJavaTest extends CommonBaseTestCase {
                     threadWhereSubscribeMethodIsExecuted.set(Thread.currentThread().getId());
                 });
         assertEquals(currentThreadId, threadWhereSubscribeMethodIsExecuted.get());
+        assertNotEquals(threadWhereCreateMethodIsCalled.get(), threadWhereSubscribeMethodIsExecuted.get());
     }
 
     /**
@@ -75,7 +88,9 @@ public class RxJavaTest extends CommonBaseTestCase {
      * <p>
      * Note - you can add 1 or more doOnNext()
      */
-    public void test_What_DoOnNext_Does() {
+    @Test
+    @DisplayName("Rx Test - all doOnNext() methods will be called")
+    public void allDoOnNextMethodsAreCalled() {
         Observable<Long> observable = Observable.create(emitter -> {
             long currentThreadIdInsideObservable = Thread.currentThread().getId();
             emitter.onNext(currentThreadIdInsideObservable);
@@ -106,7 +121,9 @@ public class RxJavaTest extends CommonBaseTestCase {
      * <p>
      * IMP - if you had called onNext() in your create() then doNext() & doOnNext()  will also be called and
      */
-    public void test_What_DoOnError_Does() {
+    @Test
+    @DisplayName("Rx Test - all doOnError() methods will be called")
+    public void allDoOnErrorMethodsAreCalled() {
         String uuid = UUID.randomUUID().toString();
         Observable<Long> observable = Observable.create(emitter -> {
             emitter.onError(new RuntimeException(uuid));
@@ -159,7 +176,9 @@ public class RxJavaTest extends CommonBaseTestCase {
      *     e.getExceptions().get(1) -> "XYX-Thrown_From_DoOnError"
      * </pre>
      */
-    public void test_What_DoOnError_Does_When() {
+    @Test
+    @DisplayName("Rx Test - when doOnError() throws a exception, then CompositeException will be generated")
+    public void compositeExceptionIsThrownIfWeThrowExcetpionFromDoOnError() {
         String uuid = UUID.randomUUID().toString() + "-Thrown_From_Create";
         Observable<Long> observable = Observable.create(emitter -> {
             emitter.onError(new RuntimeException(uuid));
@@ -199,7 +218,10 @@ public class RxJavaTest extends CommonBaseTestCase {
     /**
      * This test case is added for some experiments
      */
-    public void _testCompose() throws Exception {
+    @Disabled
+    @Test
+    @DisplayName("Rx Test - disabled")
+    public void disabledTest() throws Exception {
 
         CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
                 .enableAutomaticTransitionFromOpenToHalfOpen()

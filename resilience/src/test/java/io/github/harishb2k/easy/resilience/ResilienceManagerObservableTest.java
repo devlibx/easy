@@ -11,7 +11,9 @@ import io.github.harishb2k.easy.resilience.exception.OverflowException;
 import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
 import io.github.harishb2k.easy.resilience.module.ResilienceModule;
 import io.reactivex.rxjava3.core.Observable;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
@@ -19,15 +21,19 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 @SuppressWarnings("ResultOfMethodCallIgnored")
 public class ResilienceManagerObservableTest extends CommonBaseTestCase {
-    private Injector injector;
     private IResilienceManager resilienceManager;
 
-    @Override
+    @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
-        injector = Guice.createInjector(new ResilienceModule());
+        Injector injector = Guice.createInjector(new ResilienceModule());
         ApplicationContext.setInjector(injector);
         resilienceManager = injector.getInstance(IResilienceManager.class);
     }
@@ -35,7 +41,9 @@ public class ResilienceManagerObservableTest extends CommonBaseTestCase {
     /**
      * Test we get a proper type of exception is thrown when circuit is open
      */
-    public void testCircuitOpenExceptionIsThrown() throws Exception {
+    @Test
+    @DisplayName("CircuitOpenException will be thrown if CircuitBreaker is open")
+    public void circuitOpenExceptionIsGeneratedIfCircuitBreakerIsOpen() throws Exception {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
         ResilienceProcessor processor = (ResilienceProcessor) resilienceManager.getOrCreate(
@@ -63,7 +71,7 @@ public class ResilienceManagerObservableTest extends CommonBaseTestCase {
                             assertTrue(throwable.getClass().isAssignableFrom(CircuitOpenException.class));
                             gotException.set(true);
                         });
-        assertTrue("We must have received a CircuitOpenException", gotException.get());
+        assertTrue(gotException.get(), "We must have received a CircuitOpenException");
 
 
         // Test 2 - We have a good Observable and Circuit is forced closed
@@ -85,7 +93,9 @@ public class ResilienceManagerObservableTest extends CommonBaseTestCase {
     /**
      * Test we get a proper type of exception is thrown when circuit is open
      */
-    public void testApplicationExceptionIsThrown() {
+    @Test
+    @DisplayName("If application throws a exception then the same exception reaches to the clients")
+    public void exceptionFromApplicationWillReachToClient() {
         int concurrency = 3;
         String uuid = UUID.randomUUID().toString();
         ResilienceProcessor processor = (ResilienceProcessor) resilienceManager.getOrCreate(
@@ -110,7 +120,7 @@ public class ResilienceManagerObservableTest extends CommonBaseTestCase {
                             assertTrue(throwable.getClass().isAssignableFrom(CustomException.class));
                             gotException.set(true);
                         });
-        assertTrue("We must have received a CustomException", gotException.get());
+        assertTrue(gotException.get(), "We must have received a CustomException");
 
 
         observable = Observable.create(observableEmitter -> {
@@ -128,13 +138,15 @@ public class ResilienceManagerObservableTest extends CommonBaseTestCase {
                             assertTrue(throwable.getClass().isAssignableFrom(NullPointerException.class));
                             gotException.set(true);
                         });
-        assertTrue("We must have received a NullPointerException", gotException.get());
+        assertTrue(gotException.get(), "We must have received a NullPointerException");
     }
 
     /**
      * Test we get a proper type of exception when we make too many calls.
      */
-    public void testOverflowExceptionIsThrown() throws InterruptedException {
+    @Test
+    @DisplayName("OverflowException exception is thrown if we make too many calls")
+    public void overflowExceptionIsThrownIfWeMakeTooManyCalls() throws InterruptedException {
         int concurrency = 10;
         int queueSize = 1;
         int expectedCountOfSuccessfulRequest = concurrency + queueSize;
@@ -180,15 +192,17 @@ public class ResilienceManagerObservableTest extends CommonBaseTestCase {
                     );
         });
         waitForAllRequestToComplete.await(5, TimeUnit.SECONDS);
-        assertEquals("Expected these many success calls", expectedCountOfSuccessfulRequest, successCalls.get());
-        assertEquals("Expected these many error calls", expectedCountOfErrorRequest, errorCalls.get());
-        assertEquals("Expected these many error calls - must be of OverflowException", expectedCountOfErrorRequest, overflowExceptionCalls.get());
+        assertEquals(expectedCountOfSuccessfulRequest, successCalls.get(), "Expected these many success calls");
+        assertEquals(expectedCountOfErrorRequest, errorCalls.get(), "Expected these many error calls");
+        assertEquals(expectedCountOfErrorRequest, overflowExceptionCalls.get(), "Expected these many error calls - must be of OverflowException");
     }
 
     /**
      * Test we get a proper type of exception when we make too many calls.
      */
-    public void testRequestTimeoutExceptionIsThrown() {
+    @Test
+    @DisplayName("RequestTimeoutException exception is thrown if we took lot of time to finish request")
+    public void requestTimeoutExceptionIsThrownIfWeTakeMoreTime() {
         String uuid = UUID.randomUUID().toString();
         ResilienceProcessor processor = (ResilienceProcessor) resilienceManager.getOrCreate(
                 IResilienceManager.ResilienceCallConfig.withDefaults()
@@ -215,6 +229,6 @@ public class ResilienceManagerObservableTest extends CommonBaseTestCase {
                             gotException.set(true);
                         }
                 );
-        assertTrue("We must have received an exception", gotException.get());
+        assertTrue(gotException.get(), "We must have received an exception");
     }
 }
