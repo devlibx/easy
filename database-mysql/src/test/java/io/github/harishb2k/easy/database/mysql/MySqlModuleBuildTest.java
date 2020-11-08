@@ -7,6 +7,10 @@ import io.gitbub.harishb2k.easy.helper.CommonBaseTestCase;
 import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
 import io.github.harishb2k.easy.database.mysql.module.DatabaseMySQLModule;
 import io.github.harishb2k.easy.database.mysql.transaction.ITransactionManagerResolver;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 /**
@@ -14,6 +18,8 @@ import io.github.harishb2k.easy.database.mysql.transaction.ITransactionManagerRe
  */
 public class MySqlModuleBuildTest extends CommonBaseTestCase {
 
+    @Test
+    @DisplayName("Make sure that DatabaseMySQLModule can be added to guice")
     public void testMySqlModuleBuildSuccess() {
         Injector injector = Guice.createInjector(new AbstractModule() {
             @Override

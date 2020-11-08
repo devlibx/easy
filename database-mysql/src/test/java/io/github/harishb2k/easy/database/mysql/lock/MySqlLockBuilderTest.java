@@ -30,6 +30,10 @@ import io.github.harishb2k.easy.lock.interceptor.DistributedLockInterceptor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
@@ -41,12 +45,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @Slf4j
 public class MySqlLockBuilderTest extends CommonBaseTestCase {
     private static final AtomicReference<MySqlTestHelper> mySQLHelperAtomicReference = new AtomicReference<>();
     private static final AtomicBoolean isIsMySqlRunningCheckDone = new AtomicBoolean(false);
 
-    @Override
+    @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
         LoggingHelper.setupLogging();
@@ -84,6 +91,8 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
         );
     }
 
+    @Test
+    @DisplayName("Test MySQL lock - without annotation")
     public void testMySqlLock() {
 
         // Do not run test if MySQL is not running
@@ -156,6 +165,8 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
         }
     }
 
+    @Test
+    @DisplayName("Test MySQL lock works with method DistributedLock")
     public void testMySqlLockAnnotation() {
         // Do not run test if MySQL is not running
         if (mySQLHelperAtomicReference.get() == null || !mySQLHelperAtomicReference.get().isMySqlRunning()) {
@@ -229,12 +240,8 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
         assertEquals(lockId, r.createLockRequest(null, new Object[]{id, 10}).getUniqueLockIdForLocking());
     }
 
-    public void testMySqlLockAnnotation_WithThread_10_times() throws InterruptedException {
-        for (int i = 0; i < 20; i++) {
-            testMySqlLockAnnotation_WithThread();
-        }
-    }
-
+    @RepeatedTest(20)
+    @DisplayName("Run MySQL lock with concurrent thread to make sure lock is working properlly")
     public void testMySqlLockAnnotation_WithThread() throws InterruptedException {
         // Do not run test if MySQL is not running
         if (mySQLHelperAtomicReference.get() == null || !mySQLHelperAtomicReference.get().isMySqlRunning()) {
@@ -378,7 +385,6 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
         databaseService.stopDatabase();
         distributedLockService.shutdown();
     }
-
 
     public static class MySQLAnnotationTest {
         private final LockInsideLockChildClass lockInsideLockChildClass;

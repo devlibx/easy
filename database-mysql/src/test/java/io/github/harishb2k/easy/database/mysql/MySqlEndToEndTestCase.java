@@ -27,6 +27,10 @@ import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionInterceptor;
 import io.github.harishb2k.easy.lock.interceptor.DistributedLockInterceptor;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static ch.qos.logback.classic.Level.INFO;
 import static ch.qos.logback.classic.Level.TRACE;
@@ -56,9 +60,16 @@ public class MySqlEndToEndTestCase extends CommonBaseTestCase {
         secondaryMySqlTestHelper.startMySql(secondartMySqlConfig);
     }
 
+    @AfterAll
     public static void stopMySQL() {
         primaryMySqlTestHelper.stopMySql();
         secondaryMySqlTestHelper.stopMySql();
+    }
+
+    @AfterEach
+    public void tearDown() throws Exception {
+        IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
+        databaseService.stopDatabase();
     }
 
     public static void setupGuice() {
@@ -100,13 +111,8 @@ public class MySqlEndToEndTestCase extends CommonBaseTestCase {
         databaseService.startDatabase();
     }
 
-    @Override
-    public void tearDown() throws Exception {
-        super.tearDown();
-        IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
-        databaseService.stopDatabase();
-    }
-
+    @Test
+    @DisplayName("This will run all MySQL tests")
     public void testMySQL() throws Exception {
         main(null);
     }

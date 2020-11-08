@@ -4,7 +4,6 @@ import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.Safe;
 import io.github.harishb2k.easy.lock.DistributedLock;
 import io.github.harishb2k.easy.lock.IDistributedLockService.NoOpDistributedLockIdResolver;
-import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +21,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.github.harishb2k.easy.lock.IDistributedLockService.NO_OP_LOCK_NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Slf4j
-public abstract class TransactionTest extends TestCase {
+public abstract class TransactionTest {
     private static String uniqueString = UUID.randomUUID().toString();
 
+    // This test is executed from MySqlEndToEndTestCase
     public void testTransactionBulk() throws Exception {
         ITransactionTestClass transactionTestClass = ApplicationContext.getInstance(ITransactionTestClass.class);
         for (int i = 0; i < 10; i++) {
@@ -45,6 +48,7 @@ public abstract class TransactionTest extends TestCase {
         }
     }
 
+    // This test is executed from MySqlEndToEndTestCase
     public void testTransaction() {
         ITransactionTestClass transactionTestClass = ApplicationContext.getInstance(ITransactionTestClass.class);
         try {

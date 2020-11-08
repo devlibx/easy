@@ -1,7 +1,6 @@
 package io.github.harishb2k.easy.database.mysql;
 
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.springframework.transaction.annotation.Propagation;
@@ -11,7 +10,7 @@ import java.util.concurrent.CountDownLatch;
 
 @SuppressWarnings("ConstantConditions")
 @Slf4j
-public abstract class SimpleMysqlHelperTest extends TestCase {
+public abstract class SimpleMysqlHelperTest {
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void runTest() {
