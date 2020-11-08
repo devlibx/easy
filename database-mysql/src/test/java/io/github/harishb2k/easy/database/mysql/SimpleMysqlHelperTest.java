@@ -2,11 +2,15 @@ package io.github.harishb2k.easy.database.mysql;
 
 import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.CountDownLatch;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("ConstantConditions")
 @Slf4j
@@ -23,7 +27,7 @@ public abstract class SimpleMysqlHelperTest {
                 preparedStatement -> {
                 }
         );
-        Assert.assertFalse(executeResult);
+        assertFalse(executeResult);
 
 
         // Step 2 - Insert to DB
@@ -34,8 +38,8 @@ public abstract class SimpleMysqlHelperTest {
                     preparedStatement.setString(1, "HI");
                 }
         );
-        Assert.assertNotNull(id);
-        Assert.assertTrue(id > 0);
+        assertNotNull(id);
+        assertTrue(id > 0);
 
         // Try insert in threads
         int count = 0;
@@ -50,8 +54,8 @@ public abstract class SimpleMysqlHelperTest {
                         }
                 );
                 countDownLatch.countDown();
-                Assert.assertNotNull(_id);
-                Assert.assertTrue(_id > 0);
+                assertNotNull(_id);
+                assertTrue(_id > 0);
             }).start();
         }
         try {
@@ -71,7 +75,7 @@ public abstract class SimpleMysqlHelperTest {
                 rs -> rs.getString(1),
                 String.class
         ).orElse("");
-        Assert.assertEquals("HI", result);
+        assertEquals("HI", result);
         log.debug("Result from MySQL Select: {}", result);
     }
 }

@@ -2,9 +2,7 @@ package io.github.harishb2k.easy.database.mysql;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import io.github.harishb2k.easy.database.DatabaseConstant;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +13,7 @@ import java.sql.ResultSet;
 import java.util.UUID;
 
 import static io.github.harishb2k.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
 public abstract class TransactionSupportTestWithTwoDataSource {
@@ -38,11 +37,11 @@ public abstract class TransactionSupportTestWithTwoDataSource {
 
         String dataFromDefaultDataSource = getResult("testPersistToFirstDb", defaultDataSource);
         log.debug("From default db {}", dataFromDefaultDataSource);
-        Assert.assertEquals("testPersistToFirstDb-" + uniqueString, dataFromDefaultDataSource);
+        assertEquals("testPersistToFirstDb-" + uniqueString, dataFromDefaultDataSource);
 
         String dataFromSecondaryDataSource = getResult("testPersistToSecondDb", secondaryDataSource);
         log.debug("From secondary db {}", dataFromSecondaryDataSource);
-        Assert.assertEquals("testPersistToSecondDb-" + uniqueString, dataFromSecondaryDataSource);
+        assertEquals("testPersistToSecondDb-" + uniqueString, dataFromSecondaryDataSource);
 
         log.debug("\n\nEnd:TransactionSupportTestWithTwoDataSource:\n\n");
     }
