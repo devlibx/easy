@@ -1,14 +1,21 @@
 package io.github.harishb2k.easy.http.util;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CallTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-    public void testServerAndApiProvided() {
+@SuppressWarnings("rawtypes")
+public class CallTest {
+
+    @Test
+    @DisplayName("Call object build() fails if server and api is not provided")
+    public void callObjectShouldNotCreateIfServerAndApiIsNotProvided() {
         boolean gotError = false;
         try {
             Call call = Call.builder(Map.class)
@@ -20,7 +27,9 @@ public class CallTest extends TestCase {
         assertTrue(gotError);
     }
 
-    public void testHeaders() {
+    @Test
+    @DisplayName("Headers are set properly using methods from Call class")
+    public void headerRelatedMethodWorkInCallClass() {
 
         // Test 1 - add a single key-value
         Call call = Call.builder(Map.class)
@@ -89,7 +98,9 @@ public class CallTest extends TestCase {
         assertTrue(gotError);
     }
 
-    public void testPathParams() {
+    @Test
+    @DisplayName("Path param are set properly using methods from Call class")
+    public void pathParamRelatedMethodWorkInCallClass() {
 
         // Test 1 - add a single key-value
         Call call = Call.builder(Map.class)
@@ -158,7 +169,9 @@ public class CallTest extends TestCase {
         assertTrue(gotError);
     }
 
-    public void testQueryParams() {
+    @Test
+    @DisplayName("Query param are set properly using methods from Call class")
+    public void queryParamRelatedMethodWorkInCallClass() {
 
         // Test 1 - add a single key-value
         Call call = Call.builder(Map.class)

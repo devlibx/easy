@@ -13,6 +13,7 @@ import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.UUID;
@@ -21,6 +22,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 @SuppressWarnings("rawtypes")
 @Slf4j
 public class SyncRequestTest extends BaseTestCase {
@@ -28,6 +34,7 @@ public class SyncRequestTest extends BaseTestCase {
     /**
      * Test a simple http call (with success)
      */
+    @Test
     public void testSimpleHttpRequest() {
         Map resultSync = EasyHttp.callSync(
                 Call.builder(Map.class)
@@ -42,6 +49,7 @@ public class SyncRequestTest extends BaseTestCase {
     /**
      * Test a simple http call (with success)
      */
+    @Test
     public void testSimpleHttpRequest_WithResponseBuilder() {
         StringObjectMap resultSync = EasyHttp.callSync(
                 Call.builder(StringObjectMap.class)
@@ -63,6 +71,7 @@ public class SyncRequestTest extends BaseTestCase {
     /**
      * Test a simple http call where we make too many calls to simulate requests rejected
      */
+    @Test
     public void testRequestExpectRejected() throws Exception {
         AtomicInteger overflowCount = new AtomicInteger();
         AtomicInteger successCount = new AtomicInteger();
@@ -91,6 +100,7 @@ public class SyncRequestTest extends BaseTestCase {
     /**
      * Test a simple http call where we make too many calls to simulate requests rejected
      */
+    @Test
     public void testRequestTimeout() throws Exception {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotException = new AtomicBoolean(false);
@@ -115,6 +125,7 @@ public class SyncRequestTest extends BaseTestCase {
         assertTrue(gotException.get());
     }
 
+    @Test
     public void testSyncPostRequest() {
         Payload payload = Payload.createPayload();
         StringObjectMap response = EasyHttp.callSync(
@@ -138,6 +149,7 @@ public class SyncRequestTest extends BaseTestCase {
         assertEquals("str_89", headers.getList("String_header", String.class).get(0));
     }
 
+    @Test
     public void testSyncPutRequest() {
         Payload payload = Payload.createPayload();
         StringObjectMap response = EasyHttp.callSync(

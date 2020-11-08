@@ -9,6 +9,9 @@ import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
 import io.github.harishb2k.easy.http.BaseTestCase;
 import io.netty.handler.timeout.ReadTimeoutException;
 import io.netty.handler.timeout.ReadTimeoutHandler;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -22,12 +25,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@DisplayName("A test to validate Async Client and its working")
 public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
     private String service;
     private HttpClient httpClient;
     private WebClient webClient;
 
-    @Override
+    @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
 
@@ -45,6 +52,7 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
                 .build();
     }
 
+    @Test
     public void testReactor_HttpClient_Get_Example_With_Success() throws Exception {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotExpected = new AtomicBoolean(false);
@@ -67,6 +75,7 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
         assertTrue(gotExpected.get());
     }
 
+    @Test
     public void testReactor_HttpClient_Get_Example_With_404() throws Exception {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotExpected = new AtomicBoolean(false);
@@ -91,6 +100,7 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
         assertTrue(gotExpected.get());
     }
 
+    @Test
     public void testReactor_HttpClient_Get_Example_With_Timeout() throws Exception {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotExpected = new AtomicBoolean(false);
@@ -117,7 +127,7 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
         assertTrue(gotExpected.get());
     }
 
-
+    @Test
     public void testReactor_HttpClient_Post_Example_With_Success() throws Exception {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotExpected = new AtomicBoolean(false);
@@ -144,6 +154,7 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
         assertTrue(gotExpected.get());
     }
 
+    @Test
     public void testReactor_HttpClient_Post_Example_With_404() throws Exception {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotExpected = new AtomicBoolean(false);
@@ -169,6 +180,7 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
         assertTrue(gotExpected.get());
     }
 
+    @Test
     public void testReactor_HttpClient_Post_Example_With_Timeout() throws Exception {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotExpected = new AtomicBoolean(false);
@@ -196,7 +208,7 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
         assertTrue(gotExpected.get());
     }
 
-
+    @Test
     public void testReactor_HttpClient_Put_Example_With_Success() throws Exception {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotExpected = new AtomicBoolean(false);
@@ -223,6 +235,7 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
         assertTrue(gotExpected.get());
     }
 
+    @Test
     public void testReactor_HttpClient_Delete_Example_With_Success() throws Exception {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotExpected = new AtomicBoolean(false);
@@ -247,6 +260,7 @@ public class AsyncHttpClientBasicConceptTest extends BaseTestCase {
         assertTrue(gotExpected.get());
     }
 
+    @Test
     public void testParallelRequests_Get() throws Exception {
         LoggingHelper.getLogger(LocalHttpServer.class).setLevel(Level.INFO);
 

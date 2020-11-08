@@ -14,19 +14,18 @@ import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
 import io.github.harishb2k.easy.http.config.Config;
 import io.github.harishb2k.easy.http.module.EasyHttpModule;
 import io.github.harishb2k.easy.http.util.EasyHttp;
-import junit.framework.TestCase;
 import org.apache.http.HttpClientConnection;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import static ch.qos.logback.classic.Level.OFF;
 
-public abstract class BaseTestCase extends TestCase {
+public abstract class BaseTestCase {
     protected LocalHttpServer localHttpServer;
     protected Injector injector;
 
-    @Override
+    @BeforeEach
     public void setUp() throws Exception {
-        super.setUp();
-
         // Setup logging
         LoggingHelper.setupLogging();
         LoggingHelper.getLogger(LocalHttpServer.class).setLevel(OFF);
@@ -58,9 +57,8 @@ public abstract class BaseTestCase extends TestCase {
         return config;
     }
 
-    @Override
+    @AfterEach
     public void tearDown() throws Exception {
-        super.tearDown();
         localHttpServer.stopServer();
         EasyHttp.shutdown();
     }

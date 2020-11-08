@@ -16,29 +16,32 @@ import io.github.harishb2k.easy.http.module.EasyHttpModule;
 import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
 import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
-import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static ch.qos.logback.classic.Level.TRACE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j
-public class DemoApplication extends TestCase {
-    private Injector injector;
+public class DemoApplication {
 
-    @Override
+    @BeforeEach
     protected void setUp() throws Exception {
-        super.setUp();
         LoggingHelper.setupLogging();
         LoggingHelper.getLogger(SyncRequestProcessor.class).setLevel(TRACE);
         LoggingHelper.getLogger(FileHelper.class).setLevel(TRACE);
         LoggingHelper.getLogger(IMetrics.ConsoleOutputMetrics.class).setLevel(TRACE);
 
         // Setup injector (Onetime MUST setup before we call EasyHttp.setup())
-        injector = Guice.createInjector(new AbstractModule() {
+        // Or if you do not any console logs
+        // bind(IMetrics.class).to(IMetrics.NoOpMetrics.class).in(Scopes.SINGLETON);
+        // Or you can use Prometheus Module to get Prometheus metrics
+        Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
             protected void configure() {
                 bind(IMetrics.class).to(IMetrics.ConsoleOutputMetrics.class).in(Scopes.SINGLETON);
@@ -56,6 +59,7 @@ public class DemoApplication extends TestCase {
         EasyHttp.setup(config);
     }
 
+    @Test
     public void testSyncApiCall() {
         Map result = EasyHttp.callSync(
                 Call.builder(Map.class)
@@ -68,6 +72,7 @@ public class DemoApplication extends TestCase {
         // Result = {"userId":1,"id":1,"title":"some text ..."}
     }
 
+    @Test
     public void testAsyncApiCall() throws Exception {
         CountDownLatch waitForComplete = new CountDownLatch(1);
         EasyHttp.callAsync(
@@ -87,6 +92,7 @@ public class DemoApplication extends TestCase {
         waitForComplete.await(5, TimeUnit.SECONDS);
     }
 
+    @Test
     public void testConfigProcessor() {
         // Read config and setup EasyHttp
         Config config = YamlUtils.readYamlCamelCase("app_config_to_test_pre_processor.yaml", Config.class);

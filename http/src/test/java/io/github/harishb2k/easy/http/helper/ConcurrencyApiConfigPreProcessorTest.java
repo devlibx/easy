@@ -1,10 +1,13 @@
 package io.github.harishb2k.easy.http.helper;
 
 import io.github.harishb2k.easy.http.config.Api;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class ConcurrencyApiConfigPreProcessorTest extends TestCase {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+public class ConcurrencyApiConfigPreProcessorTest {
+
+    @Test
     public void testWhenRpsNotGiven() {
         Api api = new Api();
         api.setConcurrency(10);
@@ -17,6 +20,7 @@ public class ConcurrencyApiConfigPreProcessorTest extends TestCase {
         assertEquals(10, api.getConcurrency());
     }
 
+    @Test
     public void testWhenRpsIsGiven() {
         // Test 1
         Api api = new Api();

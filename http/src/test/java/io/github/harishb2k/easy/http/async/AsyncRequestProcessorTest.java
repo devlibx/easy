@@ -13,6 +13,8 @@ import io.github.harishb2k.easy.http.sync.SyncRequestTest.Payload;
 import io.github.harishb2k.easy.http.util.Call;
 import io.github.harishb2k.easy.http.util.EasyHttp;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -23,12 +25,16 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static io.github.harishb2k.easy.http.util.EasyHttp.callAsync;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("ResultOfMethodCallIgnored")
+@SuppressWarnings({"ResultOfMethodCallIgnored", "rawtypes"})
 @Slf4j
 public class AsyncRequestProcessorTest extends BaseTestCase {
 
-    @Override
+    @BeforeEach
     public void setUp() throws Exception {
         super.setUp();
         Thread.sleep(1000);
@@ -41,6 +47,7 @@ public class AsyncRequestProcessorTest extends BaseTestCase {
         return config;
     }
 
+    @Test
     public void testSuccessGet() {
         int delay = 10;
         Map resultSync = EasyHttp.callSync(
@@ -57,6 +64,7 @@ public class AsyncRequestProcessorTest extends BaseTestCase {
     /**
      * Test a simple http call where we make too many calls to simulate requests rejected
      */
+    @Test
     public void testRequestTimeout() throws Exception {
         CountDownLatch wait = new CountDownLatch(1);
         AtomicBoolean gotException = new AtomicBoolean(false);
@@ -80,6 +88,7 @@ public class AsyncRequestProcessorTest extends BaseTestCase {
         assertTrue(gotException.get());
     }
 
+    @Test
     public void testRejectRequest_Sync() throws Exception {
         int count = 10;
         AtomicInteger overflowExceptionCount = new AtomicInteger();
@@ -104,6 +113,7 @@ public class AsyncRequestProcessorTest extends BaseTestCase {
         assertEquals(4, successCount.get());
     }
 
+    @Test
     public void testSuccessAsync() throws Exception {
         int count = 1;
         CountDownLatch wait = new CountDownLatch(count);
@@ -136,9 +146,10 @@ public class AsyncRequestProcessorTest extends BaseTestCase {
                 .dispose();
         wait.await(10, TimeUnit.SECONDS);
         assertEquals(1, successCount.get());
-        assertEquals("Running and success callback thread must be same", runningThreadId, successThreadId.get());
+        assertEquals(runningThreadId, successThreadId.get(), "Running and success callback thread must be same");
     }
 
+    @Test
     public void testErrorAsync() throws Exception {
         int count = 1;
         CountDownLatch wait = new CountDownLatch(count);
@@ -168,9 +179,10 @@ public class AsyncRequestProcessorTest extends BaseTestCase {
         wait.await(10, TimeUnit.SECONDS);
         assertEquals(0, successCount.get());
         assertEquals(1, errorCount.get());
-        assertEquals("Running and error callback thread must be same", runningThreadId, errorThreadId.get());
+        assertEquals(runningThreadId, errorThreadId.get(), "Running and error callback thread must be same");
     }
 
+    @Test
     public void testRejectRequest_Async() throws Exception {
         int count = 10;
         CountDownLatch wait = new CountDownLatch(count);
@@ -203,6 +215,7 @@ public class AsyncRequestProcessorTest extends BaseTestCase {
         assertEquals(4, successCount.get());
     }
 
+    @Test
     public void testAsyncPostRequest() throws Exception {
         AtomicReference<StringObjectMap> data = new AtomicReference<>();
         Payload payload = Payload.createPayload();
@@ -236,6 +249,7 @@ public class AsyncRequestProcessorTest extends BaseTestCase {
         assertEquals("str_89", headers.getList("String_header", String.class).get(0));
     }
 
+    @Test
     public void testAsyncPutRequest() throws InterruptedException {
         AtomicReference<StringObjectMap> data = new AtomicReference<>();
         Payload payload = Payload.createPayload();
