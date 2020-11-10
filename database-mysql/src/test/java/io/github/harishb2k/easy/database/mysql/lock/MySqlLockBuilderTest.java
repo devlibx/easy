@@ -68,6 +68,7 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
      * Helper to make sure we have MySQL running
      */
     private void tryToSetupMySQLToRunTests() {
+        log.info("tryToSetupMySQLToRunTests");
         synchronized (isIsMySqlRunningCheckDone) {
             if (isIsMySqlRunningCheckDone.get()) return;
             try {
