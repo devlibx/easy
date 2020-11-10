@@ -15,6 +15,8 @@
         <module>http</module>
         <module>resilience</module>
         <module>lock</module>
+        <module>messaging</module>
+        <module>messaging-kafka</module>
     </modules>
     <name>easy</name>
     <url>https://github.com/harishb2k/easy</url>
@@ -277,6 +279,12 @@
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-guava</artifactId>
                 <version>${jackson.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.kafka</groupId>
+                <artifactId>kafka-clients</artifactId>
+                <version>1.1.0</version>
             </dependency>
 
             <!-- Logging -->

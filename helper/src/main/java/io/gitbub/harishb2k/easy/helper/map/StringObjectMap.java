@@ -46,6 +46,17 @@ public class StringObjectMap extends HashMap<String, Object> {
     }
 
     /**
+     * @return get value as int - it will be type casted if required
+     */
+    public Integer getInt(String key, int defaultValue) {
+        Integer value = getInt(key);
+        if (value == null) {
+            value = defaultValue;
+        }
+        return value;
+    }
+
+    /**
      * @return get value as long - it will be type casted if required
      */
     public Long getLong(String key) {
@@ -112,6 +123,17 @@ public class StringObjectMap extends HashMap<String, Object> {
     }
 
     /**
+     * @return get value as boolean - it will be type casted if required
+     */
+    public Boolean getBoolean(String key, Boolean defaultValue) {
+        Boolean value = getBoolean(key);
+        if (value == null) {
+            value = defaultValue;
+        }
+        return value;
+    }
+
+    /**
      * @return get value as string - it will be type casted if required
      */
     public String getString(String key) {
@@ -123,6 +145,17 @@ public class StringObjectMap extends HashMap<String, Object> {
         } else {
             return value.toString();
         }
+    }
+
+    /**
+     * @return get value as string - it will be type casted if required
+     */
+    public String getString(String key, String defaultValue) {
+        String value = getString(key);
+        if (value == null) {
+            value = defaultValue;
+        }
+        return value;
     }
 
     /**

@@ -10,3 +10,5 @@ dropwizard-app/target
 http/target
 resilience/target
 lock/target
+messaging/target
+messaging-kafka/target

@@ -1,0 +1,15 @@
+
+messaging:
+  producers:
+    sampleProducer:
+      topic: some_topic
+      brokers: localhost:9092
+      sync: false
+      ignored_value.serializer: org.apache.kafka.common.serialization.BytesSerializer
+      retries: 0
+      acks: 0
+  consumers:
+    sampleConsumer:
+      topic: some_topic
+      broker: localhost:9092
+      sync: true
