@@ -4,7 +4,7 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.harishb2k.easy</groupId>
-        <version>0.0.42-SNAPSHOT</version>
+        <version>0.0.42</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>database</artifactId>
