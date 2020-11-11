@@ -15,8 +15,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -27,6 +27,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static io.github.harishb2k.easy.testing.kafka.KafkaExtension.DISABLE_IF_KAFKA_NOT_RUNNING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -43,6 +44,7 @@ public class KafkaExtensionTest {
 
     @Test
     @DisplayName("Test to verify that KafkaExtension is able to start a new Kafka in docker or use existing running kafka")
+    @Tag(DISABLE_IF_KAFKA_NOT_RUNNING)
     public void verifyDockerKafkaStartedAndMessageProduceAndConsumeIsWorking(
             KafkaConfig kafkaConfig,
             Producer<String, String> producer,
@@ -51,7 +53,7 @@ public class KafkaExtensionTest {
     ) throws Exception {
 
         // Run this test only if kafka is running
-        Assumptions.assumeTrue(kafkaConfig.isRunning(), "Kafka must be running for this test case to run: kafka status = not running");
+        // Assumptions.assumeTrue(kafkaConfig.isRunning(), "Kafka must be running for this test case to run: kafka status = not running");
 
         final String topic = "some_topic_" + UUID.randomUUID().toString();
         final String message = UUID.randomUUID().toString();
@@ -105,14 +107,12 @@ public class KafkaExtensionTest {
     }
 
     @Test
+    @Tag(DISABLE_IF_KAFKA_NOT_RUNNING)
     public void verifyNewKafkaIsNotLaunched(
             KafkaConfig kafkaConfig,
             Producer<String, String> producer,
             IKafkaExtensionControl kafkaExtensionControl
-    ) throws Exception {
-
-        // Run this test only if kafka is running
-        Assumptions.assumeTrue(kafkaConfig.isRunning(), "Kafka must be running for this test case to run: kafka status = not running");
+    ) {
 
         final String topic = "some_topic_" + UUID.randomUUID().toString();
         final String message = UUID.randomUUID().toString();

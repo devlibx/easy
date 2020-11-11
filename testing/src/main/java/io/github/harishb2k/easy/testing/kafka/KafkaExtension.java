@@ -13,6 +13,9 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ConditionEvaluationResult;
+import org.junit.jupiter.api.extension.ExecutionCondition;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.ExtensionContext.Store;
 import org.junit.jupiter.api.extension.ParameterContext;
@@ -28,7 +31,8 @@ import java.util.Properties;
 import java.util.UUID;
 
 @Slf4j
-public class KafkaExtension implements ParameterResolver, BeforeAllCallback, AfterAllCallback, IKafkaExtensionControl {
+public class KafkaExtension implements ParameterResolver, BeforeAllCallback, AfterAllCallback, IKafkaExtensionControl, BeforeEachCallback, ExecutionCondition {
+    public static final String DISABLE_IF_KAFKA_NOT_RUNNING = "DISABLE_IF_KAFKA_NOT_RUNNING";
     private KafkaContainer kafkaContainer;
     private AdminClient client;
 
@@ -93,7 +97,7 @@ public class KafkaExtension implements ParameterResolver, BeforeAllCallback, Aft
         } else if (parameterContext.getParameter().getType() == IKafkaExtensionControl.class) {
             return this;
         }
-        return null;
+        return parameterContext.getParameter();
     }
 
     private Producer<String, String> createProducer() {
@@ -156,6 +160,22 @@ public class KafkaExtension implements ParameterResolver, BeforeAllCallback, Aft
             }
         }
         return null;
+    }
+
+    @Override
+    public void beforeEach(ExtensionContext context) throws Exception {
+    }
+
+    @Override
+    public ConditionEvaluationResult evaluateExecutionCondition(ExtensionContext context) {
+        if (context.getTags() != null) {
+            if (context.getTags().contains(DISABLE_IF_KAFKA_NOT_RUNNING)) {
+                if (!isKafkaRunning()) {
+                    return ConditionEvaluationResult.disabled("Test expected kafka to be running - we did not find local or docker kafka running");
+                }
+            }
+        }
+        return ConditionEvaluationResult.enabled("");
     }
 
     /**

@@ -11,12 +11,14 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.UUID;
 import java.util.concurrent.Future;
+
+import static io.github.harishb2k.easy.testing.kafka.KafkaExtension.DISABLE_IF_KAFKA_NOT_RUNNING;
 
 @ExtendWith(KafkaExtension.class)
 public class KafkaTest {
@@ -30,14 +32,12 @@ public class KafkaTest {
     }
 
     @Test
+    @Tag(DISABLE_IF_KAFKA_NOT_RUNNING)
     public void verifyNewKafkaIsNotLaunched(
             KafkaConfig kafkaConfig,
             Producer<String, String> producer,
             IKafkaExtensionControl kafkaExtensionControl
-    ) throws Exception {
-
-        // Run this test only if kafka is running
-        Assumptions.assumeTrue(kafkaConfig.isRunning(), "Kafka must be running for this test case to run: kafka status = not running");
+    ) {
 
         final String topic = "some_topic_" + UUID.randomUUID().toString();
         final String message = UUID.randomUUID().toString();
