@@ -198,7 +198,7 @@ public class MySqlExtension implements ParameterResolver, AfterEachCallback, Bef
         }
         if (dockerMySqlHolderMap.containsKey("docker_" + dataSourceName)) {
             if (dockerMySqlHolderMap.get("docker_" + dataSourceName).isRunning()) {
-                return dockerMySqlHolderMap.get("local_" + dataSourceName).mySQLContainer.getJdbcUrl();
+                return dockerMySqlHolderMap.get("docker_" + dataSourceName).mySQLContainer.getJdbcUrl();
             }
         }
         return null;
