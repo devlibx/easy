@@ -5,10 +5,10 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.harishb2k.easy</groupId>
-        <version>0.0.43-SNAPSHOT</version>
+        <version>0.0.43</version>
     </parent>
     <artifactId>messaging</artifactId>
-    <version>0.0.43-SNAPSHOT</version>
+    <version>0.0.43</version>
     <name>messaging</name>
 
     <properties>
