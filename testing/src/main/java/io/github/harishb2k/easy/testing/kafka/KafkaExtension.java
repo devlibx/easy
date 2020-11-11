@@ -73,9 +73,6 @@ public class KafkaExtension implements ParameterResolver, BeforeAllCallback, Aft
         if (parameterContext.getParameter().getType() == KafkaConfig.class) {
             KafkaConfig kafkaConfig = new KafkaConfig();
             kafkaConfig.setRunning(false);
-            if (kafkaContainer != null) {
-                log.info("Harish : {}", kafkaContainer.isRunning());
-            }
             if (isKafkaRunning()) {
                 kafkaConfig.setBrokers(getKafkaUrl());
                 kafkaConfig.setRunning(true);
