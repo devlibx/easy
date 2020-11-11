@@ -108,7 +108,7 @@ public class MessageFactory implements IMessagingFactory {
             initialized();
         }
 
-        StringObjectMap config = messagingConfigs.getProducers().get(name);
+        StringObjectMap config = messagingConfigs.getConsumers().get(name);
         if (config == null) return Optional.empty();
 
         IConsumerService consumerService = consumerServiceMap.get(config.getString("type", "KAFKA"));

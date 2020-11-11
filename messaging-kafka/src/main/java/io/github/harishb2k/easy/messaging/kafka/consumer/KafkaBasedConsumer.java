@@ -64,7 +64,6 @@ public class KafkaBasedConsumer implements IConsumer {
             final String topic = config.getString("topic");
 
             while (!stop.get()) {
-
                 try {
 
                     // Fetch records
@@ -80,7 +79,7 @@ public class KafkaBasedConsumer implements IConsumer {
                             key = record.key();
 
                             // Pass message the the client message processor
-                            messageConsumer.process(messageConsumer, record);
+                            messageConsumer.process(record.value(), record);
 
                             if (metricsEnabled) {
                                 metrics.inc(metricsPrefix + "_message_consume_success");
@@ -101,11 +100,6 @@ public class KafkaBasedConsumer implements IConsumer {
                     }
                     log.error("Got some error in kafka consumer: topic={}, error={}", topic, e.getMessage());
                 }
-
-                if (stop.get()) {
-                    log.info("Got stop signal for consumer: topic={}", topic);
-                    break;
-                }
             }
 
             // Count down stopping latch
@@ -116,11 +110,11 @@ public class KafkaBasedConsumer implements IConsumer {
     private Consumer<String, Object> createConsumer() {
         Properties properties = new Properties();
         properties.put("bootstrap.servers", config.getString("brokers", "localhost:9092"));
-        properties.put("group.id", config.getString("group", UUID.randomUUID().toString()));
+        properties.put("group.id", config.getString("group.id", UUID.randomUUID().toString()));
         properties.put("auto.offset.reset", config.getString("auto.offset.reset", "latest"));
         properties.put("enable.auto.commit", config.getBoolean("enable.auto.commit", Boolean.TRUE));
-        properties.put("key.deserializer", config.getString("key.serializer", "org.apache.kafka.common.serialization.StringSerializer"));
-        properties.put("value.deserializer", config.getString("value.serializer", "org.apache.kafka.common.serialization.StringSerializer"));
+        properties.put("key.deserializer", config.getString("key.serializer", "org.apache.kafka.common.serialization.StringDeserializer"));
+        properties.put("value.deserializer", config.getString("value.serializer", "org.apache.kafka.common.serialization.StringDeserializer"));
         properties.put("max.poll.records", config.getInt("max.poll.records", 10));
         String topic = config.getString("topic");
 

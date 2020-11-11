@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,11 +35,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Slf4j
 @ExtendWith(KafkaExtension.class)
 public class KafkaProducerConsumerTest {
-
-    public static void main(String[] args) {
-        KafkaProducerConsumerTest kafkaDemoApp = new KafkaProducerConsumerTest();
-        kafkaDemoApp.verifyMessagesPostedToKafka(null);
-    }
 
     @BeforeClass
     public static void setup() {
@@ -75,11 +71,12 @@ public class KafkaProducerConsumerTest {
         }
     }
 
-    @Test
+    @RepeatedTest(3)
     @DisplayName("Run kafka and verify that messages are being sent and consumer is able to get it")
     @Tag(DISABLE_IF_KAFKA_NOT_RUNNING)
     public void verifyMessagesPostedToKafkaAreConsumed(KafkaConfig kafkaConfig) throws Exception {
         final String topic = "some_topic_" + UUID.randomUUID().toString();
+        // final String topic = "some_topic_8";
         KafkaMessagingTestConfig config = YamlUtils.readYaml("kafka_test_config.yml", KafkaMessagingTestConfig.class);
         if (kafkaConfig.isRunning()) {
             config.getMessaging().getProducers().forEach((s, stringObjectMap) -> {
@@ -106,6 +103,11 @@ public class KafkaProducerConsumerTest {
         final AtomicInteger messagesReceivedCount = new AtomicInteger();
         IMessagingFactory messagingFactory = injector.getInstance(IMessagingFactory.class);
 
+        {
+            IProducer producer = messagingFactory.getProducer("sampleProducer").orElseThrow(() -> new RuntimeException("producer not found"));
+            producer.send("dummy", "Some sample text");
+        }
+
         // Consume messages
         messagingFactory.getConsumer("sampleConsumer").ifPresent(consumer -> {
             consumer.start((message, metadata) -> {
@@ -121,14 +123,16 @@ public class KafkaProducerConsumerTest {
         });
         Thread.sleep(500);
 
-        IProducer producer = messagingFactory.getProducer("sampleProducer").orElseThrow(() -> new RuntimeException("producer not found"));
-        for (int i = 0; i < messageCount; i++) {
-            boolean result = producer.send(UUID.randomUUID().toString(), "Some sample text");
-            assertTrue(result);
-        }
+        new Thread(() -> {
+            IProducer producer = messagingFactory.getProducer("sampleProducer").orElseThrow(() -> new RuntimeException("producer not found"));
+            for (int i = 0; i < messageCount; i++) {
+                boolean result = producer.send(UUID.randomUUID().toString(), "Some sample text");
+                assertTrue(result);
+            }
+        }).start();
 
         messagesReceived.await(10, TimeUnit.SECONDS);
         assertEquals(0, messagesReceivedErrorCount.get(), "Expected 0 errors in consumers message receive");
-        assertEquals(messageCount, messagesReceivedCount.get(), "Expected all messages to reach consumer");
+        assertTrue(messagesReceivedCount.get() >= messageCount, "Expected all messages to reach consumer");
     }
 }
