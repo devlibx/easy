@@ -1,4 +1,3 @@
-
 messaging:
   producers:
     sampleProducer:
@@ -13,3 +12,4 @@ messaging:
       topic: some_topic
       broker: localhost:9092
       sync: true
+      group.id: 1234
