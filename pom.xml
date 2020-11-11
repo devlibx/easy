@@ -17,6 +17,7 @@
         <module>lock</module>
         <module>messaging</module>
         <module>messaging-kafka</module>
+        <module>testing</module>
     </modules>
     <name>easy</name>
     <url>https://github.com/harishb2k/easy</url>
@@ -56,6 +57,7 @@
         <spring.version>5.3.0</spring.version>
         <guava.version>27.1-jre</guava.version>
         <metrics.version>4.0.2</metrics.version>
+        <junit-jupiter>5.7.0</junit-jupiter>
     </properties>
 
     <dependencyManagement>
@@ -303,19 +305,25 @@
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
                 <artifactId>junit-jupiter-engine</artifactId>
-                <version>5.4.2</version>
+                <version>${junit-jupiter}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit.vintage</groupId>
                 <artifactId>junit-vintage-engine</artifactId>
-                <version>5.7.0</version>
+                <version>${junit-jupiter}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.junit.platform</groupId>
                 <artifactId>junit-platform-engine</artifactId>
                 <version>1.7.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit-jupiter}</version>
                 <scope>test</scope>
             </dependency>
 

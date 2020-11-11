@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>easy</artifactId>
+        <groupId>io.github.harishb2k.easy</groupId>
+        <version>0.0.43-SNAPSHOT</version>
+    </parent>
+    <artifactId>testing</artifactId>
+    <version>0.0.43-SNAPSHOT</version>
+    <name>testing</name>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- Utils -->
+        <dependency>
+            <groupId>io.github.harishb2k.easy</groupId>
+            <artifactId>helper</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Kafka -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <version>1.15.0</version>
+        </dependency>
+        <!-- Kafka -->
+
+        <!-- JUnit -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit-jupiter}</version>
+            <scope>compile</scope>
+        </dependency>
+        <!-- JUnit -->
+
+    </dependencies>
+</project>
