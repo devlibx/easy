@@ -53,12 +53,14 @@ public class KafkaBasedProducer implements IProducer {
     private boolean sendSyncKafkaMessage(String topic, String key, Object value) {
         long start = System.currentTimeMillis();
         Future<RecordMetadata> ret = producer.send(new ProducerRecord<>(topic, key, value));
+        boolean success = false;
         try {
             ret.get();
+            success = true;
         } catch (Exception e) {
             log.error("(sync) error in sending message to topic={}, key={}", topic, key);
         }
-        if (ret.isDone()) {
+        if (success) {
             log.debug("(sync) message sent to topic={}, key={}, value={}", topic, key, value);
             if (metricsEnabled) {
                 metrics.observe(metricsPrefix + "_success_time_taken", (System.currentTimeMillis() - start));

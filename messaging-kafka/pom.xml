@@ -25,5 +25,12 @@
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>io.github.harishb2k.easy</groupId>
+            <artifactId>testing</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
