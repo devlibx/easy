@@ -1,7 +1,7 @@
 package io.github.harishb2k.easy;
 
-import io.github.harishb2k.easy.testing.mysql.MySqlConfig;
-import io.github.harishb2k.easy.testing.mysql.MySqlDataSource;
+import io.github.harishb2k.easy.testing.mysql.TestingMySqlConfig;
+import io.github.harishb2k.easy.testing.mysql.TestingMySqlDataSource;
 import io.github.harishb2k.easy.testing.mysql.MySqlExtension;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +35,7 @@ public class MySqlExtensionTest {
 
     @Test
     @DisplayName("Default mysql extension with default settings")
-    public void testDefaultMySQL(MySqlConfig mySqlConfig, DataSource dataSource) {
+    public void testDefaultMySQL(TestingMySqlConfig mySqlConfig, DataSource dataSource) {
         // Make sure mysql is running
         Assumptions.assumeTrue(mySqlConfig.isRunning());
 
@@ -44,7 +44,7 @@ public class MySqlExtensionTest {
 
     @Test
     @DisplayName("Test a alternate datasource")
-    public void testOtherMySQL(@MySqlDataSource("other") MySqlConfig mySqlConfig, @MySqlDataSource("other") DataSource dataSource) {
+    public void testOtherMySQL(@TestingMySqlDataSource("other") TestingMySqlConfig mySqlConfig, @TestingMySqlDataSource("other") DataSource dataSource) {
         // Make sure mysql is running
         Assumptions.assumeTrue(mySqlConfig.isRunning());
 
@@ -53,7 +53,7 @@ public class MySqlExtensionTest {
 
     @Test
     @DisplayName("Test both default and alternate datasource can work together")
-    public void testDefaultAndOtherMySQL(MySqlConfig mySqlConfig, DataSource dataSource, @MySqlDataSource("other") DataSource dataSourceOther) {
+    public void testDefaultAndOtherMySQL(TestingMySqlConfig mySqlConfig, DataSource dataSource, @TestingMySqlDataSource("other") DataSource dataSourceOther) {
         // Make sure mysql is running
         Assumptions.assumeTrue(mySqlConfig.isRunning());
 
@@ -61,7 +61,7 @@ public class MySqlExtensionTest {
         internalTestMySQL(mySqlConfig, dataSourceOther);
     }
 
-    public void internalTestMySQL(MySqlConfig mySqlConfig, DataSource dataSource) {
+    public void internalTestMySQL(TestingMySqlConfig mySqlConfig, DataSource dataSource) {
         boolean ranAll = false;
         try (Connection connection = dataSource.getConnection();
              PreparedStatement create = connection.prepareStatement("CREATE TABLE IF NOT EXISTS users (ID int NOT NULL PRIMARY KEY AUTO_INCREMENT, name varchar(255));");

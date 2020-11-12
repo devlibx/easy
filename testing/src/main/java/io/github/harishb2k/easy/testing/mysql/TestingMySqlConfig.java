@@ -3,7 +3,7 @@ package io.github.harishb2k.easy.testing.mysql;
 import lombok.Data;
 
 @Data
-public class MySqlConfig {
+public class TestingMySqlConfig {
     private String name;
     private boolean running;
 

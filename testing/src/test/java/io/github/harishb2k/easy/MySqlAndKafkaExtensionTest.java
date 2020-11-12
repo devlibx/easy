@@ -1,8 +1,8 @@
 package io.github.harishb2k.easy;
 
-import io.github.harishb2k.easy.testing.kafka.KafkaConfig;
+import io.github.harishb2k.easy.testing.kafka.TestingKafkaConfig;
 import io.github.harishb2k.easy.testing.kafka.KafkaExtension;
-import io.github.harishb2k.easy.testing.mysql.MySqlConfig;
+import io.github.harishb2k.easy.testing.mysql.TestingMySqlConfig;
 import io.github.harishb2k.easy.testing.mysql.MySqlExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
@@ -22,7 +22,7 @@ public class MySqlAndKafkaExtensionTest {
             .build();
 
     @Test
-    public void testMySQL(MySqlConfig mySqlConfig, DataSource dataSource, KafkaConfig kafkaConfig) {
+    public void testMySQL(TestingMySqlConfig mySqlConfig, DataSource dataSource, TestingKafkaConfig kafkaConfig) {
         Assumptions.assumeTrue(mySqlConfig.isRunning());
         Assumptions.assumeTrue(kafkaConfig.isRunning());
         Assertions.assertNotNull(dataSource);

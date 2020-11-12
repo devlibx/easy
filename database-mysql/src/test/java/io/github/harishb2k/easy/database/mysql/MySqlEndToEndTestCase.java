@@ -1,7 +1,6 @@
 package io.github.harishb2k.easy.database.mysql;
 
 import ch.qos.logback.classic.Level;
-import com.github.dockerjava.core.command.AbstrDockerCmd;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -12,9 +11,6 @@ import io.gitbub.harishb2k.easy.helper.ApplicationContext;
 import io.gitbub.harishb2k.easy.helper.CommonBaseTestCase;
 import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
-import io.gitbub.harishb2k.easy.helper.mysql.IMySqlTestHelper;
-import io.gitbub.harishb2k.easy.helper.mysql.IMySqlTestHelper.TestMySqlConfig;
-import io.gitbub.harishb2k.easy.helper.mysql.MySqlTestHelper;
 import io.github.harishb2k.easy.database.IDatabaseService;
 import io.github.harishb2k.easy.database.mysql.TransactionSupportTestWithTwoDataSource.HelperToTestTransactionWithTwoDatasource;
 import io.github.harishb2k.easy.database.mysql.TransactionSupportTestWithTwoDataSource.IHelperToTestTransactionWithTwoDatasource;
@@ -26,11 +22,17 @@ import io.github.harishb2k.easy.database.mysql.module.DatabaseMySQLModule;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext;
 import io.github.harishb2k.easy.database.mysql.transaction.TransactionInterceptor;
 import io.github.harishb2k.easy.lock.interceptor.DistributedLockInterceptor;
+import io.github.harishb2k.easy.testing.mysql.TestingMySqlDataSource;
+import io.github.harishb2k.easy.testing.mysql.MySqlExtension;
+import io.github.harishb2k.easy.testing.mysql.TestingMySqlConfig;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.testcontainers.shaded.com.github.dockerjava.core.command.AbstrDockerCmd;
 
 import static ch.qos.logback.classic.Level.INFO;
 import static ch.qos.logback.classic.Level.TRACE;
@@ -38,32 +40,27 @@ import static ch.qos.logback.classic.Level.TRACE;
 @SuppressWarnings({"all"})
 @Slf4j
 public class MySqlEndToEndTestCase extends CommonBaseTestCase {
-    // private static String jdbcUrl = "SET_URL_IN_TEST";// "jdbc:mysql://localhost:3306/users?useSSL=false";
-    // private static String secondaryJdbcUrl = "SET_URL_IN_TEST"; // "jdbc:mysql://localhost:3306/test_me?useSSL=false";
     private static Injector injector;
-    private static IMySqlTestHelper primaryMySqlTestHelper;
-    private static IMySqlTestHelper secondaryMySqlTestHelper;
 
+    @RegisterExtension
+    public static MySqlExtension defaultMysql = MySqlExtension.builder()
+            .withDatabase("users")
+            .withHost("localhost")
+            .withUsernamePassword("test", "test")
+            .build();
+
+    @RegisterExtension
+    public static MySqlExtension otherMySQL = MySqlExtension.builder("other")
+            .withDatabase("test_me")
+            .withHost("localhost")
+            .withUsernamePassword("test", "test")
+            .build();
 
     public static void startMySQL() throws RuntimeException {
-        // Primary setup
-        primaryMySqlTestHelper = new MySqlTestHelper();
-        primaryMySqlTestHelper.installCustomMySqlTestHelper(new MySQLHelperPlugin());
-        TestMySqlConfig primaryMySqlConfig = TestMySqlConfig.withDefaults();
-        primaryMySqlTestHelper.startMySql(primaryMySqlConfig);
-
-        // Secondary setup
-        secondaryMySqlTestHelper = new MySqlTestHelper();
-        secondaryMySqlTestHelper.installCustomMySqlTestHelper(new MySQLHelperPlugin());
-        TestMySqlConfig secondartMySqlConfig = TestMySqlConfig.withDefaults();
-        secondartMySqlConfig.setDatabase("test_me");
-        secondaryMySqlTestHelper.startMySql(secondartMySqlConfig);
     }
 
     @AfterAll
     public static void stopMySQL() {
-        primaryMySqlTestHelper.stopMySql();
-        secondaryMySqlTestHelper.stopMySql();
     }
 
     @AfterEach
@@ -72,23 +69,24 @@ public class MySqlEndToEndTestCase extends CommonBaseTestCase {
         databaseService.stopDatabase();
     }
 
-    public static void setupGuice() {
+    public void setupGuice(TestingMySqlConfig primaryMySqlConfig,
+                           TestingMySqlConfig secondaryMySqlConfig) {
 
         // Setup DB - datasource
         MySqlConfig dbConfig = new MySqlConfig();
         dbConfig.setDriverClassName("com.mysql.jdbc.Driver");
-        dbConfig.setJdbcUrl(primaryMySqlTestHelper.getMySqlConfig().getJdbcUrl());
-        dbConfig.setUsername(primaryMySqlTestHelper.getMySqlConfig().getUser());
-        dbConfig.setPassword(primaryMySqlTestHelper.getMySqlConfig().getPassword());
+        dbConfig.setJdbcUrl(primaryMySqlConfig.getJdbcUrl());
+        dbConfig.setUsername(primaryMySqlConfig.getUsername());
+        dbConfig.setPassword(primaryMySqlConfig.getPassword());
         dbConfig.setShowSql(false);
         MySqlConfigs mySqlConfigs = new MySqlConfigs();
         mySqlConfigs.addConfig(dbConfig);
 
         MySqlConfig dbConfigSecondary = new MySqlConfig();
         dbConfigSecondary.setDriverClassName("com.mysql.jdbc.Driver");
-        dbConfigSecondary.setJdbcUrl(secondaryMySqlTestHelper.getMySqlConfig().getJdbcUrl());
-        dbConfigSecondary.setUsername(secondaryMySqlTestHelper.getMySqlConfig().getUser());
-        dbConfigSecondary.setPassword(secondaryMySqlTestHelper.getMySqlConfig().getPassword());
+        dbConfigSecondary.setJdbcUrl(secondaryMySqlConfig.getJdbcUrl());
+        dbConfigSecondary.setUsername(secondaryMySqlConfig.getUsername());
+        dbConfigSecondary.setPassword(secondaryMySqlConfig.getPassword());
         dbConfigSecondary.setShowSql(false);
         mySqlConfigs.addConfig("secondary", dbConfigSecondary);
 
@@ -113,11 +111,12 @@ public class MySqlEndToEndTestCase extends CommonBaseTestCase {
 
     @Test
     @DisplayName("This will run all MySQL tests")
-    public void testMySQL() throws Exception {
-        main(null);
-    }
+    public void completeMySQLTest(
+            TestingMySqlConfig primaryMySqlConfig,
+            @TestingMySqlDataSource("other") TestingMySqlConfig secondaryMySqlConfig
+    ) throws Exception {
+        Assumptions.assumeTrue(primaryMySqlConfig.isRunning());
 
-    public static void main(String[] args) throws Exception {
         // Setup logging
         try {
             LoggingHelper.setupLogging();
@@ -135,14 +134,14 @@ public class MySqlEndToEndTestCase extends CommonBaseTestCase {
         startMySQL();
 
         // Setup dependencies
-        setupGuice();
+        setupGuice(primaryMySqlConfig, secondaryMySqlConfig);
 
         // Test 1 - Test default DB
         SimpleMysqlHelperTest simpleMysqlHelperTest = injector.getInstance(SimpleMysqlHelperTest.class);
         simpleMysqlHelperTest.runTest();
 
         // Test 2 - Test secondary DB if enabled
-        if (secondaryMySqlTestHelper.isMySqlRunning()) {
+        if (secondaryMySqlConfig.isRunning()) {
             try {
                 TransactionContext.getInstance().getContext().setDatasourceName("secondary");
                 simpleMysqlHelperTest.runTest();
@@ -157,7 +156,7 @@ public class MySqlEndToEndTestCase extends CommonBaseTestCase {
         transactionTest.testTransaction();
 
         // Test 4 - Test Multi Db
-        if (secondaryMySqlTestHelper.isMySqlRunning()) {
+        if (secondaryMySqlConfig.isRunning()) {
             validateMultiDb();
         }
 

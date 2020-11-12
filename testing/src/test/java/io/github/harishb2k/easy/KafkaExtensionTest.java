@@ -4,7 +4,7 @@ import ch.qos.logback.classic.Level;
 import io.gitbub.harishb2k.easy.helper.LoggingHelper;
 import io.gitbub.harishb2k.easy.helper.Safe;
 import io.github.harishb2k.easy.testing.kafka.IKafkaExtensionControl;
-import io.github.harishb2k.easy.testing.kafka.KafkaConfig;
+import io.github.harishb2k.easy.testing.kafka.TestingKafkaConfig;
 import io.github.harishb2k.easy.testing.kafka.KafkaExtension;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -46,7 +46,7 @@ public class KafkaExtensionTest {
     @DisplayName("Test to verify that KafkaExtension is able to start a new Kafka in docker or use existing running kafka")
     @Tag(DISABLE_IF_KAFKA_NOT_RUNNING)
     public void verifyDockerKafkaStartedAndMessageProduceAndConsumeIsWorking(
-            KafkaConfig kafkaConfig,
+            TestingKafkaConfig kafkaConfig,
             Producer<String, String> producer,
             Consumer<String, String> consumer,
             IKafkaExtensionControl kafkaExtensionControl
@@ -109,7 +109,7 @@ public class KafkaExtensionTest {
     @Test
     @Tag(DISABLE_IF_KAFKA_NOT_RUNNING)
     public void verifyNewKafkaIsNotLaunched(
-            KafkaConfig kafkaConfig,
+            TestingKafkaConfig kafkaConfig,
             Producer<String, String> producer,
             IKafkaExtensionControl kafkaExtensionControl
     ) {

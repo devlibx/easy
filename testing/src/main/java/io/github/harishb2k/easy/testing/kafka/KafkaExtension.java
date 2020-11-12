@@ -66,7 +66,7 @@ public class KafkaExtension implements ParameterResolver, BeforeAllCallback, Aft
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        return parameterContext.getParameter().getType() == KafkaConfig.class
+        return parameterContext.getParameter().getType() == TestingKafkaConfig.class
                 || parameterContext.getParameter().getType() == Producer.class
                 || parameterContext.getParameter().getType() == Consumer.class
                 || parameterContext.getParameter().getType() == IKafkaExtensionControl.class;
@@ -74,8 +74,8 @@ public class KafkaExtension implements ParameterResolver, BeforeAllCallback, Aft
 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        if (parameterContext.getParameter().getType() == KafkaConfig.class) {
-            KafkaConfig kafkaConfig = new KafkaConfig();
+        if (parameterContext.getParameter().getType() == TestingKafkaConfig.class) {
+            TestingKafkaConfig kafkaConfig = new TestingKafkaConfig();
             kafkaConfig.setRunning(false);
             if (isKafkaRunning()) {
                 kafkaConfig.setBrokers(getKafkaUrl());

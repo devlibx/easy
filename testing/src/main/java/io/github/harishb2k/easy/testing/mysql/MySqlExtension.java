@@ -65,7 +65,7 @@ public class MySqlExtension implements ParameterResolver, AfterEachCallback, Bef
         final String localMySQLName = "local_" + name;
 
         // MySQL config to run MySQL
-        MySqlConfig config = new MySqlConfig();
+        TestingMySqlConfig config = new TestingMySqlConfig();
         config.setHost(host);
         config.setPort(port);
         config.setDatabase(database);
@@ -129,7 +129,7 @@ public class MySqlExtension implements ParameterResolver, AfterEachCallback, Bef
     }
 
     private String findDataSourceNameFromMethodParameterAnnotation(ParameterContext parameterContext) {
-        MySqlDataSource dataSourceAnnotation = parameterContext.findAnnotation(MySqlDataSource.class).orElse(null);
+        TestingMySqlDataSource dataSourceAnnotation = parameterContext.findAnnotation(TestingMySqlDataSource.class).orElse(null);
         String datasourceName = DEFAULT_DATASOURCE_NAME;
         if (dataSourceAnnotation != null) {
             datasourceName = dataSourceAnnotation.value();
@@ -139,7 +139,7 @@ public class MySqlExtension implements ParameterResolver, AfterEachCallback, Bef
 
     @Override
     public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
-        boolean match = parameterContext.getParameter().getType() == MySqlConfig.class
+        boolean match = parameterContext.getParameter().getType() == TestingMySqlConfig.class
                 || parameterContext.getParameter().getType() == DataSource.class;
         if (match) {
             String name = findDataSourceNameFromMethodParameterAnnotation(parameterContext);
@@ -153,8 +153,8 @@ public class MySqlExtension implements ParameterResolver, AfterEachCallback, Bef
         String datasourceName = findDataSourceNameFromMethodParameterAnnotation(parameterContext);
         if (!Objects.equals(datasourceName, name)) return null;
 
-        if (parameterContext.getParameter().getType() == MySqlConfig.class) {
-            MySqlConfig config = new MySqlConfig();
+        if (parameterContext.getParameter().getType() == TestingMySqlConfig.class) {
+            TestingMySqlConfig config = new TestingMySqlConfig();
             config.setRunning(isMySqlRunning(datasourceName));
             if (config.isRunning()) {
                 config.setJdbcUrl(getJdbcUrl(datasourceName));
@@ -262,11 +262,11 @@ public class MySqlExtension implements ParameterResolver, AfterEachCallback, Bef
     }
 
     private static class LocalMySqlHolder {
-        private final MySqlConfig config;
+        private final TestingMySqlConfig config;
         private final HikariDataSource dataSource;
         private final String jdbcUrl;
 
-        public LocalMySqlHolder(MySqlConfig config) {
+        public LocalMySqlHolder(TestingMySqlConfig config) {
             this.config = config;
             this.jdbcUrl = String.format("jdbc:mysql://%s:%d/%s?useSSL=false", config.getHost(), config.getPort(), config.getDatabase());
             this.dataSource = getDatasource();
@@ -304,11 +304,11 @@ public class MySqlExtension implements ParameterResolver, AfterEachCallback, Bef
         private MySQLContainer mySQLContainer;
         public boolean mySqlContainerRunnable = false;
 
-        public DockerMySqlHolder(MySqlConfig config) {
+        public DockerMySqlHolder(TestingMySqlConfig config) {
             start(config);
         }
 
-        private void start(MySqlConfig config) {
+        private void start(TestingMySqlConfig config) {
             try {
                 log.info("Try to create a client for docker mysql - to see if we can use docker mysql");
                 mySQLContainer = (MySQLContainer) new MySQLContainer("mysql:5.5")

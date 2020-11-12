@@ -12,7 +12,7 @@ import io.github.harishb2k.easy.messaging.kafka.producer.KafkaBasedProducer;
 import io.github.harishb2k.easy.messaging.module.MessagingModule;
 import io.github.harishb2k.easy.messaging.producer.IProducer;
 import io.github.harishb2k.easy.messaging.service.IMessagingFactory;
-import io.github.harishb2k.easy.testing.kafka.KafkaConfig;
+import io.github.harishb2k.easy.testing.kafka.TestingKafkaConfig;
 import io.github.harishb2k.easy.testing.kafka.KafkaExtension;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
@@ -46,7 +46,7 @@ public class KafkaProducerConsumerTest {
     @Test
     @DisplayName("Run kafka and verify that messages are being sent")
     @Tag(DISABLE_IF_KAFKA_NOT_RUNNING)
-    public void verifyMessagesPostedToKafka(KafkaConfig kafkaConfig) {
+    public void verifyMessagesPostedToKafka(TestingKafkaConfig kafkaConfig) {
 
         KafkaMessagingTestConfig config = YamlUtils.readYaml("kafka_test_config.yml", KafkaMessagingTestConfig.class);
         if (kafkaConfig.isRunning()) {
@@ -74,7 +74,7 @@ public class KafkaProducerConsumerTest {
     @RepeatedTest(3)
     @DisplayName("Run kafka and verify that messages are being sent and consumer is able to get it")
     @Tag(DISABLE_IF_KAFKA_NOT_RUNNING)
-    public void verifyMessagesPostedToKafkaAreConsumed(KafkaConfig kafkaConfig) throws Exception {
+    public void verifyMessagesPostedToKafkaAreConsumed(TestingKafkaConfig kafkaConfig) throws Exception {
         final String topic = "some_topic_" + UUID.randomUUID().toString();
         // final String topic = "some_topic_8";
         KafkaMessagingTestConfig config = YamlUtils.readYaml("kafka_test_config.yml", KafkaMessagingTestConfig.class);
