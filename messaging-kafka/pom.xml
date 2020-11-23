@@ -8,7 +8,6 @@
         <version>0.0.45-SNAPSHOT</version>
     </parent>
     <artifactId>messaging-kafka</artifactId>
-    <version>0.0.45-SNAPSHOT</version>
     <name>messaging-kafka</name>
 
     <properties>
