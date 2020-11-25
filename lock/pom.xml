@@ -5,7 +5,7 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.harishb2k.easy</groupId>
-        <version>0.0.46</version>
+        <version>0.0.46-SNAPSHOT</version>
     </parent>
     <artifactId>lock</artifactId>
     <name>lock</name>
