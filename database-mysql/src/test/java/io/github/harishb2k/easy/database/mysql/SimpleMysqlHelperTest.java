@@ -1,6 +1,6 @@
-package io.github.harishb2k.easy.database.mysql;
+package io.github.devlibx.easy.database.mysql;
 
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,10 +1,10 @@
-package io.github.harishb2k.easy;
+package io.github.devlibx.easy;
 
 import ch.qos.logback.classic.Level;
-import io.gitbub.harishb2k.easy.helper.LoggingHelper;
-import io.github.harishb2k.easy.testing.kafka.IKafkaExtensionControl;
-import io.github.harishb2k.easy.testing.kafka.TestingKafkaConfig;
-import io.github.harishb2k.easy.testing.kafka.KafkaExtension;
+import io.gitbub.devlibx.easy.helper.LoggingHelper;
+import io.github.devlibx.easy.testing.kafka.IKafkaExtensionControl;
+import io.github.devlibx.easy.testing.kafka.TestingKafkaConfig;
+import io.github.devlibx.easy.testing.kafka.KafkaExtension;
 import org.apache.kafka.clients.consumer.internals.AbstractCoordinator;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.UUID;
 import java.util.concurrent.Future;
 
-import static io.github.harishb2k.easy.testing.kafka.KafkaExtension.DISABLE_IF_KAFKA_NOT_RUNNING;
+import static io.github.devlibx.easy.testing.kafka.KafkaExtension.DISABLE_IF_KAFKA_NOT_RUNNING;
 
 @ExtendWith(KafkaExtension.class)
 public class KafkaTest {

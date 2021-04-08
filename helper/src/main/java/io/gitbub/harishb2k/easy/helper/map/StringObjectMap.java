@@ -1,6 +1,6 @@
-package io.gitbub.harishb2k.easy.helper.map;
+package io.gitbub.devlibx.easy.helper.map;
 
-import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
+import io.gitbub.devlibx.easy.helper.json.JsonUtils;
 
 import java.util.HashMap;
 import java.util.List;

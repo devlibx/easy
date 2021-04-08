@@ -1,7 +1,7 @@
-package io.gitbub.harishb2k.easy.helper.json;
+package io.gitbub.devlibx.easy.helper.json;
 
-import io.gitbub.harishb2k.easy.helper.string.StringHelper;
-import io.gitbub.harishb2k.easy.helper.string.StringHelperTest.PojoClass;
+import io.gitbub.devlibx.easy.helper.string.StringHelper;
+import io.gitbub.devlibx.easy.helper.string.StringHelperTest.PojoClass;
 import junit.framework.TestCase;
 
 public class JsonUtilTest extends TestCase {

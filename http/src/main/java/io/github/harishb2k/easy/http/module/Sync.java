@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.http.module;
+package io.github.devlibx.easy.http.module;
 
 import com.google.inject.BindingAnnotation;
 

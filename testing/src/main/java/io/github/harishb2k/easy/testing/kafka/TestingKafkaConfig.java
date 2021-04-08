@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.testing.kafka;
+package io.github.devlibx.easy.testing.kafka;
 
 import lombok.Data;
 

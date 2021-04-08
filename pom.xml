@@ -2,7 +2,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.github.harishb2k.easy</groupId>
+    <groupId>io.github.devlibx.easy</groupId>
     <artifactId>easy</artifactId>
     <packaging>pom</packaging>
     <version>0.0.48-SNAPSHOT</version>
@@ -20,13 +20,13 @@
         <module>testing</module>
     </modules>
     <name>easy</name>
-    <url>https://github.com/harishb2k/easy</url>
+    <url>https://github.com/devlibx/easy</url>
     <description>A library which provides jave helpers</description>
 
     <scm>
-        <connection>scm:git:https://github.com/harishb2k/easy.git</connection>
-        <developerConnection>scm:git:https://github.com/harishb2k/easy.git</developerConnection>
-        <url>https://github.com/harishb2k/easy/tree/master</url>
+        <connection>scm:git:https://github.com/devlibx/easy.git</connection>
+        <developerConnection>scm:git:https://github.com/devlibx/easy.git</developerConnection>
+        <url>https://github.com/devlibx/easy/tree/master</url>
         <tag>0.0.45</tag>
     </scm>
 
@@ -711,7 +711,7 @@
             <name>Harish Bohara</name>
             <email>harish.bohara@gmail.com</email>
             <organization>Sonatype</organization>
-            <organizationUrl>https://github.com/harishb2k</organizationUrl>
+            <organizationUrl>https://github.com/devlibx</organizationUrl>
         </developer>
     </developers>
 </project>

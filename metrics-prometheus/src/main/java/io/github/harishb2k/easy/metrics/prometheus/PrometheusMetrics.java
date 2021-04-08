@@ -1,6 +1,6 @@
-package io.github.harishb2k.easy.metrics.prometheus;
+package io.github.devlibx.easy.metrics.prometheus;
 
-import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.Counter;
 import io.prometheus.client.Summary;

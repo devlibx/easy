@@ -1,8 +1,8 @@
-package io.github.harishb2k.easy.resilience;
+package io.github.devlibx.easy.resilience;
 
-import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
-import io.github.harishb2k.easy.resilience.exception.ExceptionUtil;
-import io.github.harishb2k.easy.resilience.exception.ResilienceException;
+import io.github.devlibx.easy.resilience.IResilienceManager.ResilienceCallConfig;
+import io.github.devlibx.easy.resilience.exception.ExceptionUtil;
+import io.github.devlibx.easy.resilience.exception.ResilienceException;
 import io.github.resilience4j.bulkhead.BulkheadConfig;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
@@ -24,8 +24,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.BiConsumer;
 
-import static io.github.harishb2k.easy.resilience.exception.ExceptionUtil.unwrapResilience4jException;
-import static io.github.harishb2k.easy.resilience.exception.ExceptionUtil.unwrapResilience4jExecutionException;
+import static io.github.devlibx.easy.resilience.exception.ExceptionUtil.unwrapResilience4jException;
+import static io.github.devlibx.easy.resilience.exception.ExceptionUtil.unwrapResilience4jExecutionException;
 
 public class ResilienceProcessor implements IResilienceProcessor {
     @Getter

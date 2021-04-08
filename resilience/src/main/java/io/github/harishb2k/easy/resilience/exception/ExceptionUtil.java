@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.resilience.exception;
+package io.github.devlibx.easy.resilience.exception;
 
 import io.github.resilience4j.bulkhead.BulkheadFullException;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;

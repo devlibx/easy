@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.database.mysql.config;
+package io.github.devlibx.easy.database.mysql.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.github.harishb2k.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
+import static io.github.devlibx.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

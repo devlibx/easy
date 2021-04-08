@@ -1,6 +1,6 @@
-package io.github.harishb2k.easy.http.util;
+package io.github.devlibx.easy.http.util;
 
-import io.github.harishb2k.easy.http.config.Config;
+import io.github.devlibx.easy.http.config.Config;
 import io.reactivex.rxjava3.core.Observable;
 
 public interface IEasyHttpImplementation {

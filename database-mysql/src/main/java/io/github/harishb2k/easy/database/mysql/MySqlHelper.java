@@ -1,9 +1,9 @@
-package io.github.harishb2k.easy.database.mysql;
+package io.github.devlibx.easy.database.mysql;
 
-import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
-import io.github.harishb2k.easy.database.exception.DatabaseExceptions.ExecuteException;
-import io.github.harishb2k.easy.database.exception.DatabaseExceptions.FindException;
-import io.github.harishb2k.easy.database.exception.DatabaseExceptions.PersistException;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
+import io.github.devlibx.easy.database.exception.DatabaseExceptions.ExecuteException;
+import io.github.devlibx.easy.database.exception.DatabaseExceptions.FindException;
+import io.github.devlibx.easy.database.exception.DatabaseExceptions.PersistException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;

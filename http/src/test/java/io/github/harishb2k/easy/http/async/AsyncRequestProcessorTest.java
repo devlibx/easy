@@ -1,17 +1,17 @@
-package io.github.harishb2k.easy.http.async;
+package io.github.devlibx.easy.http.async;
 
 import com.google.common.base.Strings;
-import io.gitbub.harishb2k.easy.helper.ParallelThread;
-import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
-import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
-import io.github.harishb2k.easy.http.BaseTestCase;
-import io.github.harishb2k.easy.http.config.Config;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
-import io.github.harishb2k.easy.http.sync.SyncRequestTest.Payload;
-import io.github.harishb2k.easy.http.util.Call;
-import io.github.harishb2k.easy.http.util.EasyHttp;
+import io.gitbub.devlibx.easy.helper.ParallelThread;
+import io.gitbub.devlibx.easy.helper.json.JsonUtils;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import io.github.devlibx.easy.http.BaseTestCase;
+import io.github.devlibx.easy.http.config.Config;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
+import io.github.devlibx.easy.http.sync.SyncRequestTest.Payload;
+import io.github.devlibx.easy.http.util.Call;
+import io.github.devlibx.easy.http.util.EasyHttp;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static io.github.harishb2k.easy.http.util.EasyHttp.callAsync;
+import static io.github.devlibx.easy.http.util.EasyHttp.callAsync;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

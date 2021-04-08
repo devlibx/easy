@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.http.config;
+package io.github.devlibx.easy.http.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;

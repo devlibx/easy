@@ -1,9 +1,9 @@
-package io.github.harishb2k.easy.testing.mysql;
+package io.github.devlibx.easy.testing.mysql;
 
 import ch.qos.logback.classic.Level;
 import com.zaxxer.hikari.HikariDataSource;
-import io.gitbub.harishb2k.easy.helper.LoggingHelper;
-import io.gitbub.harishb2k.easy.helper.Safe;
+import io.gitbub.devlibx.easy.helper.LoggingHelper;
+import io.gitbub.devlibx.easy.helper.Safe;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;

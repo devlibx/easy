@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.http.helper;
+package io.github.devlibx.easy.http.helper;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;

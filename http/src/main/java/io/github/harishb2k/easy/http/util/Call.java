@@ -1,8 +1,8 @@
-package io.github.harishb2k.easy.http.util;
+package io.github.devlibx.easy.http.util;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Strings;
-import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
+import io.gitbub.devlibx.easy.helper.json.JsonUtils;
 import io.vavr.Function0;
 import lombok.Data;
 

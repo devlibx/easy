@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper;
+package io.gitbub.devlibx.easy.helper;
 
 import com.google.inject.Injector;
 import com.google.inject.Key;

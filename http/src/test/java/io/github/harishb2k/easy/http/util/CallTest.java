@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.http.util;
+package io.github.devlibx.easy.http.util;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

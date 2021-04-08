@@ -1,10 +1,10 @@
-package io.github.harishb2k.easy.database.mysql.lock;
+package io.github.devlibx.easy.database.mysql.lock;
 
 import com.zaxxer.hikari.HikariDataSource;
-import io.gitbub.harishb2k.easy.helper.Safe;
-import io.github.harishb2k.easy.lock.IDistributedLock;
-import io.github.harishb2k.easy.lock.IDistributedLockService.ExistingLockWithNoOp;
-import io.github.harishb2k.easy.lock.config.LockConfig;
+import io.gitbub.devlibx.easy.helper.Safe;
+import io.github.devlibx.easy.lock.IDistributedLock;
+import io.github.devlibx.easy.lock.IDistributedLockService.ExistingLockWithNoOp;
+import io.github.devlibx.easy.lock.config.LockConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 

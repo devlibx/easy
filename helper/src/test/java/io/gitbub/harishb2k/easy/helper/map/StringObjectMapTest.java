@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper.map;
+package io.gitbub.devlibx.easy.helper.map;
 
 import junit.framework.TestCase;
 

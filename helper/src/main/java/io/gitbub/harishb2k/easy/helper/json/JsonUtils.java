@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper.json;
+package io.gitbub.devlibx.easy.helper.json;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -6,8 +6,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
-import io.gitbub.harishb2k.easy.helper.string.StringHelper;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import io.gitbub.devlibx.easy.helper.string.StringHelper;
 
 import java.util.List;
 import java.util.Map;

@@ -1,6 +1,6 @@
-package io.github.harishb2k.easy.messaging.producer;
+package io.github.devlibx.easy.messaging.producer;
 
-import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 
 import java.util.Optional;
 

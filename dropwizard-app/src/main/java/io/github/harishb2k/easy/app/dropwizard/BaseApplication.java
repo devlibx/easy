@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.app.dropwizard;
+package io.github.devlibx.easy.app.dropwizard;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
@@ -8,11 +8,11 @@ import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
-import io.gitbub.harishb2k.easy.helper.metrics.IMetrics.InvalidRegistryTypeFoundException;
-import io.github.harishb2k.easy.app.dropwizard.proto.ProtobufBundle;
-import io.github.harishb2k.easy.metrics.prometheus.PrometheusMetrics;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics.InvalidRegistryTypeFoundException;
+import io.github.devlibx.easy.app.dropwizard.proto.ProtobufBundle;
+import io.github.devlibx.easy.metrics.prometheus.PrometheusMetrics;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
 import io.prometheus.client.exporter.MetricsServlet;

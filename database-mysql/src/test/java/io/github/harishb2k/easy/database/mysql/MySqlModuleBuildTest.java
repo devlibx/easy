@@ -1,12 +1,12 @@
-package io.github.harishb2k.easy.database.mysql;
+package io.github.devlibx.easy.database.mysql;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.gitbub.harishb2k.easy.helper.CommonBaseTestCase;
-import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
-import io.github.harishb2k.easy.database.mysql.module.DatabaseMySQLModule;
-import io.github.harishb2k.easy.database.mysql.transaction.ITransactionManagerResolver;
+import io.gitbub.devlibx.easy.helper.CommonBaseTestCase;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
+import io.github.devlibx.easy.database.mysql.module.DatabaseMySQLModule;
+import io.github.devlibx.easy.database.mysql.transaction.ITransactionManagerResolver;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

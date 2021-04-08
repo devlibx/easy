@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper.metrics;
+package io.gitbub.devlibx.easy.helper.metrics;
 
 import com.google.inject.ImplementedBy;
 import lombok.extern.slf4j.Slf4j;

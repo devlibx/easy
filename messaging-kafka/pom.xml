@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>easy</artifactId>
-        <groupId>io.github.harishb2k.easy</groupId>
+        <groupId>io.github.devlibx.easy</groupId>
         <version>0.0.48-SNAPSHOT</version>
     </parent>
     <artifactId>messaging-kafka</artifactId>
@@ -16,7 +16,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.harishb2k.easy</groupId>
+            <groupId>io.github.devlibx.easy</groupId>
             <artifactId>messaging</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -26,7 +26,7 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.harishb2k.easy</groupId>
+            <groupId>io.github.devlibx.easy</groupId>
             <artifactId>testing</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

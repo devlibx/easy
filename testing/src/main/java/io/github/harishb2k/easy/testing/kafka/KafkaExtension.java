@@ -1,8 +1,8 @@
-package io.github.harishb2k.easy.testing.kafka;
+package io.github.devlibx.easy.testing.kafka;
 
 import ch.qos.logback.classic.Level;
-import io.gitbub.harishb2k.easy.helper.LoggingHelper;
-import io.gitbub.harishb2k.easy.helper.Safe;
+import io.gitbub.devlibx.easy.helper.LoggingHelper;
+import io.gitbub.devlibx.easy.helper.Safe;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.AdminClientConfig;

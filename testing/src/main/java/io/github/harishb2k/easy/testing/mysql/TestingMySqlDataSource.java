@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.testing.mysql;
+package io.github.devlibx.easy.testing.mysql;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

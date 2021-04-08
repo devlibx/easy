@@ -1,9 +1,9 @@
-package io.github.harishb2k.easy.database.mysql;
+package io.github.devlibx.easy.database.mysql;
 
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import io.gitbub.harishb2k.easy.helper.Safe;
-import io.github.harishb2k.easy.lock.DistributedLock;
-import io.github.harishb2k.easy.lock.IDistributedLockService.NoOpDistributedLockIdResolver;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
+import io.gitbub.devlibx.easy.helper.Safe;
+import io.github.devlibx.easy.lock.DistributedLock;
+import io.github.devlibx.easy.lock.IDistributedLockService.NoOpDistributedLockIdResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static io.github.harishb2k.easy.lock.IDistributedLockService.NO_OP_LOCK_NAME;
+import static io.github.devlibx.easy.lock.IDistributedLockService.NO_OP_LOCK_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;

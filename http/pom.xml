@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <artifactId>easy</artifactId>
-        <groupId>io.github.harishb2k.easy</groupId>
+        <groupId>io.github.devlibx.easy</groupId>
         <version>0.0.48-SNAPSHOT</version>
     </parent>
     <artifactId>http</artifactId>
@@ -45,12 +45,12 @@
 
         <!-- Helper -->
         <dependency>
-            <groupId>io.github.harishb2k.easy</groupId>
+            <groupId>io.github.devlibx.easy</groupId>
             <artifactId>helper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.harishb2k.easy</groupId>
+            <groupId>io.github.devlibx.easy</groupId>
             <artifactId>resilience</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -60,7 +60,7 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.harishb2k.easy</groupId>
+            <groupId>io.github.devlibx.easy</groupId>
             <artifactId>helper</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

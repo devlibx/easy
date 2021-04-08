@@ -1,6 +1,6 @@
-package io.github.harishb2k.easy.http.helper;
+package io.github.devlibx.easy.http.helper;
 
-import io.github.harishb2k.easy.http.config.Api;
+import io.github.devlibx.easy.http.config.Api;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.messaging.module;
+package io.github.devlibx.easy.messaging.module;
 
 import com.google.inject.AbstractModule;
 

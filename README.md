@@ -5,7 +5,7 @@
   <easy.version>1.0.40</adrastea.version>
 </properties>
 
-<!-- Get the latest version from https://mvnrepository.com/artifact/io.github.harishb2k.easy/http -->
+<!-- Get the latest version from https://mvnrepository.com/artifact/io.github.devlibx.easy/http -->
 ```
 
 ## Easy Http 
@@ -14,7 +14,7 @@ Http Module provides API to make HTTP calls. It ensures that APIs are called wit
 > Maven Dependency
 ```xml
 <dependency>
-  <groupId>io.github.harishb2k.easy</groupId>
+  <groupId>io.github.devlibx.easy</groupId>
   <artifactId>http</artifactId>
   <version>${easy.version}</version>
 </dependency>
@@ -68,19 +68,19 @@ AddUserResponse response = EasyHttp.callSync(
 ##### Example
 
 ```java
-package io.github.harishb2k.easy.http;
+package io.github.devlibx.easy.http;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import io.gitbub.harishb2k.easy.helper.LoggingHelper;
-import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
-import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
-import io.github.harishb2k.easy.http.config.Config;
-import io.github.harishb2k.easy.http.module.EasyHttpModule;
-import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
-import io.github.harishb2k.easy.http.util.Call;
-import io.github.harishb2k.easy.http.util.EasyHttp;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
+import io.gitbub.devlibx.easy.helper.LoggingHelper;
+import io.gitbub.devlibx.easy.helper.json.JsonUtils;
+import io.gitbub.devlibx.easy.helper.yaml.YamlUtils;
+import io.github.devlibx.easy.http.config.Config;
+import io.github.devlibx.easy.http.module.EasyHttpModule;
+import io.github.devlibx.easy.http.sync.SyncRequestProcessor;
+import io.github.devlibx.easy.http.util.Call;
+import io.github.devlibx.easy.http.util.EasyHttp;
 import junit.framework.TestCase;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.log4j.Logger;
@@ -183,12 +183,12 @@ MySQL Helper
 ===
 database-mysql module provides support for easy MySQL helper.
 ```shell script
-See "io.github.harishb2k.easy.database.mysql.ExampleApp" example
+See "io.github.devlibx.easy.database.mysql.ExampleApp" example
 ``` 
 ```xml
 <!-- POM Dependency -->
 <dependency>
-  <groupId>io.github.harishb2k.easy</groupId>
+  <groupId>io.github.devlibx.easy</groupId>
   <artifactId>database-mysql</artifactId>
   <version>${easy.version}</version>
 </dependency>
@@ -255,11 +255,11 @@ This module provides a distributed lock e.g. a MySQL based distributed lock is i
 Note - you will see MySQL and database dependency in the example code.  
  
 ```java
-package com.harishb2k.pack.resources.lock;
+package com.devlibx.pack.resources.lock;
 
-import io.github.harishb2k.easy.lock.DistributedLock;
-import io.github.harishb2k.easy.lock.IDistributedLock;
-import io.github.harishb2k.easy.lock.IDistributedLockIdResolver;
+import io.github.devlibx.easy.lock.DistributedLock;
+import io.github.devlibx.easy.lock.IDistributedLock;
+import io.github.devlibx.easy.lock.IDistributedLockIdResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;
 
@@ -357,7 +357,7 @@ Convert Java object to JSON string
 ```xml
 <!-- POM Dependency -->
 <dependency>
-  <groupId>io.github.harishb2k.easy</groupId>
+  <groupId>io.github.devlibx.easy</groupId>
   <artifactId>helper</artifactId>
   <version>${easy.version}</version>
 </dependency>

@@ -3,7 +3,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>easy</artifactId>
-        <groupId>io.github.harishb2k.easy</groupId>
+        <groupId>io.github.devlibx.easy</groupId>
         <version>0.0.48-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -12,17 +12,17 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.github.harishb2k.easy</groupId>
+            <groupId>io.github.devlibx.easy</groupId>
             <artifactId>database</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.harishb2k.easy</groupId>
+            <groupId>io.github.devlibx.easy</groupId>
             <artifactId>helper</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.github.harishb2k.easy</groupId>
+            <groupId>io.github.devlibx.easy</groupId>
             <artifactId>lock</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -49,7 +49,7 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.harishb2k.easy</groupId>
+            <groupId>io.github.devlibx.easy</groupId>
             <artifactId>helper</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
@@ -67,7 +67,7 @@
         </dependency>
 
         <dependency>
-            <groupId>io.github.harishb2k.easy</groupId>
+            <groupId>io.github.devlibx.easy</groupId>
             <artifactId>testing</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>

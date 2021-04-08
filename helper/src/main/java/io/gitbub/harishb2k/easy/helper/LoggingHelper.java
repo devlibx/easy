@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper;
+package io.gitbub.devlibx.easy.helper;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -38,7 +38,7 @@ public class LoggingHelper {
             console.activateOptions();
             // Logger.getRootLogger().addAppender(console);
             Logger.getRootLogger().setLevel(INFO);
-            Logger.getLogger("io.github.harishb2k.easy.http.sync").setLevel(OFF);
+            Logger.getLogger("io.github.devlibx.easy.http.sync").setLevel(OFF);
             Logger.getLogger(LocalHttpServer.class).setLevel(INFO);*/
         }
     }

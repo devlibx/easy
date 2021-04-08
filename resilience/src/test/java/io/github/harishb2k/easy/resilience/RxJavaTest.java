@@ -1,6 +1,6 @@
-package io.github.harishb2k.easy.resilience;
+package io.github.devlibx.easy.resilience;
 
-import io.gitbub.harishb2k.easy.helper.CommonBaseTestCase;
+import io.gitbub.devlibx.easy.helper.CommonBaseTestCase;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkhead;
 import io.github.resilience4j.bulkhead.ThreadPoolBulkheadConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;

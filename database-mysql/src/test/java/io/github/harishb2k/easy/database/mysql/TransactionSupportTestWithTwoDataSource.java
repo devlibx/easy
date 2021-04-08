@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.database.mysql;
+package io.github.devlibx.easy.database.mysql;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -12,7 +12,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.UUID;
 
-import static io.github.harishb2k.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
+import static io.github.devlibx.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Slf4j

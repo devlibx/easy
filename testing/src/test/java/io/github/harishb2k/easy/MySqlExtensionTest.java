@@ -1,8 +1,8 @@
-package io.github.harishb2k.easy;
+package io.github.devlibx.easy;
 
-import io.github.harishb2k.easy.testing.mysql.TestingMySqlConfig;
-import io.github.harishb2k.easy.testing.mysql.TestingMySqlDataSource;
-import io.github.harishb2k.easy.testing.mysql.MySqlExtension;
+import io.github.devlibx.easy.testing.mysql.TestingMySqlConfig;
+import io.github.devlibx.easy.testing.mysql.TestingMySqlDataSource;
+import io.github.devlibx.easy.testing.mysql.MySqlExtension;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

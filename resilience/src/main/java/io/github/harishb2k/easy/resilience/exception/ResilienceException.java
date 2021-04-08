@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.resilience.exception;
+package io.github.devlibx.easy.resilience.exception;
 
 public class ResilienceException extends RuntimeException {
     public ResilienceException(String message, Throwable e) {

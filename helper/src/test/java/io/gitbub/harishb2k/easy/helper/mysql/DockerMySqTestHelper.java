@@ -1,6 +1,6 @@
-package io.gitbub.harishb2k.easy.helper.mysql;
+package io.gitbub.devlibx.easy.helper.mysql;
 
-import io.gitbub.harishb2k.easy.helper.Safe;
+import io.gitbub.devlibx.easy.helper.Safe;
 import lombok.extern.slf4j.Slf4j;
 import org.testcontainers.containers.ContainerLaunchException;
 import org.testcontainers.containers.MySQLContainer;

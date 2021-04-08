@@ -1,12 +1,12 @@
-package io.gitbub.harishb2k.easy.helper.yaml;
+package io.gitbub.devlibx.easy.helper.yaml;
 
-import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
-import io.gitbub.harishb2k.easy.helper.string.StringHelper;
+import io.gitbub.devlibx.easy.helper.json.JsonUtils;
+import io.gitbub.devlibx.easy.helper.string.StringHelper;
 import org.yaml.snakeyaml.Yaml;
 
 import java.util.Map;
 
-import static io.gitbub.harishb2k.easy.helper.file.FileHelper.readStream;
+import static io.gitbub.devlibx.easy.helper.file.FileHelper.readStream;
 
 public class YamlUtils {
     /**

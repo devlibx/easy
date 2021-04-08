@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper.healthcheck;
+package io.gitbub.devlibx.easy.helper.healthcheck;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.database.exception;
+package io.github.devlibx.easy.database.exception;
 
 public interface DatabaseExceptions {
 

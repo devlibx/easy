@@ -1,12 +1,12 @@
-package io.github.harishb2k.easy.http.util;
+package io.github.devlibx.easy.http.util;
 
-import io.github.harishb2k.easy.http.config.Config;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyBadRequestException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyInternalServerErrorException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
+import io.github.devlibx.easy.http.config.Config;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyBadRequestException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyInternalServerErrorException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyResilienceException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
 import io.reactivex.rxjava3.core.Observable;
 
 public class EasyHttp {

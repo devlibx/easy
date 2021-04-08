@@ -1,8 +1,8 @@
-package io.github.harishb2k.easy.http.helper;
+package io.github.devlibx.easy.http.helper;
 
-import io.gitbub.harishb2k.easy.helper.Safe;
-import io.github.harishb2k.easy.http.config.Api;
-import io.github.harishb2k.easy.http.config.Server;
+import io.gitbub.devlibx.easy.helper.Safe;
+import io.github.devlibx.easy.http.config.Api;
+import io.github.devlibx.easy.http.config.Server;
 import io.opentracing.contrib.apache.http.client.TracingHttpClientBuilder;
 import io.opentracing.util.GlobalTracer;
 import lombok.extern.slf4j.Slf4j;

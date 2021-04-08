@@ -1,9 +1,9 @@
-package io.github.harishb2k.easy.database.mysql.transaction;
+package io.github.devlibx.easy.database.mysql.transaction;
 
 import com.google.inject.Provider;
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import io.github.harishb2k.easy.database.mysql.DataSourceFactory;
-import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext.Context;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
+import io.github.devlibx.easy.database.mysql.DataSourceFactory;
+import io.github.devlibx.easy.database.mysql.transaction.TransactionContext.Context;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

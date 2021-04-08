@@ -1,26 +1,26 @@
-package io.github.harishb2k.easy.http.util;
+package io.github.devlibx.easy.http.util;
 
 import com.google.inject.Key;
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import io.gitbub.harishb2k.easy.helper.Safe;
-import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
-import io.github.harishb2k.easy.http.IRequestProcessor;
-import io.github.harishb2k.easy.http.RequestObject;
-import io.github.harishb2k.easy.http.config.Config;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyBadRequestException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyInternalServerErrorException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceException;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
-import io.github.harishb2k.easy.http.module.Async;
-import io.github.harishb2k.easy.http.module.Sync;
-import io.github.harishb2k.easy.http.registry.ApiRegistry;
-import io.github.harishb2k.easy.http.registry.ServerRegistry;
-import io.github.harishb2k.easy.resilience.IResilienceManager;
-import io.github.harishb2k.easy.resilience.IResilienceManager.ResilienceCallConfig;
-import io.github.harishb2k.easy.resilience.IResilienceProcessor;
-import io.github.harishb2k.easy.resilience.ResilienceManager;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
+import io.gitbub.devlibx.easy.helper.Safe;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
+import io.github.devlibx.easy.http.IRequestProcessor;
+import io.github.devlibx.easy.http.RequestObject;
+import io.github.devlibx.easy.http.config.Config;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyBadRequestException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyInternalServerErrorException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyRequestTimeOutException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyResilienceException;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyResilienceRequestTimeoutException;
+import io.github.devlibx.easy.http.module.Async;
+import io.github.devlibx.easy.http.module.Sync;
+import io.github.devlibx.easy.http.registry.ApiRegistry;
+import io.github.devlibx.easy.http.registry.ServerRegistry;
+import io.github.devlibx.easy.resilience.IResilienceManager;
+import io.github.devlibx.easy.resilience.IResilienceManager.ResilienceCallConfig;
+import io.github.devlibx.easy.resilience.IResilienceProcessor;
+import io.github.devlibx.easy.resilience.ResilienceManager;
 import io.reactivex.rxjava3.core.Observable;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static io.github.harishb2k.easy.http.exception.EasyHttpExceptions.easyEasyResilienceException;
+import static io.github.devlibx.easy.http.exception.EasyHttpExceptions.easyEasyResilienceException;
 
 @SuppressWarnings({"EmptyTryBlock", "CatchMayIgnoreException", "ConstantConditions"})
 @Slf4j

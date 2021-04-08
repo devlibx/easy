@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.lock;
+package io.github.devlibx.easy.lock;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

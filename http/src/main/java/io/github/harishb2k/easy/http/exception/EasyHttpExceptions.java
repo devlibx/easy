@@ -1,11 +1,11 @@
-package io.github.harishb2k.easy.http.exception;
+package io.github.devlibx.easy.http.exception;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.github.harishb2k.easy.http.ResponseObject;
-import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
-import io.github.harishb2k.easy.resilience.exception.OverflowException;
-import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
-import io.github.harishb2k.easy.resilience.exception.ResilienceException;
+import io.github.devlibx.easy.http.ResponseObject;
+import io.github.devlibx.easy.resilience.exception.CircuitOpenException;
+import io.github.devlibx.easy.resilience.exception.OverflowException;
+import io.github.devlibx.easy.resilience.exception.RequestTimeoutException;
+import io.github.devlibx.easy.resilience.exception.ResilienceException;
 import io.netty.handler.timeout.ReadTimeoutException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

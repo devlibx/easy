@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper.mysql;
+package io.gitbub.devlibx.easy.helper.mysql;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

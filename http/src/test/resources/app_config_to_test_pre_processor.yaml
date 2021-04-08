@@ -35,5 +35,5 @@ apis:
     rps: 300
     async: true
     configPreProcessors:
-      - io.github.harishb2k.easy.http.TestApiConfigPreProcessor
-      - io.github.harishb2k.easy.http.helper.ConcurrencyApiConfigPreProcessor
+      - io.github.devlibx.easy.http.TestApiConfigPreProcessor
+      - io.github.devlibx.easy.http.helper.ConcurrencyApiConfigPreProcessor

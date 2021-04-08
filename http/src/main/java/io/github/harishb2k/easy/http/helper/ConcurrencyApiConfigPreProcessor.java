@@ -1,7 +1,7 @@
-package io.github.harishb2k.easy.http.helper;
+package io.github.devlibx.easy.http.helper;
 
-import io.github.harishb2k.easy.http.IApiConfigPreProcessor;
-import io.github.harishb2k.easy.http.config.Api;
+import io.github.devlibx.easy.http.IApiConfigPreProcessor;
+import io.github.devlibx.easy.http.config.Api;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

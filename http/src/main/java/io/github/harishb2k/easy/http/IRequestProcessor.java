@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.http;
+package io.github.devlibx.easy.http;
 
 import io.reactivex.rxjava3.core.Observable;
 

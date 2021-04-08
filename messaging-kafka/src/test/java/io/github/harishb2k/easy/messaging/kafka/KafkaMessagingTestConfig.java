@@ -1,7 +1,7 @@
-package io.github.harishb2k.easy.messaging.kafka;
+package io.github.devlibx.easy.messaging.kafka;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.harishb2k.easy.messaging.config.MessagingConfigs;
+import io.github.devlibx.easy.messaging.config.MessagingConfigs;
 import lombok.Data;
 
 @Data

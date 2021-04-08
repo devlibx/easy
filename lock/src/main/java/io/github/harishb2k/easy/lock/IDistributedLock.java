@@ -1,6 +1,6 @@
-package io.github.harishb2k.easy.lock;
+package io.github.devlibx.easy.lock;
 
-import io.github.harishb2k.easy.lock.config.LockConfig;
+import io.github.devlibx.easy.lock.config.LockConfig;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

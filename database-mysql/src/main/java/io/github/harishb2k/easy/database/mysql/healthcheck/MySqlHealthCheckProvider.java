@@ -1,8 +1,8 @@
-package io.github.harishb2k.easy.database.mysql.healthcheck;
+package io.github.devlibx.easy.database.mysql.healthcheck;
 
-import io.gitbub.harishb2k.easy.helper.healthcheck.IHealthCheckProvider;
-import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
-import io.github.harishb2k.easy.database.mysql.DataSourceFactory;
+import io.gitbub.devlibx.easy.helper.healthcheck.IHealthCheckProvider;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import io.github.devlibx.easy.database.mysql.DataSourceFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 

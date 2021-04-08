@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.database;
+package io.github.devlibx.easy.database;
 
 public interface IDatabaseService {
     void startDatabase();

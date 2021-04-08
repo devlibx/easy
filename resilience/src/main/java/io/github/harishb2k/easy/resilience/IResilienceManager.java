@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.resilience;
+package io.github.devlibx.easy.resilience;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

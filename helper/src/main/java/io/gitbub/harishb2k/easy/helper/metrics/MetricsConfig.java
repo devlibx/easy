@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper.metrics;
+package io.gitbub.devlibx.easy.helper.metrics;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

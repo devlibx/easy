@@ -1,11 +1,11 @@
-package io.github.harishb2k.easy.http.config;
+package io.github.devlibx.easy.http.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Strings;
-import io.gitbub.harishb2k.easy.helper.string.StringHelper;
-import io.github.harishb2k.easy.http.IApiConfigPreProcessor;
-import io.github.harishb2k.easy.http.RequestObject;
-import io.github.harishb2k.easy.http.helper.ConcurrencyApiConfigPreProcessor;
+import io.gitbub.devlibx.easy.helper.string.StringHelper;
+import io.github.devlibx.easy.http.IApiConfigPreProcessor;
+import io.github.devlibx.easy.http.RequestObject;
+import io.github.devlibx.easy.http.helper.ConcurrencyApiConfigPreProcessor;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

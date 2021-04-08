@@ -1,9 +1,9 @@
-package io.github.harishb2k.easy.messaging.kafka.consumer;
+package io.github.devlibx.easy.messaging.kafka.consumer;
 
-import io.gitbub.harishb2k.easy.helper.Safe;
-import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
-import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
-import io.github.harishb2k.easy.messaging.consumer.IConsumer;
+import io.gitbub.devlibx.easy.helper.Safe;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
+import io.github.devlibx.easy.messaging.consumer.IConsumer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;

@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.lock.config;
+package io.github.devlibx.easy.lock.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;

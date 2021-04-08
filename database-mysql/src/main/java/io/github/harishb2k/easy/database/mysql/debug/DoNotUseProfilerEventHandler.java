@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.database.mysql.debug;
+package io.github.devlibx.easy.database.mysql.debug;
 
 import com.mysql.cj.api.ProfilerEvent;
 import com.mysql.cj.api.ProfilerEventHandler;

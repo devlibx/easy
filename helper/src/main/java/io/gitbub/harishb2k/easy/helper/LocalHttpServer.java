@@ -1,12 +1,12 @@
-package io.gitbub.harishb2k.easy.helper;
+package io.gitbub.devlibx.easy.helper;
 
 import com.google.common.base.Strings;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import io.gitbub.harishb2k.easy.helper.json.JsonUtils;
-import io.gitbub.harishb2k.easy.helper.string.StringHelper;
+import io.gitbub.devlibx.easy.helper.json.JsonUtils;
+import io.gitbub.devlibx.easy.helper.string.StringHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 

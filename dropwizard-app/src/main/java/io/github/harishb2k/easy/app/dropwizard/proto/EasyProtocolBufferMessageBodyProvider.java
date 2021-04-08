@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.app.dropwizard.proto;
+package io.github.devlibx.easy.app.dropwizard.proto;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;

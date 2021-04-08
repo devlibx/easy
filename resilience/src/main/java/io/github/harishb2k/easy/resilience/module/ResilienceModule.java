@@ -1,11 +1,11 @@
-package io.github.harishb2k.easy.resilience.module;
+package io.github.devlibx.easy.resilience.module;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
-import io.github.harishb2k.easy.resilience.IResilienceManager;
-import io.github.harishb2k.easy.resilience.IResilienceProcessor;
-import io.github.harishb2k.easy.resilience.ResilienceManager;
-import io.github.harishb2k.easy.resilience.ResilienceProcessor;
+import io.github.devlibx.easy.resilience.IResilienceManager;
+import io.github.devlibx.easy.resilience.IResilienceProcessor;
+import io.github.devlibx.easy.resilience.ResilienceManager;
+import io.github.devlibx.easy.resilience.ResilienceProcessor;
 
 public class ResilienceModule extends AbstractModule {
     @Override

@@ -1,12 +1,12 @@
-package io.github.harishb2k.easy.messaging.service;
+package io.github.devlibx.easy.messaging.service;
 
-import io.gitbub.harishb2k.easy.helper.Safe;
-import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
-import io.github.harishb2k.easy.messaging.config.MessagingConfigs;
-import io.github.harishb2k.easy.messaging.consumer.IConsumer;
-import io.github.harishb2k.easy.messaging.consumer.IConsumerService;
-import io.github.harishb2k.easy.messaging.producer.IProducer;
-import io.github.harishb2k.easy.messaging.producer.IProducerService;
+import io.gitbub.devlibx.easy.helper.Safe;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import io.github.devlibx.easy.messaging.config.MessagingConfigs;
+import io.github.devlibx.easy.messaging.consumer.IConsumer;
+import io.github.devlibx.easy.messaging.consumer.IConsumerService;
+import io.github.devlibx.easy.messaging.producer.IProducer;
+import io.github.devlibx.easy.messaging.producer.IProducerService;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;

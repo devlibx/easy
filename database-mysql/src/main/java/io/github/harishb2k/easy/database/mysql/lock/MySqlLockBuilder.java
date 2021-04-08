@@ -1,9 +1,9 @@
-package io.github.harishb2k.easy.database.mysql.lock;
+package io.github.devlibx.easy.database.mysql.lock;
 
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import io.github.harishb2k.easy.lock.IDistributedLock;
-import io.github.harishb2k.easy.lock.ILockBuilder;
-import io.github.harishb2k.easy.lock.config.LockConfig;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
+import io.github.devlibx.easy.lock.IDistributedLock;
+import io.github.devlibx.easy.lock.ILockBuilder;
+import io.github.devlibx.easy.lock.config.LockConfig;
 
 public class MySqlLockBuilder implements ILockBuilder {
     @Override

@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper.string;
+package io.gitbub.devlibx.easy.helper.string;
 
 import junit.framework.TestCase;
 import lombok.Data;

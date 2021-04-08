@@ -1,19 +1,19 @@
-package io.github.harishb2k.easy.messaging.kafka;
+package io.github.devlibx.easy.messaging.kafka;
 
 import ch.qos.logback.classic.Level;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.gitbub.harishb2k.easy.helper.LoggingHelper;
-import io.gitbub.harishb2k.easy.helper.yaml.YamlUtils;
-import io.github.harishb2k.easy.messaging.config.MessagingConfigs;
-import io.github.harishb2k.easy.messaging.kafka.module.MessagingKafkaModule;
-import io.github.harishb2k.easy.messaging.kafka.producer.KafkaBasedProducer;
-import io.github.harishb2k.easy.messaging.module.MessagingModule;
-import io.github.harishb2k.easy.messaging.producer.IProducer;
-import io.github.harishb2k.easy.messaging.service.IMessagingFactory;
-import io.github.harishb2k.easy.testing.kafka.TestingKafkaConfig;
-import io.github.harishb2k.easy.testing.kafka.KafkaExtension;
+import io.gitbub.devlibx.easy.helper.LoggingHelper;
+import io.gitbub.devlibx.easy.helper.yaml.YamlUtils;
+import io.github.devlibx.easy.messaging.config.MessagingConfigs;
+import io.github.devlibx.easy.messaging.kafka.module.MessagingKafkaModule;
+import io.github.devlibx.easy.messaging.kafka.producer.KafkaBasedProducer;
+import io.github.devlibx.easy.messaging.module.MessagingModule;
+import io.github.devlibx.easy.messaging.producer.IProducer;
+import io.github.devlibx.easy.messaging.service.IMessagingFactory;
+import io.github.devlibx.easy.testing.kafka.TestingKafkaConfig;
+import io.github.devlibx.easy.testing.kafka.KafkaExtension;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.BeforeClass;
 import org.junit.jupiter.api.Assertions;
@@ -28,7 +28,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static io.github.harishb2k.easy.testing.kafka.KafkaExtension.DISABLE_IF_KAFKA_NOT_RUNNING;
+import static io.github.devlibx.easy.testing.kafka.KafkaExtension.DISABLE_IF_KAFKA_NOT_RUNNING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

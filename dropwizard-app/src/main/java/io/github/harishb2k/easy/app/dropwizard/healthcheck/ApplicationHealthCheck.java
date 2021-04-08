@@ -1,9 +1,9 @@
-package io.github.harishb2k.easy.app.dropwizard.healthcheck;
+package io.github.devlibx.easy.app.dropwizard.healthcheck;
 
 import com.codahale.metrics.health.HealthCheck;
 import io.dropwizard.setup.Environment;
-import io.gitbub.harishb2k.easy.helper.healthcheck.IHealthCheckProvider;
-import io.gitbub.harishb2k.easy.helper.string.StringHelper;
+import io.gitbub.devlibx.easy.helper.healthcheck.IHealthCheckProvider;
+import io.gitbub.devlibx.easy.helper.string.StringHelper;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;

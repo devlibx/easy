@@ -1,17 +1,17 @@
-package io.github.harishb2k.easy.http.module;
+package io.github.devlibx.easy.http.module;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
-import io.github.harishb2k.easy.http.IRequestProcessor;
-import io.github.harishb2k.easy.http.async.AsyncRequestProcessor;
-import io.github.harishb2k.easy.http.helper.AsyncHttpClientBuilder;
-import io.github.harishb2k.easy.http.helper.HttpClientBuilder;
-import io.github.harishb2k.easy.http.helper.IClientBuilder;
-import io.github.harishb2k.easy.http.registry.ApiRegistry;
-import io.github.harishb2k.easy.http.registry.ServerRegistry;
-import io.github.harishb2k.easy.http.sync.DefaultHttpResponseProcessor;
-import io.github.harishb2k.easy.http.sync.IHttpResponseProcessor;
-import io.github.harishb2k.easy.http.sync.SyncRequestProcessor;
+import io.github.devlibx.easy.http.IRequestProcessor;
+import io.github.devlibx.easy.http.async.AsyncRequestProcessor;
+import io.github.devlibx.easy.http.helper.AsyncHttpClientBuilder;
+import io.github.devlibx.easy.http.helper.HttpClientBuilder;
+import io.github.devlibx.easy.http.helper.IClientBuilder;
+import io.github.devlibx.easy.http.registry.ApiRegistry;
+import io.github.devlibx.easy.http.registry.ServerRegistry;
+import io.github.devlibx.easy.http.sync.DefaultHttpResponseProcessor;
+import io.github.devlibx.easy.http.sync.IHttpResponseProcessor;
+import io.github.devlibx.easy.http.sync.SyncRequestProcessor;
 
 public class EasyHttpModule extends AbstractModule {
     @Override

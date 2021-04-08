@@ -1,13 +1,13 @@
-package io.github.harishb2k.easy.http.registry;
+package io.github.devlibx.easy.http.registry;
 
 import com.google.inject.Inject;
-import io.gitbub.harishb2k.easy.helper.Safe;
-import io.github.harishb2k.easy.http.config.Api;
-import io.github.harishb2k.easy.http.config.Config;
-import io.github.harishb2k.easy.http.config.Server;
-import io.github.harishb2k.easy.http.helper.IClientBuilder;
-import io.github.harishb2k.easy.http.module.Async;
-import io.github.harishb2k.easy.http.module.Sync;
+import io.gitbub.devlibx.easy.helper.Safe;
+import io.github.devlibx.easy.http.config.Api;
+import io.github.devlibx.easy.http.config.Config;
+import io.github.devlibx.easy.http.config.Server;
+import io.github.devlibx.easy.http.helper.IClientBuilder;
+import io.github.devlibx.easy.http.module.Async;
+import io.github.devlibx.easy.http.module.Sync;
 import lombok.Getter;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.springframework.web.reactive.function.client.WebClient;

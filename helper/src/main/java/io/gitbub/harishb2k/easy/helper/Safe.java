@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper;
+package io.gitbub.devlibx.easy.helper;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;

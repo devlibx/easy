@@ -1,7 +1,7 @@
-package io.github.harishb2k.easy.lock;
+package io.github.devlibx.easy.lock;
 
 import com.google.inject.ImplementedBy;
-import io.github.harishb2k.easy.lock.IDistributedLock.LockRequest;
+import io.github.devlibx.easy.lock.IDistributedLock.LockRequest;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInvocation;

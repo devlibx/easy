@@ -1,11 +1,11 @@
-package io.github.harishb2k.easy.messaging.kafka.module;
+package io.github.devlibx.easy.messaging.kafka.module;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.MapBinder;
-import io.github.harishb2k.easy.messaging.consumer.IConsumerService;
-import io.github.harishb2k.easy.messaging.kafka.consumer.KafkaBasedConsumerService;
-import io.github.harishb2k.easy.messaging.kafka.producer.KafkaBasedProducerService;
-import io.github.harishb2k.easy.messaging.producer.IProducerService;
+import io.github.devlibx.easy.messaging.consumer.IConsumerService;
+import io.github.devlibx.easy.messaging.kafka.consumer.KafkaBasedConsumerService;
+import io.github.devlibx.easy.messaging.kafka.producer.KafkaBasedProducerService;
+import io.github.devlibx.easy.messaging.producer.IProducerService;
 
 public class MessagingKafkaModule extends AbstractModule {
     @Override

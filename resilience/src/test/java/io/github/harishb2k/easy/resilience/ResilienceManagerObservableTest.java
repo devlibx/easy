@@ -1,15 +1,15 @@
-package io.github.harishb2k.easy.resilience;
+package io.github.devlibx.easy.resilience;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import io.gitbub.harishb2k.easy.helper.CommonBaseTestCase;
-import io.gitbub.harishb2k.easy.helper.ParallelThread;
-import io.github.harishb2k.easy.resilience.ResilienceManagerTest.CustomException;
-import io.github.harishb2k.easy.resilience.exception.CircuitOpenException;
-import io.github.harishb2k.easy.resilience.exception.OverflowException;
-import io.github.harishb2k.easy.resilience.exception.RequestTimeoutException;
-import io.github.harishb2k.easy.resilience.module.ResilienceModule;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
+import io.gitbub.devlibx.easy.helper.CommonBaseTestCase;
+import io.gitbub.devlibx.easy.helper.ParallelThread;
+import io.github.devlibx.easy.resilience.ResilienceManagerTest.CustomException;
+import io.github.devlibx.easy.resilience.exception.CircuitOpenException;
+import io.github.devlibx.easy.resilience.exception.OverflowException;
+import io.github.devlibx.easy.resilience.exception.RequestTimeoutException;
+import io.github.devlibx.easy.resilience.module.ResilienceModule;
 import io.reactivex.rxjava3.core.Observable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

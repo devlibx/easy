@@ -1,13 +1,13 @@
-package io.github.harishb2k.easy.lock.interceptor;
+package io.github.devlibx.easy.lock.interceptor;
 
 import com.google.common.base.Strings;
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import io.github.harishb2k.easy.lock.DistributedLock;
-import io.github.harishb2k.easy.lock.IDistributedLock;
-import io.github.harishb2k.easy.lock.IDistributedLock.LockRequest;
-import io.github.harishb2k.easy.lock.IDistributedLockIdResolver;
-import io.github.harishb2k.easy.lock.IDistributedLockService;
-import io.github.harishb2k.easy.lock.IDistributedLockService.ExistingLockWithNoOp;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
+import io.github.devlibx.easy.lock.DistributedLock;
+import io.github.devlibx.easy.lock.IDistributedLock;
+import io.github.devlibx.easy.lock.IDistributedLock.LockRequest;
+import io.github.devlibx.easy.lock.IDistributedLockIdResolver;
+import io.github.devlibx.easy.lock.IDistributedLockService;
+import io.github.devlibx.easy.lock.IDistributedLockService.ExistingLockWithNoOp;
 import lombok.extern.slf4j.Slf4j;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;

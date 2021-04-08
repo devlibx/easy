@@ -1,6 +1,6 @@
-package io.github.harishb2k.easy.resilience;
+package io.github.devlibx.easy.resilience;
 
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.messaging.consumer;
+package io.github.devlibx.easy.messaging.consumer;
 
 public interface IConsumer {
 

@@ -1,9 +1,9 @@
-package io.github.harishb2k.easy.database.mysql.transaction;
+package io.github.devlibx.easy.database.mysql.transaction;
 
 import com.google.common.base.Strings;
 import org.springframework.transaction.annotation.Transactional;
 
-import static io.github.harishb2k.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
+import static io.github.devlibx.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
 
 /**
  * Resolve the name of the transaction manager to be used.

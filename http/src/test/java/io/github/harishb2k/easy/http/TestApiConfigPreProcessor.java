@@ -1,6 +1,6 @@
-package io.github.harishb2k.easy.http;
+package io.github.devlibx.easy.http;
 
-import io.github.harishb2k.easy.http.config.Api;
+import io.github.devlibx.easy.http.config.Api;
 
 public class TestApiConfigPreProcessor implements IApiConfigPreProcessor {
     @Override

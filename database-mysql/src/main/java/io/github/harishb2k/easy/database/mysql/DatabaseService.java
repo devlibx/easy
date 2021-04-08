@@ -1,7 +1,7 @@
-package io.github.harishb2k.easy.database.mysql;
+package io.github.devlibx.easy.database.mysql;
 
-import io.github.harishb2k.easy.database.IDatabaseService;
-import io.github.harishb2k.easy.database.mysql.config.MySqlConfigs;
+import io.github.devlibx.easy.database.IDatabaseService;
+import io.github.devlibx.easy.database.mysql.config.MySqlConfigs;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;

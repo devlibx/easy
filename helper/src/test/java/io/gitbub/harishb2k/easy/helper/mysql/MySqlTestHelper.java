@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper.mysql;
+package io.gitbub.devlibx.easy.helper.mysql;
 
 public class MySqlTestHelper implements IMySqlTestHelper {
     private DockerMySqTestHelper dockerMySqTestHelper;

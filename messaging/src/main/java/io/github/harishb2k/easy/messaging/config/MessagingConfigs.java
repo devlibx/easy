@@ -1,7 +1,7 @@
-package io.github.harishb2k.easy.messaging.config;
+package io.github.devlibx.easy.messaging.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import lombok.Data;
 
 import java.util.Map;

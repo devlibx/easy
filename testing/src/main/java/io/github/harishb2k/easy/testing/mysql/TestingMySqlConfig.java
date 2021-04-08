@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.testing.mysql;
+package io.github.devlibx.easy.testing.mysql;
 
 import lombok.Data;
 

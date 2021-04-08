@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.database.mysql;
+package io.github.devlibx.easy.database.mysql;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

@@ -1,11 +1,11 @@
-package io.github.harishb2k.easy.database.mysql;
+package io.github.devlibx.easy.database.mysql;
 
 import com.codahale.metrics.MetricRegistry;
 import com.google.common.base.Strings;
 import com.zaxxer.hikari.HikariDataSource;
-import io.gitbub.harishb2k.easy.helper.ApplicationContext;
-import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext;
-import io.github.harishb2k.easy.database.mysql.transaction.TransactionContext.Context;
+import io.gitbub.devlibx.easy.helper.ApplicationContext;
+import io.github.devlibx.easy.database.mysql.transaction.TransactionContext;
+import io.github.devlibx.easy.database.mysql.transaction.TransactionContext.Context;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static io.github.harishb2k.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
+import static io.github.devlibx.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
 
 @Slf4j
 public class DataSourceFactory {

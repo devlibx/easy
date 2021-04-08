@@ -1,7 +1,7 @@
-package io.gitbub.harishb2k.easy.helper.string;
+package io.gitbub.devlibx.easy.helper.string;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.gitbub.harishb2k.easy.helper.json.JsonUtil;
+import io.gitbub.devlibx.easy.helper.json.JsonUtil;
 import org.joda.time.DateTime;
 
 import javax.inject.Inject;

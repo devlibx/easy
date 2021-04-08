@@ -1,11 +1,11 @@
-package io.github.harishb2k.easy.metrics.prometheus;
+package io.github.devlibx.easy.metrics.prometheus;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Scopes;
-import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
-import io.gitbub.harishb2k.easy.helper.metrics.IMetrics.IMetricsLogger;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics.IMetricsLogger;
 import io.prometheus.client.Collector;
 import io.prometheus.client.CollectorRegistry;
 import org.junit.jupiter.api.BeforeEach;

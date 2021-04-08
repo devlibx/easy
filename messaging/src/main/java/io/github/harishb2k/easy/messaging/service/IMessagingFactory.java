@@ -1,8 +1,8 @@
-package io.github.harishb2k.easy.messaging.service;
+package io.github.devlibx.easy.messaging.service;
 
 import com.google.inject.ImplementedBy;
-import io.github.harishb2k.easy.messaging.consumer.IConsumer;
-import io.github.harishb2k.easy.messaging.producer.IProducer;
+import io.github.devlibx.easy.messaging.consumer.IConsumer;
+import io.github.devlibx.easy.messaging.producer.IProducer;
 
 import java.util.Optional;
 

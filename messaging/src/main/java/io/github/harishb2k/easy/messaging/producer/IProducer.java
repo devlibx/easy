@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.messaging.producer;
+package io.github.devlibx.easy.messaging.producer;
 
 public interface IProducer {
     /**

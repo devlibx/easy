@@ -1,12 +1,12 @@
-package io.github.harishb2k.easy.messaging.kafka.producer;
+package io.github.devlibx.easy.messaging.kafka.producer;
 
 import com.google.common.base.Strings;
-import io.gitbub.harishb2k.easy.helper.Safe;
-import io.gitbub.harishb2k.easy.helper.map.StringObjectMap;
-import io.gitbub.harishb2k.easy.helper.metrics.IMetrics;
-import io.gitbub.harishb2k.easy.helper.string.StringHelper;
-import io.github.harishb2k.easy.messaging.producer.IProducer;
-import io.github.harishb2k.easy.messaging.producer.IProducerService;
+import io.gitbub.devlibx.easy.helper.Safe;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
+import io.gitbub.devlibx.easy.helper.string.StringHelper;
+import io.github.devlibx.easy.messaging.producer.IProducer;
+import io.github.devlibx.easy.messaging.producer.IProducerService;
 
 import javax.inject.Inject;
 import java.util.Map;

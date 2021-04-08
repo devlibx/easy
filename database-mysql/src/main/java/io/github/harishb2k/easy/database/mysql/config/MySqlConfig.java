@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.database.mysql.config;
+package io.github.devlibx.easy.database.mysql.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.zaxxer.hikari.HikariDataSource;
@@ -35,7 +35,7 @@ public class MySqlConfig {
         // Used for logging/debugging
         if (showSql) {
             dataSource.addDataSourceProperty("logger", "Slf4JLogger");
-            dataSource.addDataSourceProperty("profilerEventHandler", "io.github.harishb2k.easy.database.mysql.debug.DoNotUseProfilerEventHandler");
+            dataSource.addDataSourceProperty("profilerEventHandler", "io.github.devlibx.easy.database.mysql.debug.DoNotUseProfilerEventHandler");
             dataSource.addDataSourceProperty("profileSQL", true);
         }
 

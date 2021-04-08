@@ -1,4 +1,4 @@
-package io.gitbub.harishb2k.easy.helper.file;
+package io.gitbub.devlibx.easy.helper.file;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;

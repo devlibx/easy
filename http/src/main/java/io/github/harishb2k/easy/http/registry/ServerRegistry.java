@@ -1,7 +1,7 @@
-package io.github.harishb2k.easy.http.registry;
+package io.github.devlibx.easy.http.registry;
 
-import io.github.harishb2k.easy.http.config.Config;
-import io.github.harishb2k.easy.http.config.Server;
+import io.github.devlibx.easy.http.config.Config;
+import io.github.devlibx.easy.http.config.Server;
 import lombok.Getter;
 
 import java.util.HashMap;

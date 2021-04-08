@@ -1,11 +1,11 @@
-package io.github.harishb2k.easy;
+package io.github.devlibx.easy;
 
 import ch.qos.logback.classic.Level;
-import io.gitbub.harishb2k.easy.helper.LoggingHelper;
-import io.gitbub.harishb2k.easy.helper.Safe;
-import io.github.harishb2k.easy.testing.kafka.IKafkaExtensionControl;
-import io.github.harishb2k.easy.testing.kafka.TestingKafkaConfig;
-import io.github.harishb2k.easy.testing.kafka.KafkaExtension;
+import io.gitbub.devlibx.easy.helper.LoggingHelper;
+import io.gitbub.devlibx.easy.helper.Safe;
+import io.github.devlibx.easy.testing.kafka.IKafkaExtensionControl;
+import io.github.devlibx.easy.testing.kafka.TestingKafkaConfig;
+import io.github.devlibx.easy.testing.kafka.KafkaExtension;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -27,7 +27,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static io.github.harishb2k.easy.testing.kafka.KafkaExtension.DISABLE_IF_KAFKA_NOT_RUNNING;
+import static io.github.devlibx.easy.testing.kafka.KafkaExtension.DISABLE_IF_KAFKA_NOT_RUNNING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 

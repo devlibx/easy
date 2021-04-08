@@ -1,14 +1,14 @@
-package io.github.harishb2k.easy.http.sync;
+package io.github.devlibx.easy.http.sync;
 
-import io.github.harishb2k.easy.http.ResponseObject;
-import io.github.harishb2k.easy.http.config.Api;
-import io.github.harishb2k.easy.http.config.Server;
-import io.github.harishb2k.easy.http.exception.EasyHttpExceptions;
+import io.github.devlibx.easy.http.ResponseObject;
+import io.github.devlibx.easy.http.config.Api;
+import io.github.devlibx.easy.http.config.Server;
+import io.github.devlibx.easy.http.exception.EasyHttpExceptions;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.util.EntityUtils;
 
-import static io.github.harishb2k.easy.http.config.Api.DEFAULT_ACCEPTABLE_CODES;
+import static io.github.devlibx.easy.http.config.Api.DEFAULT_ACCEPTABLE_CODES;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 @Slf4j

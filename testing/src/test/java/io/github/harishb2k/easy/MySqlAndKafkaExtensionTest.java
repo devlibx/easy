@@ -1,9 +1,9 @@
-package io.github.harishb2k.easy;
+package io.github.devlibx.easy;
 
-import io.github.harishb2k.easy.testing.kafka.TestingKafkaConfig;
-import io.github.harishb2k.easy.testing.kafka.KafkaExtension;
-import io.github.harishb2k.easy.testing.mysql.TestingMySqlConfig;
-import io.github.harishb2k.easy.testing.mysql.MySqlExtension;
+import io.github.devlibx.easy.testing.kafka.TestingKafkaConfig;
+import io.github.devlibx.easy.testing.kafka.KafkaExtension;
+import io.github.devlibx.easy.testing.mysql.TestingMySqlConfig;
+import io.github.devlibx.easy.testing.mysql.MySqlExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;

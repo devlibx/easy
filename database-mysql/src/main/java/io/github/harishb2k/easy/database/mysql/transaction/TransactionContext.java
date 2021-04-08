@@ -1,4 +1,4 @@
-package io.github.harishb2k.easy.database.mysql.transaction;
+package io.github.devlibx.easy.database.mysql.transaction;
 
 import lombok.Data;
 

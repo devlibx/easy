@@ -1,12 +1,12 @@
-package io.github.harishb2k.easy.lock.module;
+package io.github.devlibx.easy.lock.module;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Scopes;
 import com.google.inject.matcher.Matchers;
-import io.github.harishb2k.easy.lock.DistributedLock;
-import io.github.harishb2k.easy.lock.DistributedLockService;
-import io.github.harishb2k.easy.lock.IDistributedLockService;
-import io.github.harishb2k.easy.lock.interceptor.DistributedLockInterceptor;
+import io.github.devlibx.easy.lock.DistributedLock;
+import io.github.devlibx.easy.lock.DistributedLockService;
+import io.github.devlibx.easy.lock.IDistributedLockService;
+import io.github.devlibx.easy.lock.interceptor.DistributedLockInterceptor;
 
 public abstract class LockModule extends AbstractModule {
 
