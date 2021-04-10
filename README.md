@@ -4,7 +4,6 @@
 <properties>
   <easy.version>1.0.40</adrastea.version>
 </properties>
-
 <!-- Get the latest version from https://mvnrepository.com/artifact/io.github.devlibx.easy/http -->
 ```
 
