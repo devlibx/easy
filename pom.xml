@@ -18,6 +18,7 @@
         <module>messaging</module>
         <module>messaging-kafka</module>
         <module>testing</module>
+        <module>dynamic</module>
     </modules>
     <name>easy</name>
     <url>https://github.com/devlibx/easy</url>
@@ -58,6 +59,8 @@
         <guava.version>27.1-jre</guava.version>
         <metrics.version>4.0.2</metrics.version>
         <junit-jupiter>5.7.0</junit-jupiter>
+        <commons-beanutils.version>1.9.4</commons-beanutils.version>
+        <cgib.version>3.3.0</cgib.version>
     </properties>
 
     <dependencyManagement>
@@ -110,6 +113,16 @@
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
                 <version>${joda.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cglib</groupId>
+                <artifactId>cglib</artifactId>
+                <version>${cgib.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
             </dependency>
 
             <dependency>
