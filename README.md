@@ -383,3 +383,22 @@ stringHelper.stringify(testClass);
 
 // Output - {"str":"some string","an_int":11} 
 ```
+
+### Testing Module
+Testing module is create to help testing with MySQL, DynamoDB, Kafaka
+
+Following setup is needed to ues testing module
+```shell
+# Run this command if you are using DynamoDB testing
+====================================================
+docker pull testcontainers/ryuk:0.3.0
+
+# Only If you are buulding "easy" sourcecode
+==========================================
+Create following databases in MySQL
+create database users;
+create database test_me;
+
+
+
+```

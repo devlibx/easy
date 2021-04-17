@@ -1,5 +1,7 @@
 package io.github.devlibx.easy.database.dynamo;
 
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.ClientConfigurationFactory;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -29,8 +31,8 @@ public class DatabaseService implements IDatabaseService {
         }
 
         dbConfigs.getConfigs().forEach((name, dynamoConfig) -> {
-            AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard().withEndpointConfiguration(
-                    new AwsClientBuilder.EndpointConfiguration(dynamoConfig.getEndPoint(), dynamoConfig.getRegion()))
+            AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
+                    .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(dynamoConfig.getEndPoint(), dynamoConfig.getRegion()))
                     .build();
             DynamoDB dynamoDB = new DynamoDB(client);
             dataSourceFactory.add(name, dynamoDB);
