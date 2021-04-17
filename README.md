@@ -219,6 +219,9 @@ String result = mysqlHelper.findOne(
 Setup to use this MySQL helper:
 
 ```shell script
+Create test database for tests:
+create database users;
+create database test_me;
 
 // Setup DB - datasource
 DbConfig dbConfig = new DbConfig();

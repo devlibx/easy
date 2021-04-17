@@ -86,6 +86,7 @@ public class MySqlExtensionTest {
 
             ranAll = true;
         } catch (Exception ignored) {
+            ignored.printStackTrace();
         }
         assertTrue(ranAll);
     }
