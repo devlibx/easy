@@ -20,28 +20,62 @@ public class Put {
     private Object sortKeyValue;
     private List<Attribute> attributes;
 
-    public Put withTable(String table) {
-        this.table = table;
-        return this;
+    public static Builder builder(String tableName) {
+        return new Builder(tableName);
     }
 
-    public Put withKey(String key, Object value) {
-        this.keyName = key;
-        this.keyValue = value;
-        return this;
-    }
+    public static class Builder {
+        private final String table;
+        private String keyName;
+        private Object keyValue;
+        private String sortKeyName;
+        private Object sortKeyValue;
+        private List<Attribute> attributes;
 
-    public Put withSortKey(String key, Object value) {
-        this.sortKeyName = key;
-        this.sortKeyValue = value;
-        return this;
-    }
-
-    public Put addAttribute(Attribute attribute) {
-        if (attributes == null) {
-            attributes = new ArrayList<>();
+        public Builder(String table) {
+            this.table = table;
         }
-        attributes.add(attribute);
-        return this;
+
+        public Builder withKey(String keyName, Object keyValue) {
+            this.keyName = keyName;
+            this.keyValue = keyValue;
+            return this;
+        }
+
+        public Builder withSortKey(String sortKeyName, Object sortKeyValue) {
+            this.sortKeyName = sortKeyName;
+            this.sortKeyValue = sortKeyValue;
+            return this;
+        }
+
+        public Builder withKey(String keyName, Object keyValue, String sortKeyName, Object sortKeyValue) {
+            this.keyName = keyName;
+            this.keyValue = keyValue;
+            this.sortKeyName = sortKeyName;
+            this.sortKeyValue = sortKeyValue;
+            return this;
+        }
+
+        public Builder addAttribute(String name, Object value) {
+            if (attributes == null) {
+                attributes = new ArrayList<>();
+            }
+            attributes.add(new Attribute(name, value));
+            return this;
+        }
+
+        public Put build() {
+            Put obj = new Put();
+            obj.table = table;
+            obj.keyName = keyName;
+            obj.keyValue = keyValue;
+            obj.sortKeyName = sortKeyName;
+            obj.sortKeyValue = sortKeyValue;
+            if (attributes != null) {
+                obj.attributes = new ArrayList<>();
+                obj.attributes.addAll(attributes);
+            }
+            return obj;
+        }
     }
 }

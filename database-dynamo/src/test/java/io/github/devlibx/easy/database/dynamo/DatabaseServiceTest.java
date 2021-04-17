@@ -9,7 +9,6 @@ import io.github.devlibx.easy.database.IDatabaseService;
 import io.github.devlibx.easy.database.dynamo.config.DynamoConfig;
 import io.github.devlibx.easy.database.dynamo.config.DynamoConfigs;
 import io.github.devlibx.easy.database.dynamo.module.DatabaseDynamoModule;
-import io.github.devlibx.easy.database.dynamo.operation.Attribute;
 import io.github.devlibx.easy.database.dynamo.operation.Put;
 import io.github.devlibx.easy.testing.dynamo.DynamoExtension;
 import io.github.devlibx.easy.testing.dynamo.TestingDynamoDbConfig;
@@ -73,19 +72,15 @@ class DatabaseServiceTest {
             }
         });
 
-        Map<String, Object> international_travel_affinity_1 = new HashMap<>();
-        international_travel_affinity_1.put("value", 5);
-        international_travel_affinity_1.put("confidence", 0.8);
-
-
+        Map<String, Object> someAttribute = new HashMap<>();
+        someAttribute.put("value", 5);
+        someAttribute.put("score", 0.8);
         String userId = UUID.randomUUID().toString();
-        io.github.devlibx.easy.database.dynamo.operation.Put put = new Put();
-        put = put
-                .withTable(tableName)
-                .withKey("entityId", "c:user:" + userId)
-                .withSortKey("namespace", "devlibx")
-                .addAttribute(Attribute.builder().name("attr_1").value(international_travel_affinity_1).build())
-                .addAttribute(Attribute.builder().name("attr_2").value(11).build())
+        Put put = Put.builder(tableName)
+                .withKey("id", "d:user:" + UUID.randomUUID().toString(), "scope", "client")
+                .addAttribute("attr_1", someAttribute)
+                .addAttribute("attr_2", 1)
+                .build();
         ;
         helper.persist(put);
         System.out.println("Result = " + userId + " table=" + tableName);

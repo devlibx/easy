@@ -13,7 +13,6 @@ import io.github.devlibx.easy.database.dynamo.IDynamoHelper;
 import io.github.devlibx.easy.database.dynamo.config.DynamoConfig;
 import io.github.devlibx.easy.database.dynamo.config.DynamoConfigs;
 import io.github.devlibx.easy.database.dynamo.module.DatabaseDynamoModule;
-import io.github.devlibx.easy.database.dynamo.operation.Attribute;
 import io.github.devlibx.easy.database.dynamo.operation.Get;
 import io.github.devlibx.easy.database.dynamo.operation.Put;
 import lombok.Data;
@@ -104,20 +103,16 @@ public class DemoApplication {
         someAttribute.put("value", 5);
         someAttribute.put("score", 0.8);
 
-        String userId = UUID.randomUUID().toString();
-        Put put = new Put();
-        put = put
-                .withTable(TABLE_NAME)
-                .withKey("id", "d:user:" + userId)
-                .withSortKey("scope", "client")
-                .addAttribute(Attribute.builder().name("attr_1").value(someAttribute).build())
-                .addAttribute(Attribute.builder().name("attr_2").value(11).build());
-
         // Helper function which gives us a method to persist
+        Put put = Put.builder(TABLE_NAME)
+                .withKey("id", "d:user:" + UUID.randomUUID().toString(), "scope", "client")
+                .addAttribute("attr_1", someAttribute)
+                .addAttribute("attr_2", 1)
+                .build();
         helper.persist(put);
 
         StringObjectMap response = new StringObjectMap();
-        response.put("id", "d:user:" + userId, "scope", "client");
+        response.put("id", put.getKeyValue(), "scope", put.getSortKeyValue());
         return response;
     }
 
@@ -142,8 +137,8 @@ public class DemoApplication {
         @Override
         public ClientObject map(Item item) {
             ClientObject co = new ClientObject();
-            co.setUserId(item.getString("entityId"));
-            co.setNamespace(item.getString("namespace"));
+            co.setUserId(item.getString("id"));
+            co.setNamespace(item.getString("scope"));
             item.attributes().forEach(stringObjectEntry -> {
                 co.addAttribute(stringObjectEntry.getKey(), stringObjectEntry.getValue());
             });
