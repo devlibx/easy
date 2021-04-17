@@ -1,13 +1,13 @@
 package io.github.devlibx.easy.database.dynamo;
 
-import com.amazonaws.services.dynamodbv2.document.AttributeUpdate;
-import com.amazonaws.services.dynamodbv2.document.DynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.document.UpdateItemOutcome;
+import com.amazonaws.services.dynamodbv2.document.*;
+import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
+import io.github.devlibx.easy.database.dynamo.operation.Get;
 import io.github.devlibx.easy.database.dynamo.operation.Put;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static io.github.devlibx.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
@@ -38,6 +38,21 @@ public class DynamoHelper implements IDynamoHelper {
                 put.getSortKeyName(), put.getSortKeyValue(),
                 attributeUpdates.toArray(new AttributeUpdate[0])
         );
+    }
+
+    @Override
+    public <T> Optional<T> fineOne(Get get, IRowMapper<T> mapper, Class<T> cls) {
+        DynamoDB client = dataSourceFactory.get(DATASOURCE_DEFAULT);
+        Table table = client.getTable(get.getTable());
+        GetItemSpec spec = new GetItemSpec()
+                .withPrimaryKey(get.getKeyName(), get.getKeyValue(), get.getSortKeyName(), get.getSortKeyValue())
+                .withConsistentRead(get.isConsistentRead());
+        Item item = table.getItem(spec);
+        if (item != null) {
+            return Optional.ofNullable(mapper.map(item));
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override

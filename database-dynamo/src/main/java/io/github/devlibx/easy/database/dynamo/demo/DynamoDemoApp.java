@@ -1,17 +1,21 @@
 package io.github.devlibx.easy.database.dynamo.demo;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.github.devlibx.easy.database.IDatabaseService;
 import io.github.devlibx.easy.database.dynamo.IDynamoHelper;
+import io.github.devlibx.easy.database.dynamo.IDynamoHelper.IRowMapper;
 import io.github.devlibx.easy.database.dynamo.config.DynamoConfig;
 import io.github.devlibx.easy.database.dynamo.config.DynamoConfigs;
 import io.github.devlibx.easy.database.dynamo.module.DatabaseDynamoModule;
 import io.github.devlibx.easy.database.dynamo.operation.Attribute;
+import io.github.devlibx.easy.database.dynamo.operation.Get;
 import io.github.devlibx.easy.database.dynamo.operation.Put;
+import lombok.Data;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -67,12 +71,49 @@ public class DynamoDemoApp {
         Put put = new Put();
         put = put
                 .withTable(tableName)
-                .withKey("entityId", "cred:user:" + userId)
+                .withKey("entityId", "c:user:" + userId)
                 .withSortKey("namespace", "devlibx")
                 .addAttribute(Attribute.builder().name("attr_1").value(international_travel_affinity_1).build())
                 .addAttribute(Attribute.builder().name("attr_2").value(11).build())
         ;
         helper.persist(put);
         System.out.println("Result = " + userId + " table=" + tableName);
+
+
+        ClientObject item = helper.fineOne(
+                Get.builder(tableName)
+                        .withKey("entityId", "c:user:" + userId)
+                        .withSortKey("namespace", "devlibx").build(),
+                new ICustomRowMapper(),
+                ClientObject.class
+        ).orElse(null);
+        System.out.println(item);
+    }
+
+    public static class ICustomRowMapper implements IRowMapper<ClientObject> {
+        @Override
+        public ClientObject map(Item item) {
+            ClientObject co = new ClientObject();
+            co.setUserId(item.getString("entityId"));
+            co.setNamespace(item.getString("namespace"));
+            item.attributes().forEach(stringObjectEntry -> {
+                co.addAttribute(stringObjectEntry.getKey(), stringObjectEntry.getValue());
+            });
+            return co;
+        }
+    }
+
+    @Data
+    public static class ClientObject {
+        private String userId;
+        private String namespace;
+        private Map<String, Object> attributes;
+
+        public void addAttribute(String key, Object value) {
+            if (attributes == null) {
+                attributes = new HashMap<>();
+            }
+            attributes.put(key, value);
+        }
     }
 }

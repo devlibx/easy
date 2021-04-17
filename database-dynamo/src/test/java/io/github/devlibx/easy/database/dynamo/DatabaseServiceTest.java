@@ -82,7 +82,7 @@ class DatabaseServiceTest {
         io.github.devlibx.easy.database.dynamo.operation.Put put = new Put();
         put = put
                 .withTable(tableName)
-                .withKey("entityId", "cred:user:" + userId)
+                .withKey("entityId", "c:user:" + userId)
                 .withSortKey("namespace", "devlibx")
                 .addAttribute(Attribute.builder().name("attr_1").value(international_travel_affinity_1).build())
                 .addAttribute(Attribute.builder().name("attr_2").value(11).build())
