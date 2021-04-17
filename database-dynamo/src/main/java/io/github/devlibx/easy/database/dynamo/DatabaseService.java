@@ -35,6 +35,7 @@ public class DatabaseService implements IDatabaseService {
             DynamoDB dynamoDB = new DynamoDB(client);
             dataSourceFactory.add(name, dynamoDB);
         });
+        log.info("DynamoDB setup completed...");
     }
 
     @Override

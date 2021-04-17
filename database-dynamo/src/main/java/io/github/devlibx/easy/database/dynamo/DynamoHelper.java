@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.github.devlibx.easy.database.DatabaseConstant.DATASOURCE_DEFAULT;
+
 @SuppressWarnings("FuseStreamOperations")
 public class DynamoHelper implements IDynamoHelper {
     private final DataSourceFactory dataSourceFactory;
@@ -21,7 +23,7 @@ public class DynamoHelper implements IDynamoHelper {
 
     @Override
     public void persist(Put put) {
-        DynamoDB client = dataSourceFactory.get("default");
+        DynamoDB client = dataSourceFactory.get(DATASOURCE_DEFAULT);
         Table table = client.getTable(put.getTable());
 
         List<AttributeUpdate> attributeUpdates = put.getAttributes().stream()
@@ -36,5 +38,12 @@ public class DynamoHelper implements IDynamoHelper {
                 put.getSortKeyName(), put.getSortKeyValue(),
                 attributeUpdates.toArray(new AttributeUpdate[0])
         );
+    }
+
+    @Override
+    public void execute(String tableName, IDynamoOperation operation) {
+        DynamoDB client = dataSourceFactory.get(DATASOURCE_DEFAULT);
+        Table table = client.getTable(tableName);
+        operation.process(client, table);
     }
 }
