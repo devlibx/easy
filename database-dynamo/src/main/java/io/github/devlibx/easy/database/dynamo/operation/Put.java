@@ -8,6 +8,16 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Example of creating a Put item
+ * <pre>
+ *      Put put = Put.builder(TABLE_NAME)
+ *                 .withKey("id", "d:user:" + UUID.randomUUID().toString(), "scope", "client")
+ *                 .addAttribute("attr_1", someAttribute)
+ *                 .addAttribute("attr_2", 1)
+ *                 .build();
+ * </pre>
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

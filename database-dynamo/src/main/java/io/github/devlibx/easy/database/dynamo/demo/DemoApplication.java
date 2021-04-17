@@ -10,6 +10,7 @@ import io.gitbub.devlibx.easy.helper.ApplicationContext;
 import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import io.github.devlibx.easy.database.IDatabaseService;
 import io.github.devlibx.easy.database.dynamo.IDynamoHelper;
+import io.github.devlibx.easy.database.dynamo.IDynamoHelper.IRowMapper;
 import io.github.devlibx.easy.database.dynamo.config.DynamoConfig;
 import io.github.devlibx.easy.database.dynamo.config.DynamoConfigs;
 import io.github.devlibx.easy.database.dynamo.module.DatabaseDynamoModule;
@@ -132,7 +133,7 @@ public class DemoApplication {
     }
 
     // This is a  mapper function which can be implemented by client to convert DynamoDB object to POJO
-    public static class ICustomRowMapper implements IDynamoHelper.IRowMapper<ClientObject> {
+    public static class ICustomRowMapper implements IRowMapper<ClientObject> {
 
         @Override
         public ClientObject map(Item item) {
