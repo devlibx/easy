@@ -277,4 +277,118 @@ public class StringObjectMap extends HashMap<String, Object> {
             return null;
         }
     }
+
+
+    public static StringObjectMap of(String key, Object value) {
+        StringObjectMap map = new StringObjectMap();
+        map.put(key, value);
+        return map;
+    }
+
+    public static StringObjectMap of(String key1, Object value1, String key2, Object value2) {
+        StringObjectMap map = new StringObjectMap();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        return map;
+    }
+
+    public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3) {
+        StringObjectMap map = new StringObjectMap();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        map.put(key3, value3);
+        return map;
+    }
+
+    public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4) {
+        StringObjectMap map = new StringObjectMap();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        map.put(key3, value3);
+        map.put(key4, value4);
+        return map;
+    }
+
+
+    public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5) {
+        StringObjectMap map = new StringObjectMap();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        map.put(key3, value3);
+        map.put(key4, value4);
+        map.put(key5, value5);
+        return map;
+    }
+
+    public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5,
+                                      String key6, Object value6) {
+        StringObjectMap map = new StringObjectMap();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        map.put(key3, value3);
+        map.put(key4, value4);
+        map.put(key5, value5);
+        map.put(key6, value6);
+        return map;
+    }
+
+    public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5,
+                                      String key6, Object value6, String key7, Object value7) {
+        StringObjectMap map = new StringObjectMap();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        map.put(key3, value3);
+        map.put(key4, value4);
+        map.put(key5, value5);
+        map.put(key6, value6);
+        map.put(key7, value7);
+        return map;
+    }
+
+
+    public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5,
+                                      String key6, Object value6, String key7, Object value7, String key8, Object value8) {
+        StringObjectMap map = new StringObjectMap();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        map.put(key3, value3);
+        map.put(key4, value4);
+        map.put(key5, value5);
+        map.put(key6, value6);
+        map.put(key7, value7);
+        map.put(key8, value8);
+        return map;
+    }
+
+    public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5,
+                                      String key6, Object value6, String key7, Object value7, String key8, Object value8, String key9, Object value9) {
+        StringObjectMap map = new StringObjectMap();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        map.put(key3, value3);
+        map.put(key4, value4);
+        map.put(key5, value5);
+        map.put(key6, value6);
+        map.put(key7, value7);
+        map.put(key8, value8);
+        map.put(key9, value9);
+        return map;
+    }
+
+    public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5,
+                                      String key6, Object value6, String key7, Object value7, String key8, Object value8, String key9, Object value9, String key10, Object value10) {
+        StringObjectMap map = new StringObjectMap();
+        map.put(key1, value1);
+        map.put(key2, value2);
+        map.put(key3, value3);
+        map.put(key4, value4);
+        map.put(key5, value5);
+        map.put(key6, value6);
+        map.put(key7, value7);
+        map.put(key8, value8);
+        map.put(key9, value9);
+        map.put(key10, value10);
+        return map;
+    }
 }
+
