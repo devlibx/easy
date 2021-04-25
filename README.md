@@ -1,8 +1,8 @@
 
-> Latest Maven Dependency
+#### Latest Maven Dependency
 ```xml
 <properties>
-  <easy.version>1.0.40</adrastea.version>
+  <easy.version>0.0.52</adrastea.version>
 </properties>
 <!-- Get the latest version from https://mvnrepository.com/artifact/io.github.devlibx.easy/http -->
 ```

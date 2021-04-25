@@ -21,4 +21,24 @@ public class StringObjectMapTest extends TestCase {
         assertEquals(100L, map.getLong("long_key").longValue());
         assertEquals(u, map.getUUID("uuid_key"));
     }
+
+    public void testStringObjectMapExt() {
+        StringObjectMap map = StringObjectMap.of(
+                "int", 10,
+                "string", "str_1",
+                "boolean", true,
+                "str_boolean", "false",
+                "str_int", "11");
+
+        // Get typed values
+        assertEquals(10, map.getInt("int").intValue());
+        assertEquals("str_1", map.getString("string"));
+        assertTrue(map.getBoolean("boolean"));
+
+        // Auto conversion from string to boolean
+        assertFalse(map.getBoolean("str_boolean"));
+
+        // Auto conversion from string to int
+        assertEquals(11, map.getInt("str_int").intValue());
+    }
 }
