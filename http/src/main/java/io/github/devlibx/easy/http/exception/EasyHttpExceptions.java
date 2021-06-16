@@ -214,7 +214,7 @@ public class EasyHttpExceptions {
         // Check if this is a timeout issues
         if (throwable instanceof ReadTimeoutException || throwable instanceof SocketTimeoutException) {
             return new EasyRequestTimeOutException(responseObject);
-        } else if (throwable.getCause() instanceof ReadTimeoutException) {
+        } else if (throwable != null && throwable.getCause() instanceof ReadTimeoutException) {
             return new EasyRequestTimeOutException(responseObject);
         }
 

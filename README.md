@@ -1,36 +1,91 @@
-
 #### Latest Maven Dependency
+
 ```xml
+
 <properties>
-  <easy.version>0.0.52</adrastea.version>
+    <easy.version>0.0.52</adrastea.version>
 </properties>
-<!-- Get the latest version from https://mvnrepository.com/artifact/io.github.devlibx.easy/http -->
+        <!-- Get the latest version from https://mvnrepository.com/artifact/io.github.devlibx.easy/http -->
 ```
 
-## Easy Http 
-Http Module provides API to make HTTP calls. It ensures that APIs are called with circuit-breaker, time limit. 
+## Easy Http
+
+Http Module provides API to make HTTP calls. It ensures that APIs are called with circuit-breaker, time limit.
 
 > Maven Dependency
+
 ```xml
+
 <dependency>
-  <groupId>io.github.devlibx.easy</groupId>
-  <artifactId>http</artifactId>
-  <version>${easy.version}</version>
+    <groupId>io.github.devlibx.easy</groupId>
+    <artifactId>http</artifactId>
+    <version>${easy.version}</version>
 </dependency>
 ```
 
 > Calling http in Sync
+
 ```shell
- Map result = EasyHttp.callSync(
+// Example 1 - Make a call and get response in a Map
+Map result = EasyHttp.callSync(
                 Call.builder(Map.class)
                         .withServerAndApi("jsonplaceholder", "getPosts")
                         .addPathParam("id", 1)
                         .withBody("Any object - it will be converted to json string internally")
                         .build()
               );
+                
+
+
+// Example 2 - Make a call and get response in a Pojo                
+@Data
+private static class ResponsePojo {
+  @JsonProperty("userId")
+  private Integer userId;
+  @JsonProperty("id")
+  private Integer id;
+  @JsonProperty("title")
+  private String title;
+  @JsonProperty("completed")
+  private boolean completed;
+}
+                  
+ResponsePojo resultWithPojo = EasyHttp.callSync(
+        Call.builder(ResponsePojo.class)
+                .withServerAndApi("jsonplaceholder", "getPosts")
+                .addPathParam("id", 1)
+                .build()
+);
+String jsonString = JsonUtils.asJson(resultWithPojo);
+log.info("Print Result as Json String = " + jsonString);
+// Print Result as Json String = {"userId":1,"id":1,"title":"sunt aut facere repellat provident occaecati excepturi optio reprehenderit","completed":false}
+
+
+
+// Example 3 - Make a call and get process error
+// EasyHttpExceptions.EasyHttpRequestException - this is the super class to catch all error (or you can use specific sub-classes)
+try {
+    ResponsePojo resultWithPojoError = EasyHttp.callSync(
+            Call.builder(ResponsePojo.class)
+                    .withServerAndApi("jsonplaceholder", "getPosts")
+                    .addPathParam("id_make_it_fail", 1)
+                    .build()
+    );
+
+    // You can catch 
+    // EasyHttpExceptions.Easy4xxException e1;
+    // EasyHttpExceptions.EasyUnauthorizedRequestException e;
+    // EasyHttpExceptions.EasyRequestTimeOutException e;
+} catch (EasyHttpExceptions.Easy5xxException e) {
+    // You can cache specific errors
+    log.error("Api failed (5xx error): status=" + e.getStatusCode() + " byteBody=" + e.getBody());
+} catch (EasyHttpExceptions.EasyHttpRequestException e) {
+    log.error("Api failed: status=" + e.getStatusCode() + " byteBody=" + e.getBody());
+}                
 ```
 
 > Calling http in Async
+
 ```shell
 EasyHttp.callAsync(
                 Call.builder(Map.class)
@@ -49,7 +104,9 @@ EasyHttp.callAsync(
                     // e.g. EasyNotFoundException - for Http 404
                 });
 ```
+
 > Custom request and response body function. e.g. proto-buf API (over HTTP)
+
 ```shell script
 AddUserRequest request = AddUserRequest.newBuilder()
                 .setNameProvided(name)
@@ -96,7 +153,7 @@ public class DemoApplication extends TestCase {
 
     @Override
     protected void setUp() throws Exception {
-        super.setUp();       
+        super.setUp();
         LoggingHelper.setupLogging();
         Logger.getLogger(SyncRequestProcessor.class).setLevel(TRACE);
 
@@ -138,11 +195,14 @@ public class DemoApplication extends TestCase {
                 });
         waitForComplete.await(5, TimeUnit.SECONDS);
         // Or you can use blockingSubscribe(); 
-    }  
+    }
 }
 ```
+
 ###### YAML File to configure all APIs and Server URL for above example
+
 demo_app_config.yaml
+
 ```yaml
 servers:
   jsonplaceholder:
@@ -168,12 +228,16 @@ apis:
     async: true
 ```
 
-##### Details of parameters 
-1. timeout - timeout for the API. Your EasyHttp.call**() Api will timeout after the given time
-2. concurrency - how many parallel calls can be made to this API. 
-3. rps - if you know "rps" of API call, then you should set `rps` e.g. rps: 100. The EasyHttp will automatically setup required threads to support concurrent calls. You don't need to set `concurrency` manually. For example, if timeout=20 and rps=100 then EasyHttp will set `concurrency=2`  
+##### Details of parameters
 
-When you set `rps` then you have to consider `rps` from the single node i.e. how many requests this single node is going to call. For example, if you call an external API with 1000 `rps`; and you run 10 nodes, then a single node has rps=100
+1. timeout - timeout for the API. Your EasyHttp.call**() Api will timeout after the given time
+2. concurrency - how many parallel calls can be made to this API.
+3. rps - if you know "rps" of API call, then you should set `rps` e.g. rps: 100. The EasyHttp will automatically setup
+   required threads to support concurrent calls. You don't need to set `concurrency` manually. For example, if
+   timeout=20 and rps=100 then EasyHttp will set `concurrency=2`
+
+When you set `rps` then you have to consider `rps` from the single node i.e. how many requests this single node is going
+to call. For example, if you call an external API with 1000 `rps`; and you run 10 nodes, then a single node has rps=100
 
 ---
 
@@ -181,18 +245,22 @@ When you set `rps` then you have to consider `rps` from the single node i.e. how
 MySQL Helper
 ===
 database-mysql module provides support for easy MySQL helper.
+
 ```shell script
 See "io.github.devlibx.easy.database.mysql.ExampleApp" example
 ``` 
+
 ```xml
 <!-- POM Dependency -->
 <dependency>
-  <groupId>io.github.devlibx.easy</groupId>
-  <artifactId>database-mysql</artifactId>
-  <version>${easy.version}</version>
+    <groupId>io.github.devlibx.easy</groupId>
+    <artifactId>database-mysql</artifactId>
+    <version>${easy.version}</version>
 </dependency>
 ```
+
 You must setup IMysqlHelper before using it. A sample setup is als given below.
+
 ```shell script
 // Insert to DB
 IMysqlHelper mysqlHelper = injector.getInstance(IMysqlHelper.class);
@@ -214,7 +282,6 @@ String result = mysqlHelper.findOne(
         String.class
 ).orElse("");
 ```
-
 
 Setup to use this MySQL helper:
 
@@ -251,11 +318,11 @@ databaseService.startDatabase();
 
 Distributed Lock
 ===
-This module provides a distributed lock e.g. a MySQL based distributed lock is implemented by easy libs. 
-    This example shows a class `ResourceWithLocking` with a method which should take a lock before it is called. 
+This module provides a distributed lock e.g. a MySQL based distributed lock is implemented by easy libs. This example
+shows a class `ResourceWithLocking` with a method which should take a lock before it is called.
 
-Note - you will see MySQL and database dependency in the example code.  
- 
+Note - you will see MySQL and database dependency in the example code.
+
 ```java
 package com.devlibx.pack.resources.lock;
 
@@ -320,7 +387,7 @@ public class Application {
         dbConfig.setPassword("password");
         MySqlConfigs mySqlConfigs = new MySqlConfigs();
         mySqlConfigs.addConfig(dbConfig);
-        
+
         // Setup module
         injector = Guice.createInjector(new AbstractModule() {
             @Override
@@ -330,23 +397,23 @@ public class Application {
             }
         }, new DatabaseMySQLModule());
         ApplicationContext.setInjector(injector);
-        
+
         // Start DB
         IDatabaseService databaseService = injector.getInstance(IDatabaseService.class);
-        databaseService.startDatabase();      
+        databaseService.startDatabase();
 
         // Setup lock service
         IDistributedLockService distributedLockService = injector.getInstance(IDistributedLockService.class);
         distributedLockService.initialize();
-       
+
         // Example ResourceWithLocking
         ResourceWithLocking resourceWithLocking = injector.getInstance(ResourceWithLocking.class);
-        
+
         // This API call will lock before running
         // For example if you run this method concurrently in many threads, then all execution 
         // will be sequential (for same lock id) 
         Map<String, Object> response = resourceWithLocking.methodWhichShouldBeLocked("1234");
-        System.out.println(response);     
+        System.out.println(response);
     }
 }
 ```
@@ -356,14 +423,16 @@ Helper Module
 
 
 Convert Java object to JSON string
+
 ```xml
 <!-- POM Dependency -->
 <dependency>
-  <groupId>io.github.devlibx.easy</groupId>
-  <artifactId>helper</artifactId>
-  <version>${easy.version}</version>
+    <groupId>io.github.devlibx.easy</groupId>
+    <artifactId>helper</artifactId>
+    <version>${easy.version}</version>
 </dependency>
 ```
+
 ```shell script
 
 // A pojo object to stringify
@@ -385,9 +454,11 @@ stringHelper.stringify(testClass);
 ```
 
 ### Testing Module
+
 Testing module is create to help testing with MySQL, DynamoDB, Kafaka
 
 Following setup is needed to ues testing module
+
 ```shell
 # Run this command if you are using DynamoDB testing
 ====================================================
