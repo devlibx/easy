@@ -63,7 +63,7 @@ log.info("Print Result as Json String = " + jsonString);
 
 
 // Example 3 - Make a call and get process error
-// EasyHttpExceptions.EasyHttpRequestException - this is the super class to catch all error (or you can use specific sub-classes)
+// EasyHttpExceptions.EasyHttpRequestException - this is the super class to catch all error (or you can use specific sub-classes) 
 try {
     ResponsePojo resultWithPojoError = EasyHttp.callSync(
             Call.builder(ResponsePojo.class)
