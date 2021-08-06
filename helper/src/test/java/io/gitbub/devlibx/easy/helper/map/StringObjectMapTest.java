@@ -2,6 +2,8 @@ package io.gitbub.devlibx.easy.helper.map;
 
 import junit.framework.TestCase;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class StringObjectMapTest extends TestCase {
@@ -48,11 +50,13 @@ public class StringObjectMapTest extends TestCase {
                 "int", 10,
                 "string", "str_1",
                 "boolean", true,
+                "boolean_false", false,
                 "str_boolean", "false",
                 "str_int", "11",
                 "sub_1", StringObjectMap.of(
                         "a", "b",
-                        "sub_2", StringObjectMap.of("int", 11)
+                        "sub_2", StringObjectMap.of("int", 11),
+                        "list", Arrays.asList("1", "2")
                 )
         );
 
@@ -73,5 +77,18 @@ public class StringObjectMapTest extends TestCase {
         assertTrue(map.path("boolean", Boolean.class));
         assertEquals("b", map.path("sub_1.a", String.class));
         assertEquals(11, map.path("sub_1.sub_2.int", Integer.class).intValue());
+
+        assertTrue(map.isPathValueTrue("boolean"));
+        assertTrue(map.isPathValueFalse("boolean_false"));
+        assertTrue(map.isPathValueEqual("sub_1.sub_2.int", 11));
+        assertFalse(map.isPathValueEqual("sub_1.sub_2.int", 12));
+        assertTrue(map.isPathValueEqual("sub_1.a", "b"));
+        assertFalse(map.isPathValueEqual("sub_1.a", "ba"));
+
+        List l = map.path("sub_1.list", List.class);
+        assertNotNull(l);
+        assertEquals(2, l.size());
+        assertEquals("1", l.get(0));
+        assertEquals("2", l.get(1));
     }
 }

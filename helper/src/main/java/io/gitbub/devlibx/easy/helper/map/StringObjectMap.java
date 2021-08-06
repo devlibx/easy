@@ -5,6 +5,7 @@ import io.gitbub.devlibx.easy.helper.json.JsonUtils;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 @SuppressWarnings("unchecked")
@@ -418,6 +419,18 @@ public class StringObjectMap extends HashMap<String, Object> {
      */
     public <T> T path(String key, Class<T> cls) {
         return path(".", key, cls);
+    }
+
+    public boolean isPathValueEqual(String key, Object value) {
+        return Objects.equals(path(".", key, Object.class), value);
+    }
+
+    public boolean isPathValueTrue(String key) {
+        return Objects.equals(path(".", key, Boolean.class), true);
+    }
+
+    public boolean isPathValueFalse(String key) {
+        return Objects.equals(path(".", key, Boolean.class), false);
     }
 }
 
