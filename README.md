@@ -3,7 +3,7 @@
 ```xml
 
 <properties>
-    <easy.version>0.0.54</adrastea.version>
+    <easy.version>0.0.56</adrastea.version>
 </properties>
 <!-- Get the latest version from https://mvnrepository.com/artifact/io.github.devlibx.easy/http -->
 ```

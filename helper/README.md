@@ -3,6 +3,15 @@
 A useful lib to work with Map with string key andy any objecy
 <hr>
 
+```xml
+<dependency>
+    <groupId>io.github.devlibx.easy</groupId>
+    <artifactId>helper</artifactId>
+    <version>0.0.56</version>
+</dependency>
+
+```
+
 #### Path finding
 This map allows a way to find the data in sub-path. It is like finding path using json path "$.body.id". However, we
 only support non-array path e.g. "body.id". <br><br>
