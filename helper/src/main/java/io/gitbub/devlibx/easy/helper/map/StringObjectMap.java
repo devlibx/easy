@@ -321,7 +321,7 @@ public class StringObjectMap extends HashMap<String, Object> {
     }
 
     public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5,
-                                      String key6, Object value6) {
+                                     String key6, Object value6) {
         StringObjectMap map = new StringObjectMap();
         map.put(key1, value1);
         map.put(key2, value2);
@@ -333,7 +333,7 @@ public class StringObjectMap extends HashMap<String, Object> {
     }
 
     public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5,
-                                      String key6, Object value6, String key7, Object value7) {
+                                     String key6, Object value6, String key7, Object value7) {
         StringObjectMap map = new StringObjectMap();
         map.put(key1, value1);
         map.put(key2, value2);
@@ -347,7 +347,7 @@ public class StringObjectMap extends HashMap<String, Object> {
 
 
     public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5,
-                                      String key6, Object value6, String key7, Object value7, String key8, Object value8) {
+                                     String key6, Object value6, String key7, Object value7, String key8, Object value8) {
         StringObjectMap map = new StringObjectMap();
         map.put(key1, value1);
         map.put(key2, value2);
@@ -361,7 +361,7 @@ public class StringObjectMap extends HashMap<String, Object> {
     }
 
     public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5,
-                                      String key6, Object value6, String key7, Object value7, String key8, Object value8, String key9, Object value9) {
+                                     String key6, Object value6, String key7, Object value7, String key8, Object value8, String key9, Object value9) {
         StringObjectMap map = new StringObjectMap();
         map.put(key1, value1);
         map.put(key2, value2);
@@ -376,7 +376,7 @@ public class StringObjectMap extends HashMap<String, Object> {
     }
 
     public static StringObjectMap of(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5,
-                                      String key6, Object value6, String key7, Object value7, String key8, Object value8, String key9, Object value9, String key10, Object value10) {
+                                     String key6, Object value6, String key7, Object value7, String key8, Object value8, String key9, Object value9, String key10, Object value10) {
         StringObjectMap map = new StringObjectMap();
         map.put(key1, value1);
         map.put(key2, value2);
@@ -389,6 +389,35 @@ public class StringObjectMap extends HashMap<String, Object> {
         map.put(key9, value9);
         map.put(key10, value10);
         return map;
+    }
+
+    /**
+     * @param separator what is path separator e.g. "."
+     * @param key       path separated key "data.entity.id
+     * @return result or null if not found
+     */
+    public <T> T path(String separator, String key, Class<T> cls) {
+        if (separator.equals(".")) {
+            separator = "\\.";
+        }
+        StringObjectMap map = this;
+        String[] tokens = key.split(separator);
+        int len = tokens.length;
+        for (int i = 0; i < len - 1; i++) {
+            map = map.getStringObjectMap(tokens[i]);
+            if (map == null) {
+                return null;
+            }
+        }
+        return map.get(tokens[len - 1], cls);
+    }
+
+    /**
+     * @param key "." separated key "data.entity.id
+     * @return result or null if not found
+     */
+    public <T> T path(String key, Class<T> cls) {
+        return path(".", key, cls);
     }
 }
 

@@ -41,4 +41,37 @@ public class StringObjectMapTest extends TestCase {
         // Auto conversion from string to int
         assertEquals(11, map.getInt("str_int").intValue());
     }
+
+
+    public void testGetWithKeySeparator() {
+        StringObjectMap map = StringObjectMap.of(
+                "int", 10,
+                "string", "str_1",
+                "boolean", true,
+                "str_boolean", "false",
+                "str_int", "11",
+                "sub_1", StringObjectMap.of(
+                        "a", "b",
+                        "sub_2", StringObjectMap.of("int", 11)
+                )
+        );
+
+        assertEquals(10, map.path(".", "int", Integer.class).intValue());
+        assertEquals("str_1", map.path(".", "string", String.class));
+        assertTrue(map.path(".", "boolean", Boolean.class));
+        assertEquals("b", map.path(".", "sub_1.a", String.class));
+        assertEquals(11, map.path(".", "sub_1.sub_2.int", Integer.class).intValue());
+
+        assertEquals(10, map.path("#", "int", Integer.class).intValue());
+        assertEquals("str_1", map.path("#", "string", String.class));
+        assertTrue(map.path("#", "boolean", Boolean.class));
+        assertEquals("b", map.path("#", "sub_1#a", String.class));
+        assertEquals(11, map.path("#", "sub_1#sub_2#int", Integer.class).intValue());
+
+        assertEquals(10, map.path("int", Integer.class).intValue());
+        assertEquals("str_1", map.path("string", String.class));
+        assertTrue(map.path("boolean", Boolean.class));
+        assertEquals("b", map.path("sub_1.a", String.class));
+        assertEquals(11, map.path("sub_1.sub_2.int", Integer.class).intValue());
+    }
 }
