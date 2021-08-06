@@ -1,13 +1,16 @@
 #### Latest Maven Dependency
-### Helper Library
 
 ```xml
 
 <properties>
     <easy.version>0.0.54</adrastea.version>
 </properties>
-        <!-- Get the latest version from https://mvnrepository.com/artifact/io.github.devlibx.easy/http -->
+<!-- Get the latest version from https://mvnrepository.com/artifact/io.github.devlibx.easy/http -->
 ```
+
+## Helper Library
+The link to helper library which has many common useful utilities.
+[Helper Library](https://github.com/devlibx/easy/tree/master/helper)
 
 ## Easy Http
 

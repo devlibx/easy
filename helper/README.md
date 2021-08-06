@@ -1,9 +1,9 @@
 ### StringObjectMap
 
-A usefule liberaty to work with Map with string key andy any objecy
+A useful lib to work with Map with string key andy any objecy
 <hr>
 
-####Path finding
+#### Path finding
 This map allows a way to find the data in sub-path. It is like finding path using json path "$.body.id". However, we
 only support non-array path e.g. "body.id". <br><br>
 This is a custom implementation and does not uses JsonPath lib
