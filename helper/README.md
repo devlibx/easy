@@ -159,7 +159,7 @@ You may have to exclude jackson from easy lib if it conflicts with Spark. Also u
 <dependency>
     <groupId>io.github.devlibx.easy</groupId>
     <artifactId>helper</artifactId>
-    <version>0.0.57</version>
+    <version>0.0.58</version>
     <exclusions>
         <exclusion>
             <groupId>com.fasterxml.jackson.core</groupId>
