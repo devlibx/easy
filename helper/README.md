@@ -50,7 +50,52 @@ public class Example {
 There are times when you can read from underlying source, but the sink is slow. You may have to put data in sink with
 many threads. You can use ProcessQueue for the same.
 
-FYI - I used this code in scala project - mix of java and scala syntax 
+```java
+public class Test {
+    @Test
+    public void testRateLimit_WeShouldSeeRateLimitError() throws InterruptedException {
+        
+        ProcessorQueue<String> queue = new ProcessorQueue<String>(
+                10, // 10 threads as workers
+                100, // Queue buffer
+                2, // Wait for 2 sec - if we don't have enough items in 2 sec then exit
+                0, // No limit to retries
+
+                // Setup rate limit - 100 requests to process per second
+                IRateLimiter.Config.builder().limit(100).build(),
+                // NOTE - pass limit=0 if you don't want any rate-limiting
+
+                // This is client function
+                in -> {
+                    try {
+                        Thread.sleep(1000);
+                        System.out.println(in);
+                    } catch (Exception ignored) {
+                    }
+                }
+        );
+
+        // Mandatory - Start the work
+        CountDownLatch latch = queue.start();
+
+        // Client code which will generate work to process
+        for (int i = 0; i < 20; i++) {
+            queue.processItem("item_" + i);
+        }
+
+        // Mandatory - Client must specify that he is done with sending items
+        queue.noMoreItemsToProcess();
+
+        // Mandatory - You must wait for latch
+        // NOTE - this is test so we are waiting for 10 sec, for your case you can wait without any timeout
+        boolean result = latch.await(10, TimeUnit.SECONDS);
+        Assertions.assertTrue(result);
+    }
+}
+```
+
+FYI - I used this code in scala project - mix of java and scala syntax
+
 ```scala
 class Example {
   public void example() {
@@ -106,9 +151,12 @@ class Example {
 ```
 
 ###### Dependency
-You may have to exclude jackson from easy lib if it conflicts with Spark. Also use the latest version for lib. 
+
+You may have to exclude jackson from easy lib if it conflicts with Spark. Also use the latest version for lib.
+
 ```xml
- <dependency>
+
+<dependency>
     <groupId>io.github.devlibx.easy</groupId>
     <artifactId>helper</artifactId>
     <version>0.0.57</version>

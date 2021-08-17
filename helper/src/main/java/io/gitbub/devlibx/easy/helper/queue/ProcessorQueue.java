@@ -1,6 +1,7 @@
 package io.gitbub.devlibx.easy.helper.queue;
 
 
+import io.github.resilience4j.ratelimiter.RequestNotPermitted;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -23,24 +24,46 @@ public class ProcessorQueue<T> {
     private final CountDownLatch waitLatch;
     private final int maxRetryPerItem;
     private final int waitTimeToRetry;
+    private final IRateLimiter rateLimiter;
+    private final AtomicBoolean clientInitiatedAllEeventsArePosted = new AtomicBoolean(false);
 
     public ProcessorQueue(int threadCount,
                           int queueBufferSize,
                           int maxTimeToWaitForAItemToProcessInSec,
                           int maxRetryPerItem,
-                          int waitTimeToRetry,
-                          int rateLimit,
+                          IRateLimiter.Config rateLimiterConfig,
                           IProcessor<T> processor
     ) {
         this.maxRetryPerItem = maxRetryPerItem <= 0 ? Integer.MAX_VALUE : maxRetryPerItem;
-        this.waitTimeToRetry = waitTimeToRetry <= 0 ? 1 : waitTimeToRetry;
+        this.waitTimeToRetry = maxTimeToWaitForAItemToProcessInSec <= 0 ? 1 : maxTimeToWaitForAItemToProcessInSec;
         this.STOP_PROCESSOR = new AtomicBoolean(false);
         this.waitLatch = new CountDownLatch(threadCount);
         this.processor = processor;
         this.threadCount = threadCount;
         this.queue = new ArrayBlockingQueue<>(queueBufferSize);
-        this.maxTimeToWaitForAItemToProcessInSec = maxTimeToWaitForAItemToProcessInSec;
+        this.maxTimeToWaitForAItemToProcessInSec = maxTimeToWaitForAItemToProcessInSec <= 0 ? 10 : maxTimeToWaitForAItemToProcessInSec;
         this.executorService = Executors.newFixedThreadPool(threadCount);
+        if (rateLimiterConfig.limit > 0) {
+            this.rateLimiter = new DefaultRateLimiter(rateLimiterConfig);
+        } else {
+            this.rateLimiter = new NoOpRateLimiter();
+        }
+    }
+
+    public ProcessorQueue(int threadCount,
+                          int queueBufferSize,
+                          int maxTimeToWaitForAItemToProcessInSec,
+                          int maxRetryPerItem,
+                          int rateLimit,
+                          IProcessor<T> processor
+    ) {
+        this(threadCount, queueBufferSize, maxTimeToWaitForAItemToProcessInSec, maxRetryPerItem, IRateLimiter.Config.builder()
+                .limit(rateLimit)
+                .build(), processor);
+    }
+
+    public void noMoreItemsToProcess() {
+        clientInitiatedAllEeventsArePosted.set(true);
     }
 
     public CountDownLatch start() {
@@ -49,7 +72,7 @@ public class ProcessorQueue<T> {
         }
         new Thread(() -> {
             try {
-                waitLatch.wait();
+                waitLatch.await();
             } catch (InterruptedException e) {
             }
             executorService.shutdown();
@@ -58,6 +81,23 @@ public class ProcessorQueue<T> {
     }
 
     public void processItem(T item) {
+        while (true) {
+            try {
+                rateLimiter.execute(() -> {
+                    _processItem(item);
+                });
+                break;
+            } catch (RequestNotPermitted e) {
+                try {
+                    System.out.println("rate limit error - will repost it");
+                    Thread.sleep(1);
+                } catch (InterruptedException ignored) {
+                }
+            }
+        }
+    }
+
+    private void _processItem(T item) {
         try {
             queue.put(item);
         } catch (InterruptedException e) {
@@ -71,9 +111,13 @@ public class ProcessorQueue<T> {
                 try {
                     // Get items to process from thread
                     T item = queue.poll(maxTimeToWaitForAItemToProcessInSec, TimeUnit.SECONDS);
-                    if (item == null) {
-                        log.info("Worker Id=" + threadId + " - Stop worker thread - did not get times for " + maxTimeToWaitForAItemToProcessInSec + " sec");
+                    if (item == null && clientInitiatedAllEeventsArePosted.get()) {
+                        log.info("Worker Id=" + threadId + " - Stop worker thread - did not get items for " + maxTimeToWaitForAItemToProcessInSec + " sec");
                         break;
+                    } else if (item == null) {
+                        Thread.sleep(10);
+                        log.debug("Worker Id=" + threadId + " did not find any work... Continue in loop and waiting for work...");
+                        continue;
                     }
 
                     // Process the items
@@ -95,12 +139,8 @@ public class ProcessorQueue<T> {
             }
 
             // Worker is done - reduce latch
-            log.info("Worker Id=" + threadId + " - Bringdown...");
+            log.info("Worker Id=" + threadId + " - Stopping the worker thread...");
             waitLatch.countDown();
         };
-    }
-
-    public interface IProcessor<T> {
-        void process(T t);
     }
 }
