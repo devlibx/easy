@@ -50,8 +50,7 @@ public class Example {
 There are times when you can read from underlying source, but the sink is slow. You may have to put data in sink with
 many threads. You can use ProcessQueue for the same.
 
-Scala Example
-
+FYI - I used this code in scala project - mix of java and scala syntax 
 ```scala
 class Example {
   public void example() {
