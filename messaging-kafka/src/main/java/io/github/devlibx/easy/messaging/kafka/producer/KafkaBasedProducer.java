@@ -17,15 +17,17 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class KafkaBasedProducer implements IProducer {
-    private final StringObjectMap config;
+    protected final StringObjectMap config;
     private Producer<String, Object> producer;
     private final StringHelper stringHelper;
-    private final IMetrics metrics;
-    private final String metricsPrefix;
+    protected final IMetrics metrics;
+    protected final String metricsPrefix;
     private final boolean metricsEnabled;
+    private final AtomicBoolean producerClosed = new AtomicBoolean(false);
 
     public KafkaBasedProducer(StringObjectMap config, StringHelper stringHelper, IMetrics metrics) {
         this.config = config;
@@ -102,7 +104,10 @@ public class KafkaBasedProducer implements IProducer {
 
     @Override
     public void shutdown() {
-        Safe.safe(() -> producer.close());
+        Safe.safe(() -> {
+            producer.close();
+            producerClosed.set(true);
+        });
     }
 
     @Override
@@ -115,6 +120,8 @@ public class KafkaBasedProducer implements IProducer {
         String topic = config.getString("topic");
         if (Strings.isNullOrEmpty(topic)) {
             throw new RuntimeException("topic is not specified in kafka producer config");
+        } else if (producerClosed.get()) {
+            throw new RuntimeException(topic + " is already closed");
         }
 
         // Convert value to byte array

@@ -5,6 +5,7 @@ import io.github.devlibx.easy.testing.dynamo.TestingDynamoDbConfig;
 import io.github.devlibx.easy.testing.mysql.MySqlExtension;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -16,6 +17,7 @@ public class DynamoDbExtensionTest {
 
     @Test
     @DisplayName("Default dynamodb extension with default settings")
+    @Disabled
     public void testDefaultDynamoDB(TestingDynamoDbConfig dynamoDbConfig) {
         Assumptions.assumeTrue(dynamoDbConfig != null);
         Assertions.assertNotNull(dynamoDbConfig.getEndpointConfiguration());

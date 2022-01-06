@@ -12,7 +12,7 @@ public interface IMessagingFactory {
     /**
      * Initialized messaging
      */
-    void initialized();
+    void initialize();
 
     /**
      * Get a producer

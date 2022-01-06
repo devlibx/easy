@@ -36,7 +36,12 @@ public class KafkaBasedProducerService implements IProducerService {
 
         // Create a producer
         if (!kafkaBasedProducerMap.containsKey(name)) {
-            KafkaBasedProducer producer = new KafkaBasedProducer(config, stringHelper, metrics);
+            KafkaBasedProducer producer;
+            if (config.getBoolean("enableCircuitBreakerOnError", false)) {
+                producer = new KafkaBasedResilientProducer(config, stringHelper, metrics);
+            } else {
+                producer = new KafkaBasedProducer(config, stringHelper, metrics);
+            }
             producer.start();
             kafkaBasedProducerMap.put(name, producer);
         }

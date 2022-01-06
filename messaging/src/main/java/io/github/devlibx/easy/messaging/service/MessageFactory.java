@@ -36,7 +36,7 @@ public class MessageFactory implements IMessagingFactory {
 
 
     @Override
-    public synchronized void initialized() {
+    public synchronized void initialize() {
         // No-OP if already initialized
         if (initialized) return;
 
@@ -90,7 +90,7 @@ public class MessageFactory implements IMessagingFactory {
 
         // Initialized if not done already
         if (!initialized) {
-            initialized();
+            initialize();
         }
 
         StringObjectMap config = messagingConfigs.getProducers().get(name);
@@ -105,7 +105,7 @@ public class MessageFactory implements IMessagingFactory {
 
         // Initialized if not done already
         if (!initialized) {
-            initialized();
+            initialize();
         }
 
         StringObjectMap config = messagingConfigs.getConsumers().get(name);

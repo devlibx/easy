@@ -7,9 +7,29 @@ messaging:
       ignored_value.serializer: org.apache.kafka.common.serialization.BytesSerializer
       retries: 0
       acks: 0
+    customer:
+      topic: customer
+      brokers: localhost:9092
+      sync: false
+      retries: 0
+      acks: 0
+      value.serializer: org.apache.kafka.common.serialization.BytesSerializer
+    customerNoErrorIfMessageSendFail:
+      topic: customer
+      brokers: localhost:9092
+      sync: false
+      retries: 0
+      acks: 0
+      value.serializer: org.apache.kafka.common.serialization.BytesSerializer
+      enableCircuitBreakerOnError: true
   consumers:
     sampleConsumer:
       topic: some_topic
+      broker: localhost:9092
+      sync: true
+      group.id: 1234
+    customer:
+      topic: customer
       broker: localhost:9092
       sync: true
       group.id: 1234
