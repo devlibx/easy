@@ -1,6 +1,7 @@
-### Producer
+## Kafka helper setup
+This is the setup code to get ```IMessagingFactory``` object. You can manually set-up if you like.
 ```java
- // Setup messaging factory - recommended using this code, as it will setup defaults.
+// Setup messaging factory - recommended using this code, as it will setup defaults.
 // You can create objects by yourself if you want
 KafkaMessagingTestConfig kafkaConfig = YamlUtils.readYaml("kafka_test_config.yml", KafkaMessagingTestConfig.class);
 Injector injector = Guice.createInjector(new AbstractModule() {
@@ -13,7 +14,10 @@ Injector injector = Guice.createInjector(new AbstractModule() {
 // Get messaging factory and initialize the factory
 IMessagingFactory messagingFactory = injector.getInstance(IMessagingFactory.class);
 messagingFactory.initialize();
+```
 
+### Producer
+```java
 // Produce sample data
 messagingFactory.getProducer("customer").ifPresent(producer -> {
     for (int i = 0; i < 100; i++) {
@@ -27,18 +31,6 @@ messagingFactory.getProducer("customer").ifPresent(producer -> {
 
 ### Consumer
 ```java
- // Setup messaging factory - recommended using this code, as it will setup defaults.
-// You can create objects by yourself if you want
-KafkaMessagingTestConfig kafkaConfig = YamlUtils.readYaml("kafka_test_config.yml", KafkaMessagingTestConfig.class);
-Injector injector = Guice.createInjector(new AbstractModule() {
-    @Override
-    protected void configure() {
-        bind(MessagingConfigs.class).toInstance(kafkaConfig.messaging);
-    }
-}, new MessagingKafkaModule(), new MessagingModule());
-IMessagingFactory messagingFactory = injector.getInstance(IMessagingFactory.class);
-messagingFactory.initialize();
-
 // Get and start consuming data
 messagingFactory.getConsumer("customer").ifPresent(consumer -> {
     consumer.start((message, metadata) -> {
@@ -47,6 +39,8 @@ messagingFactory.getConsumer("customer").ifPresent(consumer -> {
     });
 });
 ```
+---
+<br>
 
 ### Example Code
 You can see the full example code
