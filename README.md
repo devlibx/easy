@@ -12,6 +12,11 @@
 The link to helper library which has many common useful utilities.
 [Helper Library](https://github.com/devlibx/easy/tree/master/helper)
 
+## Kafka Producer/Consumer Library
+The link to Kafka library which has a easy way to produce or consume on Kafka.
+[Kafka Library](https://github.com/devlibx/easy/tree/master/messaging-kafka)
+
+
 ## Easy Http
 
 Http Module provides API to make HTTP calls. It ensures that APIs are called with circuit-breaker, time limit.
