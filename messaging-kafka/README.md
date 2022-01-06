@@ -42,16 +42,13 @@ messagingFactory.getConsumer("customer").ifPresent(consumer -> {
 ---
 <br>
 
-### Example Code
-You can see the full example code
-```io/github/devlibx/easy/messaging/kafka/kafkaResilientExample.java``` and 
-```io/github/devlibx/easy/messaging/kafka/kafkaExample.java```
-
-##### Messaging config 
+### Messaging config 
 We have defined few message producer and consumer:
 customer - normal message producer
 customerNoErrorIfMessageSendFail - if message send fails then we open circuit, and we do not block once circuit is open.
+<br>
     use ```enableCircuitBreakerOnError=true``` to enable this
+
 ```yaml
 messaging:
   producers:    
@@ -77,3 +74,10 @@ messaging:
       sync: true
       group.id: 1234
 ```
+---
+<br>
+
+### Example Code
+You can see the full example code
+```io/github/devlibx/easy/messaging/kafka/kafkaResilientExample.java``` and
+```io/github/devlibx/easy/messaging/kafka/kafkaExample.java```
