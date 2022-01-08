@@ -3,7 +3,27 @@ This is the setup code to get ```IMessagingFactory``` object. You can manually s
 ```java
 // Setup messaging factory - recommended using this code, as it will setup defaults.
 // You can create objects by yourself if you want
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import io.gitbub.devlibx.easy.helper.yaml.YamlUtils;
+import io.github.devlibx.easy.messaging.config.MessagingConfigs;
+import io.github.devlibx.easy.messaging.kafka.module.MessagingKafkaModule;
+import io.github.devlibx.easy.messaging.module.MessagingModule;
+import io.github.devlibx.easy.messaging.service.IMessagingFactory;
+
+----
+@Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+public static class KafkaMessagingTestConfig {
+    public MessagingConfigs messaging;
+}
+----
+
+// Read config from file        
 KafkaMessagingTestConfig kafkaConfig = YamlUtils.readYaml("kafka_test_config.yml", KafkaMessagingTestConfig.class);
+
 Injector injector = Guice.createInjector(new AbstractModule() {
     @Override
     protected void configure() {
