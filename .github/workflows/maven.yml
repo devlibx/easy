@@ -35,7 +35,9 @@ jobs:
           git config user.email "devlibxgithub@gmail.com"
           git config user.name "GitHub Actions"
       - name: Publish to the Maven Central Repository
-        run: mvn -B clean install -Dmaven.test.skip=true release:prepare release:perform -P release
+        run: |
+          mvn clean install -DskipTests
+          mvn -B clean install -Dmaven.test.skip=true release:prepare release:perform -P release
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
