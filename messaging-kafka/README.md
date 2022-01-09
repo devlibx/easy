@@ -63,11 +63,16 @@ messagingFactory.getConsumer("customer").ifPresent(consumer -> {
 <br>
 
 ### Messaging config 
-We have defined few message producer and consumer:
-customer - normal message producer
-customerNoErrorIfMessageSendFail - if message send fails then we open circuit, and we do not block once circuit is open.
-<br>
-    use ```enableCircuitBreakerOnError=true``` to enable this
+
+**Example consumer** -> customer - normal message producer <br>
+**Example producer** -> customerNoErrorIfMessageSendFail - if message send fails then we open circuit, and we do not block once circuit is open.
+**use ```enableCircuitBreakerOnError=true``` to enable circuit breaker**
+
+**sync** = true | false (send message in sync or async mode) <br>
+**request.timeout.ms** = timeout of not able to send message (in case of sync=false you will not block, but you should still define
+a timeout for your kafka client) <br>
+**ack** = (0 | 1 | all) -> if "ack=1" then circuit-breaker settings will not have any effect <br>
+**enableCircuitBreakerOnError** = true | false (default=false) - open circuit to avoid calls to Kafka if there are errors <br>
 
 ```yaml
 messaging:
@@ -100,46 +105,45 @@ messaging:
 <br>
 
 ### Example Code
-You can see the full example code
+You can see the full example code (under messaging-kafka/src/test)
 ```io/github/devlibx/easy/messaging/kafka/kafkaResilientExample.java``` and
 ```io/github/devlibx/easy/messaging/kafka/kafkaExample.java```
 ---
 <br>
 
 
-### How to test resilient kafka producer
-To do this we will set-up a proxy using "toxiproxy". This is to generate latency between out client and 
+## How to test resilient kafka producer 
+This implementation was tested using ```toxiproxy``` to generate errors between client and kafka <br>
+
+To do this we will set-up a proxy using ```toxiproxy```. This is to generate latency between out client and 
 Kafka
 
-My IPs
+*My IPs for this example*
 ```shell
 My Host IP							: 192.168.0.126
 My VM IP (which is running Kafka)   : 192.168.64.29
 
 ```
 
-1. Run a Kafka in other VM -> The Kafka as following setting in server.properties file:
+1. Run a Kafka in other VM <br>You will have to change following setting in server.properties file before 
+you run Kafka (to proxy it for this setup).
 ```shell
-# Kafka listens for connection in 0.0.0.0:9092
-# But client will connect to the address given by "advertised.listeners"
-# Here I am telling my Kafka clinet to connect to "My Host IP on port 19092 -> where my proxy is running"
 advertised.listeners=PLAINTEXT://192.168.0.126:19092
 ```
 
-
 2. Setup proxy
 ```shell
-# Create a Kafka proxyy
-# My kafka clients will connect at "My Host IP : 19092" which will forward it to "My VM"
+# Create a Kafka proxy
+# My kafka clients (example code) will connect at "My Host IP : 19092", and proxy will forward it to "My VM"
 toxiproxy-cli create -l 192.168.0.126:19092 -u 192.168.64.29:9092 ubuntu_kafka
 ```
 
-3. Run you client and use following to add or remove errors
+3. Run you client and use following to add/remove errors
 ```shell
-# How to generate error
-toxiproxy-cli toxic add -t latency -a latency=200  -n bad ubuntu_kafka
+# When your app is running then you can inject latency of 200 ms by following
+toxiproxy-cli toxic add -t latency -a latency=200  -n inject_latency_in_my_kafka_calls ubuntu_kafka
 
-# How to remove error
-toxiproxy-cli toxic delete  -n bad ubuntu_kafka
+# To remove the latency
+toxiproxy-cli toxic delete  -n inject_latency_in_my_kafka_calls ubuntu_kafka
 ```
 
