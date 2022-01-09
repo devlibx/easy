@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.SortedMap;
 import java.util.UUID;
 
 public class StringObjectMapTest extends TestCase {
@@ -153,5 +154,11 @@ public class StringObjectMapTest extends TestCase {
         }
         long end = System.currentTimeMillis();
         System.out.println("===> " + (end - start));
+    }
+
+    public void testSortedMap() {
+        SortedMap<String, String> m = Maps.SortedMaps.of("a", "b", "c", "d");
+        assertEquals("b", m.get("a"));
+        assertEquals("d", m.get("c"));
     }
 }
