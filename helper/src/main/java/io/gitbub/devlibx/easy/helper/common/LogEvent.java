@@ -99,7 +99,7 @@ public class LogEvent {
             return builder;
         }
 
-        public static Builder withEventTypeAndEventSubType(String eventType, String eventSubType) {
+        public static Builder withEventTypeSubType(String eventType, String eventSubType) {
             if (Strings.isNullOrEmpty(SERVICE_NAME_FOR_APPLICATION)) {
                 throw new RuntimeException("Please set global application name using LogEvent.setGlobalServiceName(XYZ) at boot-up");
             }
@@ -111,33 +111,11 @@ public class LogEvent {
             return builder;
         }
 
-        public static Builder withEventTypeAndEntity(String eventType, String entityType, String entityId) {
-            if (Strings.isNullOrEmpty(SERVICE_NAME_FOR_APPLICATION)) {
-                throw new RuntimeException("Please set global application name using LogEvent.setGlobalServiceName(XYZ) at boot-up");
-            }
-
-            Builder builder = new Builder();
-            builder.logEvent.service = SERVICE_NAME_FOR_APPLICATION;
-            builder.logEvent.eventType = eventType;
-            builder.logEvent.entity = new Entity();
-            builder.logEvent.entity.type = entityType;
-            builder.logEvent.entity.id = entityId;
-            return builder;
-        }
-
-        public static Builder withEventTypeEventSubTypeAndEntity(String eventType, String eventSubType, String entityType, String entityId) {
-            if (Strings.isNullOrEmpty(SERVICE_NAME_FOR_APPLICATION)) {
-                throw new RuntimeException("Please set global application name using LogEvent.setGlobalServiceName(XYZ) at boot-up");
-            }
-
-            Builder builder = new Builder();
-            builder.logEvent.service = SERVICE_NAME_FOR_APPLICATION;
-            builder.logEvent.eventType = eventType;
-            builder.logEvent.eventSubType = eventSubType;
-            builder.logEvent.entity = new Entity();
-            builder.logEvent.entity.type = entityType;
-            builder.logEvent.entity.id = entityId;
-            return builder;
+        public Builder entity(String entityType, String entityId) {
+            this.logEvent.entity = new Entity();
+            this.logEvent.entity.type = entityType;
+            this.logEvent.entity.id = entityId;
+            return this;
         }
 
         public Builder data(StringObjectMap data) {
@@ -265,7 +243,6 @@ public class LogEvent {
             }
             return this;
         }
-
 
         public Builder data(String key1, Object value1, String key2, Object value2, String key3, Object value3, String key4, Object value4, String key5, Object value5, String key6, Object value6) {
             StringObjectMap m = StringObjectMap.of(key1, value1, key2, value2, key3, value3, key4, value4, key5, value5, key6, value6);

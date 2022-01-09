@@ -33,7 +33,8 @@ public class LogEventTest extends TestCase {
     public void testLogEvent() {
         LogEvent.setGlobalServiceName("testing");
         LogEvent event = LogEvent.Builder
-                .withEventTypeAndEntity("test", "user", "user_1")
+                .withEventType("test")
+                .entity("user", "user_1")
                 .data("key", "value")
                 .build();
         assertEquals("user", event.getEntity().getType());
@@ -43,7 +44,8 @@ public class LogEventTest extends TestCase {
 
 
         event = LogEvent.Builder
-                .withEventTypeEventSubTypeAndEntity("test", "test_sub_type", "user", "user_1")
+                .withEventTypeSubType("test", "test_sub_type")
+                .entity("user", "user_1")
                 .data("key", "value")
                 .dimensions("key1", "value1", "key2", "value2")
                 .dimensions("key3", "value3")
@@ -64,7 +66,8 @@ public class LogEventTest extends TestCase {
 
 
         event = LogEvent.Builder
-                .withEventTypeEventSubTypeAndEntity("test", "test_sub_type", "user", "user_1")
+                .withEventTypeSubType("test", "test_sub_type")
+                .entity("user", "user_1")
                 .build();
         System.out.println(JsonUtils.asJson(event));
     }
