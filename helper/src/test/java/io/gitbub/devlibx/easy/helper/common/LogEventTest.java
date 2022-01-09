@@ -61,5 +61,11 @@ public class LogEventTest extends TestCase {
         assertEquals("value4", event.getDimensions().get("key4"));
 
         System.out.println(JsonUtils.asJson(event));
+
+
+        event = LogEvent.Builder
+                .withEventTypeEventSubTypeAndEntity("test", "test_sub_type", "user", "user_1")
+                .build();
+        System.out.println(JsonUtils.asJson(event));
     }
 }

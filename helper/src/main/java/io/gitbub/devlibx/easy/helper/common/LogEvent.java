@@ -1,6 +1,7 @@
 package io.gitbub.devlibx.easy.helper.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
 import io.gitbub.devlibx.easy.helper.map.Maps;
@@ -13,24 +14,34 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
+ * Sample event Json
  * <pre>
  * {
  *    "__service__" : "testing",
- *    "__timestamp__" : 1641583496507,
- *    "__unique_id__" : "d45bee09-b8a6-4188-ad16-a1cab3496c42",
+ *    "__timestamp__" : 1641722003542,
+ *    "__unique_id__" : "432f211b-ddad-44f2-bd51-78e1e793b7ad",
  *    "data" : {
  *       "key" : "value"
+ *    },
+ *    "dimensions" : {
+ *       "key1" : "value1",
+ *       "key2" : "value2",
+ *       "key3" : "value3",
+ *       "key4" : "value4"
  *    },
  *    "entity" : {
  *       "id" : "user_1",
  *       "type" : "user"
  *    },
- *    "event_name" : "test"
+ *    "event_sub_type" : "test_sub_type",
+ *    "event_type" : "test"
  * }
+ * </pre>
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NoArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class LogEvent {
     private static String SERVICE_NAME_FOR_APPLICATION;
 
