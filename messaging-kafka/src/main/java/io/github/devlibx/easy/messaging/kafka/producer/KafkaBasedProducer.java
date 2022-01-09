@@ -17,6 +17,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
@@ -87,14 +88,19 @@ public class KafkaBasedProducer implements IProducer {
         long start = System.currentTimeMillis();
         producer.send(new ProducerRecord<>(topic, key, value), (metadata, exception) -> {
             if (exception != null) {
+                long timeTaken = (System.currentTimeMillis() - start);
                 log.error("(async) failed to send message to topic={}, key={}, value={}", topic, key, value);
                 if (log.isErrorEnabled()) {
                     exception.printStackTrace();
                 }
                 if (metricsEnabled) {
-                    metrics.observe(metricsPrefix + "_failure_time_taken", (System.currentTimeMillis() - start));
+                    metrics.observe(metricsPrefix + "_failure_time_taken", timeTaken);
                     metrics.inc(metricsPrefix + "_failure");
                 }
+
+                // Process error
+                processErrorOnAsyncResponse(timeTaken, TimeUnit.MILLISECONDS, exception);
+
             } else {
                 log.debug("(async) message sent to topic={}, key={}, value={}", topic, key, value);
                 if (metricsEnabled) {
@@ -148,5 +154,10 @@ public class KafkaBasedProducer implements IProducer {
     }
 
     protected void processError(Exception e) {
+        // NO-OP
+    }
+
+    protected void processErrorOnAsyncResponse(long duration, TimeUnit durationUnit, Throwable throwable) {
+        // NO-OP
     }
 }
