@@ -20,7 +20,7 @@ public class KafkaBasedResilientProducer extends KafkaBasedProducer {
         // Setup a circuit breaker with default settings
         CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
                 .enableAutomaticTransitionFromOpenToHalfOpen()
-                .waitDurationInOpenState(Duration.ofMillis(100))
+                .waitDurationInOpenState(Duration.ofSeconds(10))
                 .build();
         circuitBreaker = CircuitBreaker.of(config.getString("name") + "-circuit-breaker", circuitBreakerConfig);
     }
@@ -29,17 +29,34 @@ public class KafkaBasedResilientProducer extends KafkaBasedProducer {
     public boolean send(String key, Object value) {
         long start = System.currentTimeMillis();
         try {
-            circuitBreaker.decorateCallable(() -> KafkaBasedResilientProducer.super.send(key, value)).call();
+            try {
+                return circuitBreaker.decorateCallable(() -> KafkaBasedResilientProducer.super.send(key, value)).call();
+            } catch (InternalErrorWrapper wrapperError) {
+                throw wrapperError.e;
+            }
         } catch (CallNotPermittedException e) {
             metrics.observe(metricsPrefix + "_failure_time_taken", (System.currentTimeMillis() - start));
             metrics.inc(metricsPrefix + "_failure");
             metrics.inc(metricsPrefix + "_failure_circuit_open");
-            log.error("failed to send kafka message: topic={}, error={}", config.getString("name"), e.getMessage());
+            log.error("failed to send kafka message (CallNotPermittedException): topic={}, error={}", config.getString("name"), e.getMessage());
         } catch (Exception e) {
             metrics.observe(metricsPrefix + "_failure_time_taken", (System.currentTimeMillis() - start));
             metrics.inc(metricsPrefix + "_failure");
             log.error("circuit-open to send kafka message: topic={}, error={}", config.getString("name"), e.getMessage());
         }
         return false;
+    }
+
+    @Override
+    protected void processError(Exception e) {
+        throw new InternalErrorWrapper(e);
+    }
+
+    private static class InternalErrorWrapper extends RuntimeException {
+        private final Exception e;
+
+        private InternalErrorWrapper(Exception e) {
+            this.e = e;
+        }
     }
 }

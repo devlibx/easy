@@ -45,6 +45,7 @@ public class KafkaBasedProducer implements IProducer {
         properties.put("key.serializer", config.getString("key.serializer", "org.apache.kafka.common.serialization.StringSerializer"));
         properties.put("value.serializer", config.getString("value.serializer", "org.apache.kafka.common.serialization.StringSerializer"));
         properties.put("acks", config.getString("acks", "1"));
+        properties.put("request.timeout.ms", config.getInt("request.timeout.ms", 1000));
         properties.put("partition.assignment.strategy", config.getString("partition.assignment.strategy", "org.apache.kafka.clients.consumer.RangeAssignor"));
         if (!Strings.isNullOrEmpty(config.getString("partitioner.class"))) {
             properties.put("partitioner.class", config.getString("partitioner.class"));
@@ -56,11 +57,13 @@ public class KafkaBasedProducer implements IProducer {
         long start = System.currentTimeMillis();
         Future<RecordMetadata> ret = producer.send(new ProducerRecord<>(topic, key, value));
         boolean success = false;
+        Exception errorToThrow = null;
         try {
             ret.get();
             success = true;
         } catch (Exception e) {
             log.error("(sync) error in sending message to topic={}, key={}", topic, key);
+            errorToThrow = e;
         }
         if (success) {
             log.debug("(sync) message sent to topic={}, key={}, value={}", topic, key, value);
@@ -75,6 +78,7 @@ public class KafkaBasedProducer implements IProducer {
                 metrics.observe(metricsPrefix + "_failure_time_taken", (System.currentTimeMillis() - start));
                 metrics.inc(metricsPrefix + "_failure");
             }
+            processError(errorToThrow);
             return false;
         }
     }
@@ -141,5 +145,8 @@ public class KafkaBasedProducer implements IProducer {
         } else {
             return sendAsyncKafkaMessage(topic, key, value);
         }
+    }
+
+    protected void processError(Exception e) {
     }
 }
