@@ -6,6 +6,8 @@ import io.gitbub.devlibx.easy.helper.map.Maps;
 import junit.framework.TestCase;
 import org.junit.Assert;
 
+import java.util.Map;
+
 public class LogEventTest extends TestCase {
 
     public void testLogEventWithError() {
@@ -70,5 +72,13 @@ public class LogEventTest extends TestCase {
                 .entity("user", "user_1")
                 .build();
         System.out.println(JsonUtils.asJson(event));
+    }
+
+    public void testMaps() {
+        Map<String, String> map = Maps.of("key", "value");
+        assertEquals("value", map.get("key"));
+
+        Map<String, Integer> mapInt = Maps.of("key", 10);
+        assertEquals(Integer.valueOf(10), mapInt.get("key"));
     }
 }

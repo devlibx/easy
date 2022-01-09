@@ -4,21 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 class CodeGenerator {
+
     public static void main(String[] args) {
+        // Generate(10, "Map<String, String>", "HashMap<>()", "String", "String");
+        Generate(10, "Map<K, V>", "HashMap<>()", "K", "V", "<K, V>");
+    }
 
-        int N = 10;
-        for (int i = 1; i <= N; i++) {
-
-            String className = "Map<String, String>";
-            String classNameImpl = "HashMap<>()";
-
-            StringBuffer sb = new StringBuffer();
-            sb.append("public static ").append(className).append(" of(");
-
+    public static void Generate(int count, String className, String classNameImpl, String keyType, String valueType, String genericReturnType) {
+        for (int i = 1; i <= count; i++) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("public static ").append(genericReturnType).append(" ").append(className).append(" of(");
 
             List<String> argParam = new ArrayList<>();
             for (int j = 1; j <= i; j++) {
-                argParam.add(String.format("String key%d, String value%d", j, j));
+                argParam.add(String.format("%s key%d, %s value%d", keyType, j, valueType, j));
             }
             String string = String.join(", ", argParam);
             sb.append(string);
@@ -36,7 +35,7 @@ class CodeGenerator {
             sb.append("; \n \treturn map;");
             sb.append("\n} \n");
 
-            System.out.println(sb.toString());
+            System.out.println(sb);
         }
 
     }
