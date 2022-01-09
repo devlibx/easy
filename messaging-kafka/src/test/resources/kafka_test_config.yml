@@ -25,6 +25,7 @@ messaging:
       request.timeout.ms: 100
       value.serializer: org.apache.kafka.common.serialization.BytesSerializer
       enableCircuitBreakerOnError: true
+      circuit-breaker.stay_in_open_state_on_error.ms: 10000
   consumers:
     sampleConsumer:
       topic: some_topic

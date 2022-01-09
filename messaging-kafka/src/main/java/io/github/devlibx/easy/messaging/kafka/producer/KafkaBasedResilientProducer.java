@@ -17,10 +17,13 @@ public class KafkaBasedResilientProducer extends KafkaBasedProducer {
     public KafkaBasedResilientProducer(StringObjectMap config, StringHelper stringHelper, IMetrics metrics) {
         super(config, stringHelper, metrics);
 
+        // How long to remain in open state when circuit opens (default = 10sec)
+        int waitDurationInOpenState = config.getInt("circuit-breaker.stay_in_open_state_on_error.ms", 10 * 1000);
+
         // Setup a circuit breaker with default settings
         CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
                 .enableAutomaticTransitionFromOpenToHalfOpen()
-                .waitDurationInOpenState(Duration.ofSeconds(10))
+                .waitDurationInOpenState(Duration.ofMillis(waitDurationInOpenState))
                 .build();
         circuitBreaker = CircuitBreaker.of(config.getString("name") + "-circuit-breaker", circuitBreakerConfig);
     }
