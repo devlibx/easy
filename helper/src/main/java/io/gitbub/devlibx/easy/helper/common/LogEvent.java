@@ -81,6 +81,14 @@ public class LogEvent {
         private String id;
     }
 
+    public static Builder build(String eventType) {
+        return Builder.withEventType(eventType);
+    }
+
+    public static Builder build(String eventType, String eventSubType) {
+        return Builder.withEventTypeSubType(eventType, eventSubType);
+    }
+
     public static void setGlobalServiceName(String serviceName) {
         SERVICE_NAME_FOR_APPLICATION = serviceName;
     }

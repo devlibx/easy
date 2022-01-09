@@ -34,8 +34,7 @@ public class LogEventTest extends TestCase {
 
     public void testLogEvent() {
         LogEvent.setGlobalServiceName("testing");
-        LogEvent event = LogEvent.Builder
-                .withEventType("test")
+        LogEvent event = LogEvent.build("test")
                 .entity("user", "user_1")
                 .data("key", "value")
                 .build();
