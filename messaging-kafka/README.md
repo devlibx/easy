@@ -77,20 +77,22 @@ messaging:
       brokers: localhost:9092
       sync: false
       retries: 0
-      acks: 0
+      acks: 1
+      request.timeout.ms: 100
       value.serializer: org.apache.kafka.common.serialization.BytesSerializer
     customerNoErrorIfMessageSendFail:
       topic: customer
       brokers: localhost:9092
       sync: false
       retries: 0
-      acks: 0
+      acks: 1
+      request.timeout.ms: 100
       value.serializer: org.apache.kafka.common.serialization.BytesSerializer
       enableCircuitBreakerOnError: true
   consumers:   
     customer:
       topic: customer
-      broker: localhost:9092
+      brokers: localhost:9092
       sync: true
       group.id: 1234
 ```
@@ -101,3 +103,43 @@ messaging:
 You can see the full example code
 ```io/github/devlibx/easy/messaging/kafka/kafkaResilientExample.java``` and
 ```io/github/devlibx/easy/messaging/kafka/kafkaExample.java```
+---
+<br>
+
+
+### How to test resilient kafka producer
+To do this we will set-up a proxy using "toxiproxy". This is to generate latency between out client and 
+Kafka
+
+My IPs
+```shell
+My Host IP							: 192.168.0.126
+My VM IP (which is running Kafka)   : 192.168.64.29
+
+```
+
+1. Run a Kafka in other VM -> The Kafka as following setting in server.properties file:
+```shell
+# Kafka listens for connection in 0.0.0.0:9092
+# But client will connect to the address given by "advertised.listeners"
+# Here I am telling my Kafka clinet to connect to "My Host IP on port 19092 -> where my proxy is running"
+advertised.listeners=PLAINTEXT://192.168.0.126:19092
+```
+
+
+2. Setup proxy
+```shell
+# Create a Kafka proxyy
+# My kafka clients will connect at "My Host IP : 19092" which will forward it to "My VM"
+toxiproxy-cli create -l 192.168.0.126:19092 -u 192.168.64.29:9092 ubuntu_kafka
+```
+
+3. Run you client and use following to add or remove errors
+```shell
+# How to generate error
+toxiproxy-cli toxic add -t latency -a latency=200  -n bad ubuntu_kafka
+
+# How to remove error
+toxiproxy-cli toxic delete  -n bad ubuntu_kafka
+```
+
