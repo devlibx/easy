@@ -25,12 +25,14 @@ public interface IResilienceManager {
         private int timeout = 1000;
         private int queueSize = 100;
         private boolean useSemaphore = false;
+        private int waitDurationInOpenState = 10000;
 
         public static ResilienceCallConfigBuilder withDefaults() {
             return ResilienceCallConfig.builder()
                     .queueSize(100)
                     .timeout(1000)
                     .concurrency(10)
+                    .waitDurationInOpenState(10000)
                     .useSemaphore(false);
         }
 
@@ -69,8 +71,13 @@ public interface IResilienceManager {
                 return this;
             }
 
+            public ResilienceCallConfig.ResilienceCallConfigBuilder waitDurationInOpenState(int waitDurationInOpenState) {
+                this.waitDurationInOpenState = waitDurationInOpenState;
+                return this;
+            }
+
             public ResilienceCallConfig build() {
-                return new ResilienceCallConfig(this.id, this.concurrency, this.timeout, this.queueSize, this.useSemaphore);
+                return new ResilienceCallConfig(this.id, this.concurrency, this.timeout, this.queueSize, this.useSemaphore, this.waitDurationInOpenState);
             }
 
             public String toString() {

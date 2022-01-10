@@ -111,6 +111,7 @@ class EasyHttpObject implements IEasyHttpImplementation {
                         .timeout(api.getTimeout())
                         .queueSize(api.getQueueSize())
                         .useSemaphore(api.isAsync())
+                        .waitDurationInOpenState(api.getWaitBeforeClosingCircuitAfterError())
                         .build();
                 IResilienceProcessor resilienceProcessor = resilienceManager.getOrCreate(callConfig);
                 resilienceProcessors.put(key, resilienceProcessor);

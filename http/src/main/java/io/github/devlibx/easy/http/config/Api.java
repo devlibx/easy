@@ -108,6 +108,11 @@ public class Api {
     private int timeout = 1000;
 
     /**
+     * How long to wait before we need to check if we can retry after circuit was openned
+     */
+    private int waitBeforeClosingCircuitAfterError = 10000;
+
+    /**
      * RPS of this API. If this is set to non-zero then "ConcurrencyApiConfigPreProcessor" will execute and will
      * update you concurrency to optimize your required threads/semaphore.
      */
