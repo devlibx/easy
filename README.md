@@ -228,6 +228,7 @@ apis:
     server: jsonplaceholder
     timeout: 10000
     concurrency: 3
+    waitBeforeClosingCircuitAfterError: 5000
   getPostsAsync:
     method: GET
     path: /posts/${id}
@@ -244,6 +245,14 @@ apis:
 3. rps - if you know "rps" of API call, then you should set `rps` e.g. rps: 100. The EasyHttp will automatically setup
    required threads to support concurrent calls. You don't need to set `concurrency` manually. For example, if
    timeout=20 and rps=100 then EasyHttp will set `concurrency=2`
+4. waitBeforeClosingCircuitAfterError = when circuit is opened due to error, all the calls to external service will
+   not be done (circuit breaker will avoid calling external service). <br>
+   However, circuit breaker has to check after some time e.g. 10sec to see if external service is up of not. To do this
+   it allows few calls to go to external service to see if external service is up. <br>
+   This time is configured using ```waitBeforeClosingCircuitAfterError (default 10sec)```. <br>
+   If you keep it too small e.g. 10-50ms; your circuit breaker will call external service frequently after error. <br>
+   If you keep it large e.g. 30sec then; your circuit breaker will wait for 30 sec before calling external service.
+      And you can see many request are failing.
 
 When you set `rps` then you have to consider `rps` from the single node i.e. how many requests this single node is going
 to call. For example, if you call an external API with 1000 `rps`; and you run 10 nodes, then a single node has rps=100
