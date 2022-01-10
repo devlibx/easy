@@ -2,6 +2,7 @@ package io.github.devlibx.easy.http.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.base.Strings;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import io.gitbub.devlibx.easy.helper.string.StringHelper;
 import io.github.devlibx.easy.http.IApiConfigPreProcessor;
 import io.github.devlibx.easy.http.RequestObject;
@@ -113,6 +114,11 @@ public class Api {
     private int rps = 0;
 
     private List<String> configPreProcessors = Collections.singletonList(ConcurrencyApiConfigPreProcessor.class.getCanonicalName());
+
+    /**
+     * Setup common headers
+     */
+    private StringObjectMap headers;
 
     /**
      * We add this extra time to overall request. This is to account for time consumed in other activities

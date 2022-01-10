@@ -2,6 +2,7 @@ package io.github.devlibx.easy.http.async;
 
 import com.google.inject.Inject;
 import io.gitbub.devlibx.easy.helper.ApplicationContext;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.gitbub.devlibx.easy.helper.string.StringHelper;
 import io.github.devlibx.easy.http.IRequestProcessor;
@@ -66,7 +67,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                 webClient
                         .get()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
-                        .headers(consumerHeaders(requestObject))
+                        .headers(consumerHeaders(requestObject, api.getHeaders()))
                         .retrieve()
                         .bodyToMono(byte[].class)
                         .doOnError(onErrorConsumer(server, api, observableEmitter, startTime))
@@ -78,7 +79,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                 webClient
                         .delete()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
-                        .headers(consumerHeaders(requestObject))
+                        .headers(consumerHeaders(requestObject, api.getHeaders()))
                         .retrieve()
                         .bodyToMono(byte[].class)
                         .doOnError(onErrorConsumer(server, api, observableEmitter, startTime))
@@ -90,7 +91,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                 webClient
                         .post()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
-                        .headers(consumerHeaders(requestObject))
+                        .headers(consumerHeaders(requestObject, api.getHeaders()))
                         .bodyValue(requestObject.getBody())
                         .retrieve()
                         .bodyToMono(byte[].class)
@@ -104,7 +105,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                 webClient
                         .put()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
-                        .headers(consumerHeaders(requestObject))
+                        .headers(consumerHeaders(requestObject, api.getHeaders()))
                         .bodyValue(requestObject.getBody())
                         .retrieve()
                         .bodyToMono(byte[].class)
@@ -143,9 +144,9 @@ public class AsyncRequestProcessor implements IRequestProcessor {
         };
     }
 
-    private Consumer<HttpHeaders> consumerHeaders(RequestObject requestObject) {
+    private Consumer<HttpHeaders> consumerHeaders(RequestObject requestObject, StringObjectMap apiHeaders) {
         return httpHeaders -> {
-            requestObject.preProcessHeaders();
+            requestObject.preProcessHeaders(apiHeaders);
             requestObject.getHeaders().forEach((key, value) -> {
                 httpHeaders.add(key, stringHelper.stringify(value));
             });

@@ -284,4 +284,40 @@ public class AsyncRequestProcessorTest extends BaseTestCase {
         assertEquals("str_89", headers.getList("String_header", String.class).get(0));
 
     }
+
+    @Test
+    public void testAsyncPostRequestWithRequestHeaders() throws Exception {
+        AtomicReference<StringObjectMap> data = new AtomicReference<>();
+        Payload payload = Payload.createPayload();
+        CountDownLatch wait = new CountDownLatch(1);
+        EasyHttp.callAsync(
+                Call.builder(StringObjectMap.class)
+                        .withServerAndApi("testServer", "getPostsWithHeadersForPost")
+                        .addQueryParam("delay", 1)
+                        .withBody(payload)
+                        .addHeaders("int_header", 67, "string_header", "str_89")
+                        .build()
+        ).subscribe(stringObjectMap -> {
+            data.set(stringObjectMap);
+            wait.countDown();
+        }, throwable -> {
+            wait.countDown();
+        });
+        wait.await(100, TimeUnit.SECONDS);
+        assertNotNull(data.get());
+        StringObjectMap response = data.get();
+        assertEquals("post", response.get("method"));
+        assertFalse(Strings.isNullOrEmpty(response.getString("request_body")));
+        assertFalse(Strings.isNullOrEmpty(response.getString("headers")));
+
+        Payload responseBody = JsonUtils.readObject(response.getString("request_body"), Payload.class);
+        assertNotNull(responseBody);
+        assertEquals(payload, responseBody);
+
+        StringObjectMap headers = JsonUtils.convertAsStringObjectMap(response.getString("headers"));
+        assertEquals("67", headers.getList("Int_header", String.class).get(0));
+        assertEquals("str_89", headers.getList("String_header", String.class).get(0));
+        assertEquals("value", headers.getList("Key", String.class).get(0));
+        assertEquals("10", headers.getList("Key1", String.class).get(0));
+    }
 }

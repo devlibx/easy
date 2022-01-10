@@ -169,7 +169,7 @@ public class SyncRequestProcessor implements IRequestProcessor {
         requestBase.setConfig(buildRequestConfig(server, api, requestObject));
 
         // Add headers to the request
-        requestObject.preProcessHeaders();
+        requestObject.preProcessHeaders(api.getHeaders());
         requestObject.getHeaders().forEach((key, value) -> {
             requestBase.addHeader(key, stringHelper.stringify(value));
         });

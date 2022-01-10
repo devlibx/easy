@@ -10,6 +10,14 @@ servers:
     port: 9123
 
 apis:
+  getPostsWithHeaders:
+    path: /delay
+    server: testServer
+    timeout: 1000
+    concurrency: 3
+    headers:
+      key: value
+      key1: 10
   getPosts:
     method: GET
     path: /posts/${id}
@@ -60,3 +68,12 @@ apis:
     path: /delay
     server: testServer
     timeout: 2000
+  getPostsWithHeadersForPost:
+    method: POST
+    path: /delay
+    server: testServer
+    timeout: 1000
+    concurrency: 3
+    headers:
+      key: value
+      key1: 10

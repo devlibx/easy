@@ -1,9 +1,8 @@
 package io.github.devlibx.easy.http;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.github.devlibx.easy.http.util.Call;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import io.github.devlibx.easy.http.util.Call.IResponseBuilderFunc;
-import io.vavr.Function1;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,12 +27,15 @@ public class RequestObject {
     private byte[] body;
     private IResponseBuilderFunc<?> responseBuilder;
 
-    public void preProcessHeaders() {
+    public void preProcessHeaders(StringObjectMap apiHeaders) {
         if (headers == null) {
             headers = new HashMap<>();
         }
         if (!headers.containsKey("Content-Type") && !headers.containsKey("content-type")) {
             headers.put("Content-Type", "application/json");
+        }
+        if (apiHeaders != null) {
+            headers.putAll(apiHeaders);
         }
     }
 }

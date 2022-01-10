@@ -35,6 +35,25 @@ public class SyncRequestTest extends BaseTestCase {
      * Test a simple http call (with success)
      */
     @Test
+    public void testSimpleHttpRequestWithHeadersInConfig() {
+        StringObjectMap resultSync = EasyHttp.callSync(
+                Call.builder(StringObjectMap.class)
+                        .withServerAndApi("testServer", "getPostsWithHeaders")
+                        .addQueryParam("delay", 1)
+                        .build()
+        );
+        assertEquals("1", resultSync.get("delay"));
+        assertEquals("some data", resultSync.get("data"));
+        String headersString = resultSync.getString("headers", "{}");
+        StringObjectMap headers = JsonUtils.convertAsStringObjectMap(headersString);
+        assertEquals("value", headers.getList("Key", String.class).get(0));
+        assertEquals("10", headers.getList("Key1", String.class).get(0));
+    }
+
+    /**
+     * Test a simple http call (with success)
+     */
+    @Test
     public void testSimpleHttpRequest() {
         Map resultSync = EasyHttp.callSync(
                 Call.builder(Map.class)
