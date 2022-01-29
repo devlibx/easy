@@ -374,6 +374,7 @@ public class ResilienceManagerTest extends CommonBaseTestCase {
                         .concurrency(100000)
                         .id(uuid)
                         .timeout(1000)
+                        .waitDurationInOpenState(100)
                         .build()
         );
 
