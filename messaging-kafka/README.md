@@ -111,6 +111,68 @@ You can see the full example code (under messaging-kafka/src/test)
 ---
 <br>
 
+### Spring Boot Integration
+```java
+
+application.properties:
+# Messaging to send events to update user event
+messaging.producers.updateUserEvent.enabled: true
+messaging.producers.updateUserEvent.topic: topic_123
+messaging.producers.updateUserEvent.brokers: localhost:9092
+messaging.producers.updateUserEvent.sync: true
+messaging.producers.updateUserEvent.enableCircuitBreakerOnError: true
+messaging.producers.updateUserEvent.request.timeout.ms: 100
+messaging.producers.updateUserEvent.ack: 1
+messaging.producers.updateUserEvent.circuit-breaker.stay_in_open_state_on_error.ms: 10000
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Configuration
+@ConfigurationProperties(prefix = "messaging")
+public class MessagingConfigs extends io.github.devlibx.easy.messaging.config.MessagingConfigs {
+}
+
+
+@Configuration
+public static class MessagingConfigurationBeanFactory {
+
+    @Bean
+    public StringHelper stringHelper() {
+        return new StringHelper();
+    }
+
+    @Bean
+    public IMetrics metrics() {
+        return new IMetrics.NoOpMetrics();
+    }
+
+    @Bean
+    @Autowired
+    public IMessagingFactory messagingFactory(MessagingConfigs messagingConfigs, StringHelper stringHelper, IMetrics metrics) {
+        Map<String, IProducerService> producerServiceMap = new HashMap<>();
+        producerServiceMap.put("KAFKA", new KafkaBasedProducerService(stringHelper, metrics));
+        Map<String, IConsumerService> consumerServiceMap = new HashMap<>();
+        consumerServiceMap.put("KAFKA", new KafkaBasedConsumerService(metrics));
+        IMessagingFactory messagingFactory = new MessageFactory(producerServiceMap, consumerServiceMap, messagingConfigs);
+        messagingFactory.initialize();
+        return messagingFactory;
+    }
+}
+
+Usage:
+======
+messagingFactory.getProducer("updateUserEvent")
+        .ifPresent(producer -> producer.send(key, JsonUtils.asJson(logEvent)));
+```
 
 ## How to test resilient kafka producer 
 This implementation was tested using ```toxiproxy``` to generate errors between client and kafka <br>
