@@ -1,5 +1,6 @@
 package io.github.devlibx.easy.database.mysql.module;
 
+import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
@@ -8,6 +9,8 @@ import com.google.inject.multibindings.MapBinder;
 import com.google.inject.multibindings.OptionalBinder;
 import com.google.inject.name.Names;
 import io.gitbub.devlibx.easy.helper.healthcheck.IHealthCheckProvider;
+import io.gitbub.devlibx.easy.helper.json.JsonUtils;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import io.github.devlibx.easy.database.IDatabaseService;
 import io.github.devlibx.easy.database.mysql.DataSourceFactory;
 import io.github.devlibx.easy.database.mysql.DataSourceProxy;
@@ -21,10 +24,18 @@ import io.github.devlibx.easy.database.mysql.transaction.ITransactionManagerReso
 import io.github.devlibx.easy.database.mysql.transaction.TransactionInterceptor;
 import io.github.devlibx.easy.lock.ILockBuilder;
 import io.github.devlibx.easy.lock.module.LockModule;
+import org.jdbi.v3.core.Jdbi;
+import org.jdbi.v3.core.argument.AbstractArgumentFactory;
+import org.jdbi.v3.core.argument.Argument;
+import org.jdbi.v3.core.config.ConfigRegistry;
+import org.jdbi.v3.guava.GuavaPlugin;
+import org.jdbi.v3.jodatime2.JodaTimePlugin;
+import org.jdbi.v3.sqlobject.SqlObjectPlugin;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.inject.Singleton;
 import javax.sql.DataSource;
+import java.sql.Types;
 
 /**
  * This module provides all the dependencies to support MySQL related functions.
@@ -120,5 +131,27 @@ public class DatabaseMySQLModule extends LockModule {
      */
     protected TransactionInterceptor transactionInterceptor() {
         return new TransactionInterceptor(defaultTimeout, getProvider(ITransactionManagerResolver.class));
+    }
+
+    @Provides
+    @Inject
+    public Jdbi jdbi(DataSource dataSource) {
+        Jdbi jdbi = Jdbi.create(dataSource);
+        jdbi.installPlugin(new SqlObjectPlugin());
+        jdbi.installPlugin(new JodaTimePlugin());
+        jdbi.installPlugin(new GuavaPlugin());
+        jdbi.registerArgument(new StringObjectMapArgumentFactory());
+        return jdbi;
+    }
+
+    public static class StringObjectMapArgumentFactory extends AbstractArgumentFactory<StringObjectMap> {
+        public StringObjectMapArgumentFactory() {
+            super(Types.VARCHAR);
+        }
+
+        @Override
+        protected Argument build(StringObjectMap value, ConfigRegistry config) {
+            return (position, statement, ctx) -> statement.setString(position, JsonUtils.asJson(value));
+        }
     }
 }

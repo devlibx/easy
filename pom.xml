@@ -63,6 +63,7 @@
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <cgib.version>3.3.0</cgib.version>
         <aws.sdk.version>1.11.1000</aws.sdk.version>
+        <jdbi.version>3.30.0</jdbi.version>
     </properties>
 
     <dependencyManagement>
@@ -236,6 +237,31 @@
                 <artifactId>spring-jdbc</artifactId>
                 <version>${spring.version}</version>
             </dependency>
+
+            <!-- Jdbi -->
+            <dependency>
+                <groupId>org.jdbi</groupId>
+                <artifactId>jdbi3-core</artifactId>
+                <version>${jdbi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jdbi</groupId>
+                <artifactId>jdbi3-sqlobject</artifactId>
+                <version>${jdbi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jdbi</groupId>
+                <artifactId>jdbi3-jodatime2</artifactId>
+                <version>${jdbi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.jdbi</groupId>
+                <artifactId>jdbi3-guava</artifactId>
+                <version>${jdbi.version}</version>
+            </dependency>
+
+
+
 
             <!-- Metrics -->
             <dependency>
