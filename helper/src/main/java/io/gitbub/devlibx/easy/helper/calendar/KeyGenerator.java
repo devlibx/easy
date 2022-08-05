@@ -36,7 +36,7 @@ public class KeyGenerator {
         return keys;
     }
 
-    interface IKeyFunc {
+    public interface IKeyFunc {
         default String generate(DateTime time) {
             int month = time.getMonthOfYear();
             int day = time.getDayOfMonth();

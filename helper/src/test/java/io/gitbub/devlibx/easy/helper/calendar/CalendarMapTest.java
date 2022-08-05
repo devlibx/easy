@@ -22,14 +22,14 @@ public class CalendarMapTest {
         Assertions.assertTrue(cm.add(from.minusDays(9), new Container(11)));
         Assertions.assertFalse(cm.add(from.minusDays(10), new Container(12)));
 
-        cm.executeForKey(from.minusDays(10), (container, outOfRange) -> {
+        cm.executeForKey(from.minusDays(10), (key, container, outOfRange) -> {
             if (!outOfRange) {
                 Assertions.fail("I expected out of range");
             }
             return null;
         });
 
-        cm.executeForKey(from.minusDays(9), (container, outOfRange) -> {
+        cm.executeForKey(from.minusDays(9), (key, container, outOfRange) -> {
             if (outOfRange) {
                 Assertions.fail("I expected not out of range");
             }

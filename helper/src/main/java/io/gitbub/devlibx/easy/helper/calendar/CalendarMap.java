@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class CalendarMap<T> {
 
-    private final Map<String, T> data;
+    private Map<String, T> data;
 
     /**
      * Create a map for calendar days - for last N days
@@ -37,9 +37,9 @@ public class CalendarMap<T> {
      */
     public void executeForKey(String key, Callback<T> processFunc) {
         if (data.containsKey(key)) {
-            processFunc.process(data.get(key), false);
+            processFunc.process(key, data.get(key), false);
         } else {
-            processFunc.process(null, true);
+            processFunc.process(key, null, true);
         }
     }
 
@@ -49,10 +49,10 @@ public class CalendarMap<T> {
     public void executeForKey(IKeyFunc keyFunc, DateTime time, Callback<T> processFunc) {
         String key = keyFunc.generate(time);
         if (data.containsKey(key)) {
-            T t = processFunc.process(data.get(key), false);
+            T t = processFunc.process(key, data.get(key), false);
             data.put(key, t);
         } else {
-            processFunc.process(null, true);
+            processFunc.process(key, null, true);
         }
     }
 
@@ -67,6 +67,15 @@ public class CalendarMap<T> {
             }
         };
         executeForKey(keyFunc, time, processFunc);
+    }
+
+    public synchronized void executeForAll(Callback<T> processFunc) {
+        Map<String, T> newData = new HashMap<>();
+        data.forEach((key, value) -> {
+            T t = processFunc.process(key, value, false);
+            newData.put(key, t);
+        });
+        data = newData;
     }
 
     /**
@@ -110,7 +119,7 @@ public class CalendarMap<T> {
         return add(key, t);
     }
 
-    interface Callback<T> {
-        T process(T t, boolean outOfRange);
+    public interface Callback<T> {
+        T process(String key, T t, boolean outOfRange);
     }
 }
