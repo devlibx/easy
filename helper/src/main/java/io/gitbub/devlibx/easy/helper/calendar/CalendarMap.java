@@ -1,6 +1,7 @@
 package io.gitbub.devlibx.easy.helper.calendar;
 
 import io.gitbub.devlibx.easy.helper.calendar.KeyGenerator.IKeyFunc;
+import lombok.Getter;
 import org.joda.time.DateTime;
 
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 public class CalendarMap<T> {
 
+    @Getter
     private Map<String, T> data;
 
     /**
@@ -30,6 +32,22 @@ public class CalendarMap<T> {
 
     public CalendarMap(int days) {
         this(DateTime.now(), days);
+    }
+
+
+    /**
+     * Helper to create calendar map for this month
+     */
+    public static <T> CalendarMap<T> forThisMonth(Class<T> cls) {
+        DateTime time = DateTime.now();
+        return forMonth(time, cls);
+    }
+
+    /**
+     * Helper to create calendar map for month given by the time
+     */
+    public static <T> CalendarMap<T> forMonth(DateTime time, Class<T> cls) {
+        return new CalendarMap<T>(time, time.getDayOfMonth());
     }
 
     /**

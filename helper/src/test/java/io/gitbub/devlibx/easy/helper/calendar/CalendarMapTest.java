@@ -18,6 +18,8 @@ public class CalendarMapTest {
         DateTime from = new DateTime(new DateTime(dt));
 
         CalendarMap<Container> cm = new CalendarMap<Container>(from, 10);
+        int ac = cm.getData().size();
+        DateTime rr = from.minusDays(10);
         Assertions.assertTrue(cm.add(from, new Container(10)));
         Assertions.assertTrue(cm.add(from.minusDays(9), new Container(11)));
         Assertions.assertFalse(cm.add(from.minusDays(10), new Container(12)));
@@ -39,6 +41,18 @@ public class CalendarMapTest {
         Container c = cm.getDataByTime(from.minusDays(9));
         Assertions.assertNotNull(c);
         Assertions.assertEquals(12, c.count);
+    }
+
+    @Test
+    public void testThisMonth() {
+        DateTimeFormatter formatter = DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss");
+        DateTime dt = formatter.parseDateTime("10/05/2022 12:11:11");
+        DateTime from = new DateTime(new DateTime(dt));
+
+        CalendarMap<Container> cm = CalendarMap.forMonth(from, Container.class);
+        Assertions.assertTrue(cm.getData().containsKey("5-1"));
+        Assertions.assertTrue(cm.getData().containsKey("5-10"));
+        Assertions.assertEquals(10, cm.getData().size());
     }
 
     @Data

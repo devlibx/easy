@@ -6,6 +6,9 @@ import org.joda.time.format.DateTimeFormatter;
 
 public class CalendarUtils {
 
+    /**
+     * Example time = 2001-07-04T12:08:56.235+0530
+     */
     public static final String DATETIME_FORMAT_V1 = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
     public static final String DATETIME_FORMAT_V2 = "yyyy.MM.dd G 'at' HH:mm:ss z";
     public static final String DATETIME_FORMAT_10 = "dd/MM/yyyy HH:mm:ss";
