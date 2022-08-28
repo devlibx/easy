@@ -24,7 +24,7 @@ public class DroolsHelperTest {
 
         String resultFile = "/tmp/" + UUID.randomUUID().toString();
         System.out.println(resultFile);
-        // droolsHelper.downloadS3File("s3://<PUT YPUR BUCKET>/temp/missed_event_sample_rule.drl", resultFile);
+        //  droolsHelper.downloadS3File("s3://<PUT YPUR BUCKET>/temp/missed_event_sample_rule.drl", resultFile);
     }
 
     @Test
