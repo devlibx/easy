@@ -113,11 +113,10 @@ public class DroolsHelper {
         kContainer = ks.newKieContainer(kr.getDefaultReleaseId());
     }
 
-    private void downloadS3File(String file, String outputFile) {
-        System.out.format("Downloading %s from S3 ...\n", file);
-        file = file.replace("s3://", "");
-        String bucket = file.substring(0, file.indexOf('/'));
-        String key = file.substring(file.indexOf('/'));
+    void downloadS3File(String file, String outputFile) {
+        System.out.format("Downloading %s from S3 to output file %s\n", file, outputFile);
+        String bucket = getBucket(file);
+        String key = getKey(file);
         System.out.format("Downloading bucket=%s key=%s from S3 ...\n", bucket, key);
 
         final AmazonS3 s3 = AmazonS3ClientBuilder.standard().build();
@@ -132,9 +131,23 @@ public class DroolsHelper {
             }
             s3is.close();
             fos.close();
+
+            System.out.format(">>>> [DONE] Downloaded %s from S3 to output file %s\n", file, outputFile);
         } catch (Exception e) {
+            System.out.format(">>> [FAILED] Downloaded %s from S3 to output file %s failed\n", file, outputFile);
             e.printStackTrace();
             throw new RuntimeException(e);
         }
+    }
+
+    String getBucket(String file) {
+        file = file.replace("s3://", "");
+        String bucket = file.substring(0, file.indexOf('/'));
+        return bucket;
+    }
+
+    String getKey(String file) {
+        file = file.replace("s3://", "");
+        return file.substring(file.indexOf('/') + 1);
     }
 }

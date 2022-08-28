@@ -9,8 +9,23 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.UUID;
 
 public class DroolsHelperTest {
+
+    @Test
+    public void testFilePathParsing() throws Exception {
+        DroolsHelper droolsHelper = new DroolsHelper();
+        String bucket = droolsHelper.getBucket("s3://some-bucket/temp/path/a.drl");
+        Assertions.assertEquals("some-bucket", bucket);
+
+        String key = droolsHelper.getKey("s3://some-bucket/temp/path/a.drl");
+        Assertions.assertEquals("temp/path/a.drl", key);
+
+        String resultFile = "/tmp/" + UUID.randomUUID().toString();
+        System.out.println(resultFile);
+        // droolsHelper.downloadS3File("s3://<PUT YPUR BUCKET>/temp/missed_event_sample_rule.drl", resultFile);
+    }
 
     @Test
     public void testDroolsAsString() throws Exception {
