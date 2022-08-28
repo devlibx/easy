@@ -1,0 +1,84 @@
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import io.github.devlibx.easy.rule.drools.ResultMap;
+import java.util.Objects;
+
+rule "Filter Input Stream"
+  dialect "java"
+  agenda-group "filter-input-stream"
+  when
+      event : StringObjectMap()
+      resultMap: ResultMap()
+  then
+      String status = event.get("data", "order_status", String.class);
+      if (Objects.equals("COMPLETED", status) || Objects.equals("INIT", status)) {
+        resultMap.put("skip", false);
+      } else {
+        resultMap.put("skip", true);
+      }
+end
+
+rule "Order Initiated"
+  dialect "java"
+  agenda-group "initial-event-trigger"
+  when
+      event : StringObjectMap()
+      resultMap: ResultMap()
+  then
+
+     String status = event.get("data", "order_status", String.class);
+
+     if (Objects.equals("INIT", status)) {
+
+       // Keep this in state store with TTL of 10 min
+       // Wait for completed event in 30 sec
+       resultMap.put("retain-state", true);
+       resultMap.put("retain-ttl-in-sec", 600);
+       resultMap.put("retain-state-expiry-in-sec", 30);
+
+       // Order id is the key we use as state key
+       String orderId = event.get("data", "order_id", String.class);
+       resultMap.put("retain-state-key", orderId);
+
+       // This is the state object we persist - we will get this back in other calls
+       StringObjectMap state = StringObjectMap.of(
+            "user_id", event.get("data", "user_id", String.class),
+            "order_id", event.get("data", "order_id", String.class)
+       );
+       resultMap.put("retain-object", state);
+
+     } else if (Objects.equals("COMPLETED", status)) {
+
+        String orderId = event.get("data", "order_id", String.class);
+        resultMap.put("retain-state-key", orderId);
+
+        resultMap.put("retain-state-delete", true);
+        resultMap.put("retain-state", false);
+     } else {
+        resultMap.put("retain-in-state", false);
+     }
+
+end
+
+rule "Order Expire Trigger"
+  dialect "java"
+  agenda-group "expiry-event-trigger"
+  when
+      event : StringObjectMap()
+      resultMap: ResultMap()
+  then
+      String orderId = event.getString("order_id");
+      System.out.println(event);
+      System.out.println("Input:" + event.getString("user_id") + " " + orderId);
+
+      StringObjectMap state = StringObjectMap.of(
+             "user_id", event.getString("user_id"),
+             "order_id", event.getString("order_id")
+      );
+      System.out.println("state");
+      System.out.println(state);
+      resultMap.put("trigger-object", state);
+      resultMap.put("trigger-expiry", true);
+      resultMap.put("retain-state-key", orderId);
+
+      System.out.println("--------------------");
+end

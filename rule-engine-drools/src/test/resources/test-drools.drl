@@ -1,0 +1,31 @@
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import io.github.devlibx.easy.rule.drools.ResultMap;
+
+rule "Order completed"
+  dialect "java"
+  agenda-group "filter-input-stream"
+  when
+      event : StringObjectMap()
+      result: ResultMap()
+  then
+      if (event.get("data", "order_status", String.class) == "COMPLETED") {
+        result.put("filter", true);
+      } else {
+        result.put("filter", false);
+      }
+end
+
+rule "Order completed - Extra rule"
+  dialect "java"
+  agenda-group "filter-input-stream-ignore-me-i-am-not-in-correct-agenda-group"
+  when
+      event : StringObjectMap()
+      result: ResultMap()
+  then
+      System.out.println("***I should not be called ***");
+      if (event.get("data", "order_status", String.class) == "COMPLETED") {
+        result.put("filter", true);
+      } else {
+        result.put("filter", false);
+      }
+end

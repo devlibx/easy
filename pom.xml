@@ -20,6 +20,7 @@
         <module>testing</module>
         <module>dynamic</module>
         <module>database-dynamo</module>
+        <module>rule-engine-drools</module>
     </modules>
     <name>easy</name>
     <url>https://github.com/devlibx/easy</url>
@@ -64,6 +65,7 @@
         <cgib.version>3.3.0</cgib.version>
         <aws.sdk.version>1.11.1000</aws.sdk.version>
         <jdbi.version>3.30.0</jdbi.version>
+        <drools.version>7.1.0.Beta1</drools.version>
     </properties>
 
     <dependencyManagement>
@@ -72,6 +74,11 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-dynamodb</artifactId>
+                <version>${aws.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-s3</artifactId>
                 <version>${aws.sdk.version}</version>
             </dependency>
 
@@ -408,6 +415,13 @@
                 <scope>test</scope>
             </dependency>
             <!-- JUnit End -->
+
+            <!--Drools  -->
+            <dependency>
+                <groupId>org.kie</groupId>
+                <artifactId>kie-ci</artifactId>
+                <version>${drools.version}</version>
+            </dependency>
 
             <dependency>
                 <groupId>org.glassfish.jersey.core</groupId>
