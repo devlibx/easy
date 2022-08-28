@@ -15,6 +15,7 @@ import org.kie.api.runtime.KieSession;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.nio.charset.Charset;
 import java.util.UUID;
 
 public class DroolsHelper {
@@ -22,6 +23,12 @@ public class DroolsHelper {
     private KieContainer kContainer;
     private final Object ONCE = new Object();
     private boolean done;
+
+    public void initializeWithRulesAsString(String rules) throws Exception {
+        String tempFile = "/tmp/" + UUID.randomUUID().toString();
+        FileUtils.write(new File(tempFile), rules, Charset.defaultCharset());
+        initialize(tempFile);
+    }
 
     public void initialize(String ruleFile) throws Exception {
         synchronized (ONCE) {

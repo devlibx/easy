@@ -3,12 +3,43 @@ package io.github.devlibx.easy.rule.drools;
 
 import io.gitbub.devlibx.easy.helper.json.JsonUtils;
 import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.nio.charset.Charset;
 
 public class DroolsHelperTest {
+
+    @Test
+    public void testDroolsAsString() throws Exception {
+        DroolsHelper droolsHelper = new DroolsHelper();
+
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource("test-drools.drl").getFile());
+        droolsHelper.initializeWithRulesAsString(FileUtils.readFileToString(file, Charset.defaultCharset()));
+
+        // Here we run your rule
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 10; i++) {
+
+            // This is the result object we will populate
+            ResultMap result = new ResultMap();
+
+            // This is the input which we use to run rules
+            StringObjectMap message = new StringObjectMap();
+            message.put("data", StringObjectMap.of("order_status", "COMPLETED"));
+
+            droolsHelper.execute("filter-input-stream", result, message);
+
+            // Result will be populated with what we set in drools
+            System.out.println(result);
+        }
+
+        System.out.println(System.currentTimeMillis() - start);
+    }
+
 
     @Test
     public void testDrools() throws Exception {
