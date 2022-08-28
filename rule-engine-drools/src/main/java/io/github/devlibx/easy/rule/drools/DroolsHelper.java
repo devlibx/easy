@@ -38,6 +38,48 @@ public class DroolsHelper {
         return kSession;
     }
 
+    /**
+     * Helper function to execute rules
+     *
+     * @param agenda group agenda to execute
+     * @param inputs input objects
+     */
+    public void execute(String agenda, Object... inputs) {
+        KieSession kSession = null;
+        try {
+            kSession = getKieSessionWithAgenda(agenda);
+            for (Object o : inputs) {
+                kSession.insert(o);
+            }
+            kSession.fireAllRules();
+        } finally {
+            if (kSession != null) {
+                kSession.destroy();
+            }
+        }
+    }
+
+    /**
+     * Helper function to execute rules
+     *
+     * @param inputs input objects
+     */
+    public void execute(Object... inputs) {
+        KieSession kSession = null;
+        try {
+            kSession = kContainer.newKieSession();
+            for (Object o : inputs) {
+                kSession.insert(o);
+            }
+            kSession.fireAllRules();
+            kSession.destroy();
+        } finally {
+            if (kSession != null) {
+                kSession.destroy();
+            }
+        }
+    }
+
     private void internalInitialize(String ruleFile) throws Exception {
         // You can put your DRL here - i am reading it from file to keep the example code clean
         String downloadFile = "/tmp/" + UUID.randomUUID().toString();

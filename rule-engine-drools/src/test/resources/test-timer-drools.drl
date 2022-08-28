@@ -10,8 +10,11 @@ rule "Filter Input Stream"
       resultMap: ResultMap()
   then
       String status = event.get("data", "order_status", String.class);
+      String orderId = event.get("data", "order_id", String.class);
+
       if (Objects.equals("COMPLETED", status) || Objects.equals("INIT", status)) {
         resultMap.put("skip", false);
+        resultMap.put("group-key", orderId);
       } else {
         resultMap.put("skip", true);
       }
@@ -33,7 +36,7 @@ rule "Order Initiated"
        // Wait for completed event in 30 sec
        resultMap.put("retain-state", true);
        resultMap.put("retain-ttl-in-sec", 600);
-       resultMap.put("retain-state-expiry-in-sec", 30);
+       resultMap.put("retain-state-expiry-in-sec", 2);
 
        // Order id is the key we use as state key
        String orderId = event.get("data", "order_id", String.class);
