@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -15,6 +16,7 @@ import org.kie.api.runtime.KieSession;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
@@ -87,9 +89,13 @@ public class DroolsHelper {
         }
     }
 
-    String getFileFromJarUrl(String ruleFile) {
-        String s = ruleFile.replace("jar://", "");
-        return getClass().getResource(ruleFile.replace("jar://", "")).getFile();
+    String getFileContentFromJar(String ruleFile) {
+        String file = ruleFile.replace("jar://", "");
+        try (InputStream in = getClass().getResourceAsStream(file)) {
+            return IOUtils.toString(in, Charset.defaultCharset());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private void internalInitialize(String ruleFile) throws Exception {
@@ -97,14 +103,16 @@ public class DroolsHelper {
         String downloadFile = "/tmp/" + UUID.randomUUID().toString();
 
         // Download file if required
+        String drl = "";
         if (ruleFile.startsWith("s3")) {
             downloadS3File(ruleFile, downloadFile);
+            drl = FileUtils.readFileToString(new File(downloadFile));
         } else if (ruleFile.startsWith("/")) {
             downloadFile = ruleFile;
+            drl = FileUtils.readFileToString(new File(downloadFile));
         } else if (ruleFile.startsWith("jar://")) {
-            downloadFile = getFileFromJarUrl(ruleFile);
+            drl = getFileContentFromJar(ruleFile);
         }
-        String drl = FileUtils.readFileToString(new File(downloadFile));
 
         // Default setup fro Drools
         KieServices ks = KieServices.Factory.get();

@@ -26,9 +26,8 @@ public class DroolsHelperTest {
         System.out.println(resultFile);
         //  droolsHelper.downloadS3File("s3://<PUT YPUR BUCKET>/temp/missed_event_sample_rule.drl", resultFile);
 
-        String file = droolsHelper.getFileFromJarUrl("jar:///test-drools.drl");
-        System.out.println(file);
-        String drl = FileUtils.readFileToString(new File(file));
+        String file = droolsHelper.getFileContentFromJar("jar:///test-drools.drl");
+        // System.out.println(file);
     }
 
     @Test
