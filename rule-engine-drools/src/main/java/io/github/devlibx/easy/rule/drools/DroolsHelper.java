@@ -87,6 +87,11 @@ public class DroolsHelper {
         }
     }
 
+    String getFileFromJarUrl(String ruleFile) {
+        String s = ruleFile.replace("jar://", "");
+        return getClass().getResource(ruleFile.replace("jar://", "")).getFile();
+    }
+
     private void internalInitialize(String ruleFile) throws Exception {
         // You can put your DRL here - i am reading it from file to keep the example code clean
         String downloadFile = "/tmp/" + UUID.randomUUID().toString();
@@ -96,6 +101,8 @@ public class DroolsHelper {
             downloadS3File(ruleFile, downloadFile);
         } else if (ruleFile.startsWith("/")) {
             downloadFile = ruleFile;
+        } else if (ruleFile.startsWith("jar://")) {
+            downloadFile = getFileFromJarUrl(ruleFile);
         }
         String drl = FileUtils.readFileToString(new File(downloadFile));
 
