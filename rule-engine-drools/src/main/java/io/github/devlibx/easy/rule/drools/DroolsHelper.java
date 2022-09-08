@@ -18,6 +18,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 public class DroolsHelper {
@@ -112,6 +114,12 @@ public class DroolsHelper {
             drl = FileUtils.readFileToString(new File(downloadFile));
         } else if (ruleFile.startsWith("jar://")) {
             drl = getFileContentFromJar(ruleFile);
+        }else if (ruleFile.startsWith("pwd://")) {
+            String file = ruleFile.replace("pwd://", "");
+            Path currentRelativePath = Paths.get("");
+            String runningDir = currentRelativePath.toAbsolutePath().toString();
+            String filePath = runningDir + "/" + file;
+            drl = FileUtils.readFileToString(new File(filePath), Charset.defaultCharset());
         }
 
         // Default setup fro Drools

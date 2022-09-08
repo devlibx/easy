@@ -31,6 +31,13 @@ public class DroolsHelperTest {
     }
 
     @Test
+    public void testDroolsAsStringWithPwd() throws Exception {
+        String path = "pwd:///src/test/resources/test-drools.drl";
+        DroolsHelper droolsHelper = new DroolsHelper();
+        droolsHelper.initialize(path);
+    }
+
+    @Test
     public void testDroolsAsString() throws Exception {
         DroolsHelper droolsHelper = new DroolsHelper();
 
