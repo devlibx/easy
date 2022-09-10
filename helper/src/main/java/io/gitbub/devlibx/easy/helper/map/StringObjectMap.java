@@ -1,7 +1,9 @@
 package io.gitbub.devlibx.easy.helper.map;
 
 import io.gitbub.devlibx.easy.helper.json.JsonUtils;
+import org.joda.time.DateTime;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -262,6 +264,95 @@ public class StringObjectMap extends HashMap<String, Object> {
     }
 
     /**
+     * Get DateTime from key1 -> do the conversion e.g. from long, string, Date etc
+     */
+    public DateTime getDateTimeFromMiles(String key1) {
+        Object result = get(key1);
+        if (result == null) {
+            return null;
+        } else if (result instanceof DateTime) {
+            return (DateTime) result;
+        } else if (result instanceof Date) {
+            return new DateTime((Date) result);
+        } else if (result instanceof Number) {
+            DateTime eventTime = new DateTime(((Number) result).longValue());
+            return new DateTime(eventTime);
+        } else if (result instanceof String) {
+            long val = Long.parseLong((String) result);
+            DateTime eventTime = new DateTime(val);
+            return new DateTime(eventTime);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Get DateTime from key1, key2 -> do the conversion e.g. from long, string, Date etc
+     */
+    public DateTime getDateTimeFromMiles(String key1, String key2) {
+        StringObjectMap subMap = getStringObjectMap(key1);
+        if (subMap == null) return null;
+
+        return subMap.getDateTimeFromMiles(key2);
+    }
+
+    /**
+     * Get DateTime from key1, key2, key3 -> do the conversion e.g. from long, string, Date etc
+     */
+    public DateTime getDateTimeFromMiles(String key1, String key2, String key3) {
+        StringObjectMap subMap = getStringObjectMap(key1);
+        if (subMap == null) return null;
+        StringObjectMap subMap1 = subMap.getStringObjectMap(key2);
+        if (subMap1 == null) return null;
+        return subMap1.getDateTimeFromMiles(key3);
+    }
+
+    /**
+     * (default time Now is returned if missing) Get DateTime from key1 -> do the conversion e.g. from long, string, Date etc
+     */
+    public DateTime getDateTimeFromMilesOrNow(String key1) {
+        return getDateTimeFromMilesOrDefault(key1, DateTime.now());
+    }
+
+    /**
+     * (default time Now is returned if missing) Get DateTime from key1, key2 -> do the conversion e.g. from long, string, Date etc
+     */
+    public DateTime getDateTimeFromMilesOrNow(String key1, String key2) {
+        return getDateTimeFromMilesOrDefault(key1, key2, DateTime.now());
+    }
+
+    /**
+     * (default time Now is returned if missing) Get DateTime from key1, key2, key3 -> do the conversion e.g. from long, string, Date etc
+     */
+    public DateTime getDateTimeFromMilesOrNow(String key1, String key2, String key3) {
+        return getDateTimeFromMilesOrDefault(key1, key2, key3, DateTime.now());
+    }
+
+    /**
+     * Get DateTime from key1 -> do the conversion e.g. from long, string, Date etc
+     */
+    public DateTime getDateTimeFromMilesOrDefault(String key1, DateTime defaultValue) {
+        DateTime t = getDateTimeFromMiles(key1);
+        return t == null ? defaultValue : t;
+    }
+
+    /**
+     * Get DateTime from key1, key2 -> do the conversion e.g. from long, string, Date etc
+     */
+    public DateTime getDateTimeFromMilesOrDefault(String key1, String key2, DateTime defaultValue) {
+        DateTime t = getDateTimeFromMiles(key1, key2);
+        return t == null ? defaultValue : t;
+    }
+
+    /**
+     * Get DateTime from key1, key2, key3 -> do the conversion e.g. from long, string, Date etc
+     */
+    public DateTime getDateTimeFromMilesOrDefault(String key1, String key2, String key3, DateTime defaultValue) {
+        DateTime t = getDateTimeFromMiles(key1, key2, key3);
+        return t == null ? defaultValue : t;
+    }
+
+    /**
      * Convenience method to get get value as StringObjectMap
      */
     public StringObjectMap getStringObjectMap(String key) {
@@ -277,6 +368,20 @@ public class StringObjectMap extends HashMap<String, Object> {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Helper to get map of key, value type
+     */
+    public <K, V> Map<K, V> getMap(String key, Class<K> kClass, Class<V> vClass) {
+        return (Map<K, V>) get(key);
+    }
+
+    /**
+     * Helper to get map of key, value type
+     */
+    public <K, V> Map<K, V> getMap(String key, String key1, Class<K> kClass, Class<V> vClass) {
+        return (Map<K, V>) get(key, key1, Map.class);
     }
 
 

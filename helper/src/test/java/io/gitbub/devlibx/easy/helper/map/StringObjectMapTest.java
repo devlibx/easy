@@ -2,8 +2,10 @@ package io.gitbub.devlibx.easy.helper.map;
 
 import io.gitbub.devlibx.easy.helper.json.JsonUtils;
 import junit.framework.TestCase;
+import org.joda.time.DateTime;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.UUID;
@@ -160,5 +162,45 @@ public class StringObjectMapTest extends TestCase {
         SortedMap<String, String> m = Maps.SortedMaps.of("a", "b", "c", "d");
         assertEquals("b", m.get("a"));
         assertEquals("d", m.get("c"));
+    }
+
+
+    public void testDateTime() {
+        DateTime now = DateTime.now();
+        DateTime bad = DateTime.now().plusHours(1);
+
+        StringObjectMap in = StringObjectMap.of("time", now);
+        assertEquals(now, in.getDateTimeFromMiles("time"));
+
+        in = StringObjectMap.of("time", new Date(now.getMillis()));
+        assertEquals(now, in.getDateTimeFromMiles("time"));
+
+        in = StringObjectMap.of("time", now.getMillis());
+        assertEquals(now, in.getDateTimeFromMiles("time"));
+
+        in = StringObjectMap.of("time", now.getMillis() + "");
+        assertEquals(now, in.getDateTimeFromMiles("time"));
+
+
+        in = StringObjectMap.of(
+                "key1", now.getMillis()
+        );
+        assertEquals(now, in.getDateTimeFromMilesOrDefault("key1", bad));
+
+        in = StringObjectMap.of(
+                "key1", StringObjectMap.of(
+                        "key2", now.getMillis()
+                )
+        );
+        assertEquals(now, in.getDateTimeFromMilesOrDefault("key1", "key2", bad));
+
+        in = StringObjectMap.of(
+                "key1", StringObjectMap.of(
+                        "key2", StringObjectMap.of(
+                                "key3", now.getMillis()
+                        )
+                )
+        );
+        assertEquals(now, in.getDateTimeFromMilesOrDefault("key1", "key2", "key3", bad));
     }
 }
