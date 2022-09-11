@@ -6,6 +6,7 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.util.Map;
 
+import static io.gitbub.devlibx.easy.helper.file.FileHelper.readFileFromResourcePath;
 import static io.gitbub.devlibx.easy.helper.file.FileHelper.readStream;
 
 public class YamlUtils {
@@ -19,11 +20,27 @@ public class YamlUtils {
     }
 
     /**
-     * Read YAM file and convert to a object
+     * Read YAM file and convert to an object
      */
     public static <T> T readYaml(String file, Class<T> cls) {
         Yaml yaml = new Yaml();
         Map<String, Object> obj = yaml.load(readStream(file));
         return JsonUtils.getCamelCase().readObject(new StringHelper().stringify(obj), cls);
+    }
+
+    /**
+     * Read file from resources path
+     *
+     * @param file file coming from "resources" dir
+     */
+    public static <T> T readYamlFromResourcePath(String file, Class<T> cls) {
+        try {
+            String configAsString = readFileFromResourcePath(file);
+            Yaml yaml = new Yaml();
+            Map<String, Object> obj = yaml.load(configAsString);
+            return JsonUtils.getCamelCase().readObject(new StringHelper().stringify(obj), cls);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
