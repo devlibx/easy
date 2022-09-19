@@ -51,6 +51,19 @@ public class KafkaBasedProducer implements IProducer {
         if (!Strings.isNullOrEmpty(config.getString("partitioner.class"))) {
             properties.put("partitioner.class", config.getString("partitioner.class"));
         }
+        if (config.containsKey("linger.ms")) {
+            properties.put("linger.ms", config.getInt("linger.ms"));
+        }
+        if (config.containsKey("batch.size")) {
+            properties.put("batch.size", config.getInt("batch.size"));
+        }
+        if (config.containsKey("buffer.memory")) {
+            properties.put("buffer.memory", config.getLong("buffer.memory"));
+        }
+        if (config.containsKey("compression.type")) {
+            properties.put("compression.type", config.getString("compression.type"));
+        }
+
         producer = new KafkaProducer<>(properties);
     }
 

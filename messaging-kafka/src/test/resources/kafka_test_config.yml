@@ -16,6 +16,10 @@ messaging:
       acks: 1
       request.timeout.ms: 100
       value.serializer: org.apache.kafka.common.serialization.BytesSerializer
+      linger.ms: 100
+      batch.size: 1600
+      buffer.memory: 33554432
+      compression.type: gzip
     customerNoErrorIfMessageSendFail:
       topic: customer
       brokers: localhost:9092
