@@ -63,7 +63,8 @@
         <junit-jupiter>5.7.0</junit-jupiter>
         <commons-beanutils.version>1.9.4</commons-beanutils.version>
         <cgib.version>3.3.0</cgib.version>
-        <aws.sdk.version>1.11.1000</aws.sdk.version>
+        <!--<aws.sdk.version>1.11.1000</aws.sdk.version>-->
+        <aws.sdk.version>1.12.131</aws.sdk.version>
         <jdbi.version>3.30.0</jdbi.version>
         <drools.version>7.1.0.Beta1</drools.version>
     </properties>
@@ -84,6 +85,11 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-core</artifactId>
+                <version>${aws.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.amazonaws</groupId>
+                <artifactId>aws-java-sdk-kms</artifactId>
                 <version>${aws.sdk.version}</version>
             </dependency>
 
