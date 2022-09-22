@@ -115,37 +115,50 @@ public class KafkaBasedConsumer implements IConsumer {
             properties.put("group.id", config.getString("group.id", UUID.randomUUID().toString()));
         } else if (config.containsKey("group-id")) {
             properties.put("group.id", config.getString("group-id", UUID.randomUUID().toString()));
+        } else {
+            properties.put("group.id", UUID.randomUUID().toString());
         }
 
         if (config.containsKey("auto.offset.reset")) {
             properties.put("auto.offset.reset", config.getString("auto.offset.reset", "latest"));
         } else if (config.containsKey("auto-offset-reset")) {
             properties.put("auto.offset.reset", config.getString("auto-offset-reset", "latest"));
+        } else {
+            properties.put("auto.offset.reset", "latest");
         }
 
         if (config.containsKey("enable.auto.commit")) {
             properties.put("enable.auto.commit", config.getBoolean("enable.auto.commit", Boolean.TRUE));
         } else if (config.containsKey("enable-auto-commit")) {
             properties.put("enable.auto.commit", config.getBoolean("enable-auto-commit", Boolean.TRUE));
+        } else {
+            properties.put("enable.auto.commit", Boolean.TRUE);
         }
 
         if (config.containsKey("key.deserializer")) {
             properties.put("key.deserializer", config.getString("key.serializer", "org.apache.kafka.common.serialization.StringDeserializer"));
         } else if (config.containsKey("key-deserializer")) {
             properties.put("key.deserializer", config.getString("key-serializer", "org.apache.kafka.common.serialization.StringDeserializer"));
+        } else {
+            properties.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         }
 
         if (config.containsKey("value.deserializer")) {
             properties.put("value.deserializer", config.getString("value.serializer", "org.apache.kafka.common.serialization.StringDeserializer"));
         } else if (config.containsKey("value-deserializer")) {
             properties.put("value.deserializer", config.getString("value-serializer", "org.apache.kafka.common.serialization.StringDeserializer"));
+        } else {
+            properties.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         }
 
         if (config.containsKey("max.poll.records")) {
             properties.put("max.poll.records", config.getInt("max.poll.records", 10));
         } else if (config.containsKey("max-poll-records")) {
             properties.put("max.poll.records", config.getInt("max-poll-records", 10));
+        } else {
+            properties.put("max.poll.records", 10);
         }
+
         String topic = config.getString("topic");
 
         Consumer<String, Object> consumer = new KafkaConsumer<>(properties);
