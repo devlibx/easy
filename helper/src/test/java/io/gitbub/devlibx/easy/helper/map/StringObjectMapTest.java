@@ -64,6 +64,9 @@ public class StringObjectMapTest extends TestCase {
                 )
         );
 
+        assertEquals((Integer)11, map.path("sub_1.sub_2.int", Integer.class));
+        assertNull(map.path("sub_1.sub_2_does_not_exist.int", Integer.class));
+
         assertEquals(10, map.path(".", "int", Integer.class).intValue());
         assertEquals("str_1", map.path(".", "string", String.class));
         assertTrue(map.path(".", "boolean", Boolean.class));

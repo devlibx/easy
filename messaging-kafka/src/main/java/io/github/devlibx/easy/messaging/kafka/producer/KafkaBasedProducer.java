@@ -43,6 +43,7 @@ public class KafkaBasedProducer implements IProducer {
         Properties properties = new Properties();
         properties.put("bootstrap.servers", config.getString("brokers", "localhost:9092"));
         properties.put("retries", config.getInt("retries", 1));
+
         properties.put("key.serializer", config.getString("key.serializer", "org.apache.kafka.common.serialization.StringSerializer"));
         properties.put("value.serializer", config.getString("value.serializer", "org.apache.kafka.common.serialization.StringSerializer"));
         properties.put("acks", config.getString("acks", "1"));
@@ -62,6 +63,27 @@ public class KafkaBasedProducer implements IProducer {
         }
         if (config.containsKey("compression.type")) {
             properties.put("compression.type", config.getString("compression.type"));
+        }
+
+        // For properties file "." does not work, we will use "_"
+        properties.put("key.serializer", config.getString("key_serializer", "org.apache.kafka.common.serialization.StringSerializer"));
+        properties.put("value.serializer", config.getString("value_serializer", "org.apache.kafka.common.serialization.StringSerializer"));
+        properties.put("request.timeout.ms", config.getInt("request_timeout_ms", 1000));
+        properties.put("partition.assignment.strategy", config.getString("partition_assignment_strategy", "org.apache.kafka.clients.consumer.RangeAssignor"));
+        if (!Strings.isNullOrEmpty(config.getString("partitioner_class"))) {
+            properties.put("partitioner.class", config.getString("partitioner_class"));
+        }
+        if (config.containsKey("linger_ms")) {
+            properties.put("linger.ms", config.getInt("linger_ms"));
+        }
+        if (config.containsKey("batch_size")) {
+            properties.put("batch.size", config.getInt("batch_size"));
+        }
+        if (config.containsKey("buffer_memory")) {
+            properties.put("buffer.memory", config.getLong("buffer_memory"));
+        }
+        if (config.containsKey("compression_type")) {
+            properties.put("compression.type", config.getString("compression_type"));
         }
 
         producer = new KafkaProducer<>(properties);
