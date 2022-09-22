@@ -19,7 +19,14 @@ public class KafkaBasedResilientProducer extends KafkaBasedProducer {
         super(config, stringHelper, metrics);
 
         // How long to remain in open state when circuit opens (default = 10sec)
-        int waitDurationInOpenState = config.getInt("circuit-breaker.stay_in_open_state_on_error.ms", 10 * 1000);
+        int waitDurationInOpenState;
+        if (config.containsKey("circuit-breaker.stay_in_open_state_on_error.ms")) {
+            waitDurationInOpenState = config.getInt("circuit-breaker.stay_in_open_state_on_error.ms", 10 * 1000);
+        } else if (config.containsKey("circuit-breaker-stay_in_open_state_on_error-ms")) {
+            waitDurationInOpenState = config.getInt("circuit-breaker-stay_in_open_state_on_error-ms", 10 * 1000);
+        } else {
+            waitDurationInOpenState = 10 * 1000;
+        }
 
         // Setup a circuit breaker with default settings
         CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
