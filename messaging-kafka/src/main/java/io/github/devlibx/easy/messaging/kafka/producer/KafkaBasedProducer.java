@@ -41,53 +41,65 @@ public class KafkaBasedProducer implements IProducer {
     @Override
     public void start() {
         Properties properties = new Properties();
+
         properties.put("bootstrap.servers", config.getString("brokers", "localhost:9092"));
         properties.put("retries", config.getInt("retries", 1));
-
-        properties.put("key.serializer", config.getString("key.serializer", "org.apache.kafka.common.serialization.StringSerializer"));
-        properties.put("value.serializer", config.getString("value.serializer", "org.apache.kafka.common.serialization.StringSerializer"));
         properties.put("acks", config.getString("acks", "1"));
-        properties.put("request.timeout.ms", config.getInt("request.timeout.ms", 1000));
-        properties.put("partition.assignment.strategy", config.getString("partition.assignment.strategy", "org.apache.kafka.clients.consumer.RangeAssignor"));
+
+        if (config.containsKey("key.serializer")) {
+            properties.put("key.serializer", config.getString("key.serializer", "org.apache.kafka.common.serialization.StringSerializer"));
+        } else if (config.containsKey("key-serializer")) {
+            properties.put("key.serializer", config.getString("key-serializer", "org.apache.kafka.common.serialization.StringSerializer"));
+        }
+        if (config.containsKey("value.serializer")) {
+            properties.put("value.serializer", config.getString("value.serializer", "org.apache.kafka.common.serialization.StringSerializer"));
+        } else if (config.containsKey("value-serializer")) {
+            properties.put("value.serializer", config.getString("value-serializer", "org.apache.kafka.common.serialization.StringSerializer"));
+        }
+
+        if (config.containsKey("request.timeout.ms")) {
+            properties.put("request.timeout.ms", config.getInt("request.timeout.ms", 1000));
+        } else if (config.containsKey("request-timeout-ms")) {
+            properties.put("request.timeout.ms", config.getInt("request-timeout-ms", 1000));
+        }
+
+        if (config.containsKey("partition.assignment.strategy")) {
+            properties.put("partition.assignment.strategy", config.getString("partition.assignment.strategy", "org.apache.kafka.clients.consumer.RangeAssignor"));
+        } else if (config.containsKey("partition-assignment-strategy")) {
+            properties.put("partition.assignment.strategy", config.getString("partition-assignment-strategy", "org.apache.kafka.clients.consumer.RangeAssignor"));
+        }
+
         if (!Strings.isNullOrEmpty(config.getString("partitioner.class"))) {
             properties.put("partitioner.class", config.getString("partitioner.class"));
+        } else if (!Strings.isNullOrEmpty(config.getString("partitioner-class"))) {
+            properties.put("partitioner.class", config.getString("partitioner-class"));
         }
+
         if (config.containsKey("linger.ms")) {
             properties.put("linger.ms", config.getInt("linger.ms"));
+        } else if (config.containsKey("linger-ms")) {
+            properties.put("linger.ms", config.getInt("linger-ms"));
         }
+
         if (config.containsKey("batch.size")) {
             properties.put("batch.size", config.getInt("batch.size"));
+        } else if (config.containsKey("batch-size")) {
+            properties.put("batch.size", config.getInt("batch-size"));
         }
         if (config.containsKey("buffer.memory")) {
             properties.put("buffer.memory", config.getLong("buffer.memory"));
+        } else if (config.containsKey("buffer-memory")) {
+            properties.put("buffer.memory", config.getLong("buffer-memory"));
         }
         if (config.containsKey("compression.type")) {
             properties.put("compression.type", config.getString("compression.type"));
-        }
-
-        // For properties file "." does not work, we will use "_"
-        properties.put("key.serializer", config.getString("key-serializer", "org.apache.kafka.common.serialization.StringSerializer"));
-        properties.put("value.serializer", config.getString("value-serializer", "org.apache.kafka.common.serialization.StringSerializer"));
-        properties.put("request.timeout.ms", config.getInt("request-timeout-ms", 1000));
-        properties.put("partition.assignment.strategy", config.getString("partition-assignment-strategy", "org.apache.kafka.clients.consumer.RangeAssignor"));
-        if (!Strings.isNullOrEmpty(config.getString("partitioner-class"))) {
-            properties.put("partitioner.class", config.getString("partitioner-class"));
-        }
-        if (config.containsKey("linger-ms")) {
-            properties.put("linger.ms", config.getInt("linger-ms"));
-        }
-        if (config.containsKey("batch-size")) {
-            properties.put("batch.size", config.getInt("batch-size"));
-        }
-        if (config.containsKey("buffer-memory")) {
-            properties.put("buffer.memory", config.getLong("buffer-memory"));
-        }
-        if (config.containsKey("compression-type")) {
+        } else if (config.containsKey("compression-type")) {
             properties.put("compression.type", config.getString("compression-type"));
         }
 
         producer = new KafkaProducer<>(properties);
     }
+
 
     private boolean sendSyncKafkaMessage(String topic, String key, Object value) {
         long start = System.currentTimeMillis();
