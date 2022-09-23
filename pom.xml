@@ -580,6 +580,9 @@
                                     <source>${maven.compiler.target}</source>
                                     <additionalparam>-Xdoclint:none</additionalparam>
                                     <detectJavaApiLink>false</detectJavaApiLink>
+                                    <additionalOptions>
+                                        <additionalOption>-Xdoclint:none</additionalOption>
+                                    </additionalOptions>
                                 </configuration>
                             </execution>
                         </executions>
