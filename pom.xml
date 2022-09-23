@@ -5,7 +5,7 @@
     <groupId>io.github.devlibx.easy</groupId>
     <artifactId>easy</artifactId>
     <packaging>pom</packaging>
-    <version>0.17.98-SNAPSHOT</version>
+    <version>0.java-17.97-SNAPSHOT</version>
     <modules>
         <module>helper</module>
         <module>database</module>
@@ -609,7 +609,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-release-plugin</artifactId>
-                        <version>3.0.0-M1</version>
+                        <version>3.0.0-M6</version>
                         <configuration>
                             <tagNameFormat>v@{project.version}</tagNameFormat>
                         </configuration>
