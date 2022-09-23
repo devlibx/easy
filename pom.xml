@@ -5,7 +5,7 @@
     <groupId>io.github.devlibx.easy</groupId>
     <artifactId>easy</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.97-SNAPSHOT</version>
+    <version>0.17.97-SNAPSHOT</version>
     <modules>
         <module>helper</module>
         <module>database</module>
@@ -35,14 +35,15 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>15</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <grpc.version>1.13.1</grpc.version>
         <protobuf.version>3.5.1</protobuf.version>
         <mysql.connector.version>8.0.23</mysql.connector.version>
         <scylla.connector.version>3.5.0</scylla.connector.version>
         <guice.version>5.1.0</guice.version>
-        <lombok.version>1.18.16</lombok.version>
+        <lombok.version>1.18.24</lombok.version>
         <jackson.version>2.13.3</jackson.version>
         <kafka.client.version>1.1.0</kafka.client.version>
         <dropwizard.version>2.1.1</dropwizard.version>
@@ -448,10 +449,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <release>${maven.compiler.target}</release>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -485,7 +485,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>${maven-compiler-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -529,10 +529,9 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.8.1</version>
+                        <version>${maven-compiler-plugin.version}</version>
                         <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
+                            <release>${maven.compiler.target}</release>
                             <skip>true</skip>
                             <annotationProcessorPaths>
                                 <path>
@@ -628,7 +627,7 @@
                         </plugin>
                         <plugin>
                             <artifactId>maven-compiler-plugin</artifactId>
-                            <version>3.8.1</version>
+                            <version>${maven-compiler-plugin.version}</version>
                         </plugin>
                         <plugin>
                             <artifactId>maven-surefire-plugin</artifactId>
@@ -672,10 +671,9 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.8.1</version>
+                        <version>${maven-compiler-plugin.version}</version>
                         <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
+                            <release>${maven.compiler.target}</release>
                             <skip>true</skip>
                             <annotationProcessorPaths>
                                 <path>
@@ -721,7 +719,7 @@
                         </plugin>
                         <plugin>
                             <artifactId>maven-compiler-plugin</artifactId>
-                            <version>3.8.1</version>
+                            <version>${maven-compiler-plugin.version}</version>
                         </plugin>
                         <plugin>
                             <artifactId>maven-surefire-plugin</artifactId>
