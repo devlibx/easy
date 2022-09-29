@@ -42,7 +42,7 @@
         <mysql.connector.version>8.0.23</mysql.connector.version>
         <scylla.connector.version>3.5.0</scylla.connector.version>
         <guice.version>5.1.0</guice.version>
-        <lombok.version>1.18.16</lombok.version>
+        <lombok.version>1.18.24</lombok.version>
         <jackson.version>2.13.3</jackson.version>
         <kafka.client.version>1.1.0</kafka.client.version>
         <dropwizard.version>2.1.1</dropwizard.version>
@@ -432,6 +432,12 @@
                 <groupId>org.kie</groupId>
                 <artifactId>kie-ci</artifactId>
                 <version>${drools.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>com.google.inject</groupId>
+                        <artifactId>guice</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
