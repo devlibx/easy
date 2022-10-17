@@ -102,6 +102,12 @@ public class KafkaBasedProducer implements IProducer {
             properties.put("buffer.memory", config.getLong("buffer-memory"));
         }
 
+        if (config.containsKey("max.inflight.requests.per.connection")) {
+            properties.put("max.inflight.requests.per.connection", config.getInt("max.inflight.requests.per.connection"));
+        } else if (config.containsKey("max-inflight-requests-per-connection")) {
+            properties.put("max.inflight.requests.per.connection", config.getInt("max-inflight-requests-per-connection"));
+        }
+
         if (config.containsKey("compression.type")) {
             properties.put("compression.type", config.getString("compression.type"));
         } else if (config.containsKey("compression-type")) {
