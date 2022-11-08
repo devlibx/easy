@@ -30,6 +30,15 @@ messaging:
       value.serializer: org.apache.kafka.common.serialization.BytesSerializer
       enableCircuitBreakerOnError: true
       circuit-breaker.stay_in_open_state_on_error.ms: 10000
+    orders:
+      topic: orders_in
+      brokers: localhost:9092
+      sync: true
+      retries: 0
+      acks: 1
+      request.timeout.ms: 100
+      value.serializer: org.apache.kafka.common.serialization.BytesSerializer
+      circuit-breaker.stay_in_open_state_on_error.ms: 10000
   consumers:
     sampleConsumer:
       topic: some_topic
@@ -41,4 +50,11 @@ messaging:
       brokers: localhost:9092
       sync: true
       group.id: 1234
+    orders:
+      topic: orders_in
+      brokers: localhost:9092
+      sync: true
+      group.id: 1234
+      parallelThreadCount: 10
+      thread.count: 1
 

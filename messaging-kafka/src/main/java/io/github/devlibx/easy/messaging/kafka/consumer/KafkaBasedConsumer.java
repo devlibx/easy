@@ -26,31 +26,45 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class KafkaBasedConsumer implements IConsumer {
-    private final StringObjectMap config;
-    private final IMetrics metrics;
-    private final String metricsPrefix;
-    private final boolean metricsEnabled;
+    protected final StringObjectMap config;
+    protected final IMetrics metrics;
+    protected final String metricsPrefix;
+    protected final boolean metricsEnabled;
     private final ExecutorService executorService;
     private final List<Consumer<String, Object>> consumers;
-    private final AtomicBoolean stop;
-    private final CountDownLatch stopLatch;
+    protected final AtomicBoolean stop;
+    protected final CountDownLatch stopLatch;
+    private final int threadCount;
 
     public KafkaBasedConsumer(StringObjectMap config, IMetrics metrics) {
         this.config = config;
         this.metrics = metrics;
         this.metricsPrefix = config.getString("name", UUID.randomUUID().toString());
-        this.metricsEnabled = config.getBoolean("metrics.enabled", Boolean.TRUE);
         this.stop = new AtomicBoolean(false);
         this.consumers = new ArrayList<>();
 
-        int threadCount = config.getInt("thread.count", 2);
+        if (config.containsKey("thread.count")) {
+            threadCount = config.getInt("thread.count", 2);
+        } else if (config.containsKey("thread-count")) {
+            threadCount = config.getInt("thread-count", 2);
+        } else {
+            threadCount = 2;
+        }
+
+        if (config.containsKey("metrics.enabled")) {
+            this.metricsEnabled = config.getBoolean("metrics.enabled", Boolean.TRUE);
+        } else if (config.containsKey("metrics-enabled")) {
+            this.metricsEnabled = config.getBoolean("metrics-enabled", Boolean.TRUE);
+        } else {
+            this.metricsEnabled = Boolean.TRUE;
+        }
+
         this.executorService = Executors.newScheduledThreadPool(threadCount);
         this.stopLatch = new CountDownLatch(threadCount);
     }
 
     @Override
     public void start(IMessageConsumer messageConsumer) {
-        int threadCount = config.getInt("thread.count", 2);
         for (int i = 0; i < threadCount; i++) {
             Consumer<String, Object> consumer = createConsumer();
             consumers.add(consumer);
@@ -58,9 +72,17 @@ public class KafkaBasedConsumer implements IConsumer {
         }
     }
 
-    private Runnable consumerRunnable(Consumer<String, Object> consumer, IMessageConsumer messageConsumer) {
+    protected Runnable consumerRunnable(Consumer<String, Object> consumer, IMessageConsumer messageConsumer) {
+        final int pollTime;
+        if (config.containsKey("poll.time")) {
+            pollTime = config.getInt("poll.time", 100);
+        } else if (config.containsKey("poll-time")) {
+            pollTime = config.getInt("poll-time", 100);
+        } else {
+            pollTime = 100;
+        }
+
         return () -> {
-            final int pollTime = config.getInt("poll.time", 100);
             final String topic = config.getString("topic");
 
             while (!stop.get()) {
@@ -183,7 +205,7 @@ public class KafkaBasedConsumer implements IConsumer {
         // This will make the threads stop
         stop.set(true);
 
-        // Wait for sometime - just in-case we take time to shutdown
+        // Wait for some time - just in-case we take time to shut down
         try {
             stopLatch.await(10, TimeUnit.SECONDS);
         } catch (InterruptedException ignored) {
