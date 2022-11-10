@@ -103,7 +103,9 @@ EasyHttp.callAsync(
                         .addPathParam("id", 1)
                         .withBody("Any object - it will be converted to json string internally")
                         .build()
-        ).subscribe(
+        )
+          .subscribeOn(Schedulers.io())
+          .subscribe(
                 result -> {
                     log.info("Print Result as Json String = " + JsonUtils.asJson(result));
                     // Result = {"userId":1,"id":1,"title":"some text ..."}

@@ -65,6 +65,11 @@ messagingFactory.getConsumer("customer").ifPresent(consumer -> {
 ### Messaging config 
 
 **Example consumer** -> customer - normal message producer <br>
+**parallelThreadCount** = if yous set this value to N (e.g. N=10), then the partition will be processed using 10 threads. Be careful 
+when you use this value. Once it is > 1 then you will lose the ordering guarantee, because a partition is processed in
+N threads and the 2nd event for a user can process in parallel or if 1st message takes time then the 2nd, 3rd, ... message 
+can be processed
+
 **Example producer** -> customerNoErrorIfMessageSendFail - if message send fails then we open circuit, and we do not block once circuit is open.
 **use ```enableCircuitBreakerOnError=true``` to enable circuit breaker**
 
@@ -73,6 +78,8 @@ messagingFactory.getConsumer("customer").ifPresent(consumer -> {
 a timeout for your kafka client) <br>
 **ack** = (0 | 1 | all) -> if "ack=1" then circuit-breaker settings will not have any effect <br>
 **enableCircuitBreakerOnError** = true | false (default=false) - open circuit to avoid calls to Kafka if there are errors <br>
+
+
 
 ```yaml
 messaging:

@@ -34,7 +34,12 @@ public class KafkaBasedConsumerService implements IConsumerService {
 
         // Create a producer
         if (!kafkaBasedConsumerMap.containsKey(name)) {
-            KafkaBasedConsumer consumer = new KafkaBasedConsumer(config, metrics);
+            KafkaBasedConsumer consumer;
+            if (config.containsKey("parallelThreadCount") && config.getInt("parallelThreadCount", 0) > 0) {
+                consumer = new KafkaBasedParallelConsumer(config, metrics);
+            } else {
+                consumer = new KafkaBasedConsumer(config, metrics);
+            }
             kafkaBasedConsumerMap.put(name, consumer);
         }
     }
