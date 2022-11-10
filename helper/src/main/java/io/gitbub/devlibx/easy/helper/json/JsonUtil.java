@@ -34,7 +34,6 @@ public class JsonUtil {
      */
     public JsonUtil(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.objectMapper.registerModule(new JodaModule());
     }
 
     /**
