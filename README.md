@@ -243,6 +243,9 @@ apis:
 
 ##### Details of parameters
 
+"use port = -1": this will remove the port from url "http://something:<port>/abcd". With -1 it will become "http://something/abcd"
+
+
 1. timeout - timeout for the API. Your EasyHttp.call**() Api will timeout after the given time
 2. concurrency - how many parallel calls can be made to this API.
 3. rps - if you know "rps" of API call, then you should set `rps` e.g. rps: 100. The EasyHttp will automatically setup
