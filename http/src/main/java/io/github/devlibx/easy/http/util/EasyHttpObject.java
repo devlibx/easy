@@ -161,23 +161,30 @@ class EasyHttpObject implements IEasyHttpImplementation {
     public <T> T callSync(Call<T> call) {
         long start = System.currentTimeMillis();
         String key = call.getServer() + "_" + call.getApi() + "_call_error_time";
+        int code = 200;
         try {
             T t = internalCall(call).blockingFirst();
             key = call.getServer() + "_" + call.getApi() + "_call_time";
+            code = 200;
             return t;
         } catch (EasyResilienceException e) {
             Optional<EasyResilienceException> ex = easyEasyResilienceException(e);
             if (ex.isPresent()) {
+                code = ex.get().getStatusCode();
                 throw ex.get();
             } else {
+                code = e.getStatusCode();
                 throw new EasyHttpRequestException(e);
             }
         } catch (EasyHttpRequestException e) {
+            code = e.getStatusCode();
             throw e;
         } catch (Exception e) {
+            code = 500;
             throw easyEasyResilienceException(e).orElseThrow(() -> new RuntimeException(e));
         } finally {
             metrics.observe(key, System.currentTimeMillis() - start);
+            metrics.inc("easy_http_sync", "server", call.getServer(), "api", call.getApi(), "code", "" + code);
         }
     }
 

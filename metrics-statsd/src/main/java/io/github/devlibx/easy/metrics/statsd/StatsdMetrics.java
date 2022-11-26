@@ -30,6 +30,12 @@ public class StatsdMetrics implements IMetrics {
         return null;
     }
 
+    /*@Override
+    public void observe(String name, double amt) {
+        name = String.format("%s.%s", getPrefix(), name);
+        statsDClient.recordExecutionTime(name, (long) amt);
+    }*/
+
     @Override
     public void inc(String name, String... labels) {
         name = String.format("%s.%s", getPrefix(), name);
