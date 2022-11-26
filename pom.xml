@@ -21,6 +21,7 @@
         <module>dynamic</module>
         <module>database-dynamo</module>
         <module>rule-engine-drools</module>
+        <module>metrics-statsd</module>
     </modules>
     <name>easy</name>
     <url>https://github.com/devlibx/easy</url>
@@ -67,6 +68,7 @@
         <aws.sdk.version>1.12.131</aws.sdk.version>
         <jdbi.version>3.30.0</jdbi.version>
         <drools.version>7.1.0.Beta1</drools.version>
+        <statsd.version>3.1.0</statsd.version>
     </properties>
 
     <dependencyManagement>
@@ -320,6 +322,12 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+            <dependency>
+                <groupId>com.timgroup</groupId>
+                <artifactId>java-statsd-client</artifactId>
+                <version>${statsd.version}</version>
+            </dependency>
+
 
             <!-- Jackson -->
             <dependency>
