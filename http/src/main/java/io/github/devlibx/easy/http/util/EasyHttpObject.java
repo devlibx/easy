@@ -57,16 +57,27 @@ class EasyHttpObject implements IEasyHttpImplementation {
         resilienceManager = null;
     }
 
-
     /**
      * Setup EasyHttp to make HTTP requests
      */
     @Override
     public void setup(Config config) {
+        setup(config, null);
+    }
+
+    /**
+     * Setup EasyHttp to make HTTP requests
+     */
+    @Override
+    public void setup(Config config, IMetrics metricsObj) {
 
         // Get metrics class if provided
         try {
-            metrics = ApplicationContext.getInstance(IMetrics.class);
+            if (metrics == null) {
+                metrics = ApplicationContext.getInstance(IMetrics.class);
+            } else {
+                metrics = metricsObj;
+            }
         } catch (Exception e) {
             metrics = new IMetrics.NoOpMetrics();
         }

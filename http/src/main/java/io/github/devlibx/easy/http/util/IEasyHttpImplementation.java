@@ -1,9 +1,17 @@
 package io.github.devlibx.easy.http.util;
 
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.github.devlibx.easy.http.config.Config;
 import io.reactivex.rxjava3.core.Observable;
 
 public interface IEasyHttpImplementation {
+
+    /**
+     * Setup easy http
+     */
+    default void setup(Config config, IMetrics metrics) {
+        setup(config, metrics);
+    }
 
     /**
      * Setup easy http
