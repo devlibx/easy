@@ -5,7 +5,7 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.devlibx.easy</groupId>
-        <version>0.0.111</version>
+        <version>0.0.112-SNAPSHOT</version>
     </parent>
     <artifactId>messaging-kafka</artifactId>
     <name>messaging-kafka</name>
