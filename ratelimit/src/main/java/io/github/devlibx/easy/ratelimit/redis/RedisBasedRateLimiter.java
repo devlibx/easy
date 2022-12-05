@@ -159,30 +159,24 @@ public class RedisBasedRateLimiter implements IRateLimiter {
 
     @Override
     public void acquire(long permits) {
-        int retry = 10;
+        int retry = 3;
         while (retry-- >= 0) {
             try {
+                // Take in limiter
                 limiterLock.lock();
                 RRateLimiter _limiter = limiter;
                 limiterLock.unlock();
 
                 if (_limiter != null) {
                     _limiter.acquire(permits);
-                }
-                return;
-            } catch (Exception e) {
-                if (e.getMessage().contains("ERR user_script:1: RateLimiter is not initialized script")) {
-                    sleep(5);
-                    limiterLock.lock();
-                    RRateLimiter _limiter = limiter;
-                    limiterLock.unlock();
-                    applyRate(_limiter);
+                    retry = -1;
                 } else {
-                    log.error("error in acquiring lock: name={}", rateLimiterConfig.getName(), e);
+                    sleep(10);
                 }
+            } catch (Exception e) {
+                log.error("error in acquiring lock: name={}, retryCount={}", rateLimiterConfig.getName(), retry, e);
             }
         }
-        log.error("failed to acquire lock: {}", rateLimiterConfig.getName());
     }
 
     @Override
