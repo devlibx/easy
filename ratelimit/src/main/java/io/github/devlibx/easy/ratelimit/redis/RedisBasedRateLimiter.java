@@ -60,6 +60,12 @@ public class RedisBasedRateLimiter implements IRateLimiter {
             }
             limiter = redissonClient.getRateLimiter(rateLimiterConfig.getName());
             applyRate();
+
+            // Start rate limit job
+            rateLimiterConfig.getRateLimitJob().ifPresent(rateLimitJob -> {
+                rateLimitJob.startRateLimitJob(rateLimiterConfig);
+            });
+
         } else {
             throw new RuntimeException("redis property must be set to use redis based rate limiter");
         }

@@ -41,7 +41,6 @@ public class RateLimiterFactory implements IRateLimiterFactory {
                     while (count-- >= 0 && !result) {
                         result = rateLimiter.trySetRate(rateLimiterConfig.getRate());
                     }
-                    System.out.println("--->>FFF " + result);
 
                     rateLimiterMap.put(name, rateLimiter);
                 } else {

@@ -2,6 +2,8 @@ package io.github.devlibx.easy.ratelimit;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.base.Strings;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +11,11 @@ import lombok.NoArgsConstructor;
 import org.redisson.config.Config;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 
+@SuppressWarnings("unchecked")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,6 +42,9 @@ public class RateLimiterConfig {
 
     @Builder.Default
     private TimeUnit rateIntervalUnit = TimeUnit.SECONDS;
+
+    @Builder.Default
+    private StringObjectMap rateLimitJobConfig = new StringObjectMap();
 
     @Data
     @NoArgsConstructor
@@ -71,6 +78,24 @@ public class RateLimiterConfig {
         @JsonIgnore
         public String uniqueKey() {
             return host + "-" + port;
+        }
+    }
+
+    @JsonIgnore
+    public Optional<IRateLimitJob> getRateLimitJob() {
+        if (rateLimitJobConfig == null
+                || Strings.isNullOrEmpty(rateLimitJobConfig.getString("rate-limit-class"))
+                || !rateLimitJobConfig.getBoolean("enabled", true)
+        ) {
+            return Optional.empty();
+        }
+
+        try {
+            Class<IRateLimitJob> rateLimitJobClass = (Class<IRateLimitJob>) Class.forName(rateLimitJobConfig.getString("rate-limit-class"));
+            return Optional.of(rateLimitJobClass.newInstance());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Optional.empty();
         }
     }
 }
