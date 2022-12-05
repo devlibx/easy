@@ -22,6 +22,7 @@
         <module>database-dynamo</module>
         <module>rule-engine-drools</module>
         <module>metrics-statsd</module>
+        <module>ratelimit</module>
     </modules>
     <name>easy</name>
     <url>https://github.com/devlibx/easy</url>
@@ -69,11 +70,17 @@
         <jdbi.version>3.30.0</jdbi.version>
         <drools.version>7.1.0.Beta1</drools.version>
         <statsd.version>3.1.0</statsd.version>
+        <redisson.version>3.13.3</redisson.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
 
+            <dependency>
+                <groupId>org.redisson</groupId>
+                <artifactId>redisson</artifactId>
+                <version>${redisson.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-dynamodb</artifactId>
