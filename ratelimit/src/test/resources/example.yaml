@@ -1,0 +1,12 @@
+rate_limit_factory:
+  enabled: true
+  rate_limiters:
+    example-config-normal:
+      enabled: true
+      redis:
+        host: localhost
+        port: 6379
+      rate_type: OVERALL
+      rate: 1
+      rate_interval: 1
+      rate_interval_unit: SECONDS
