@@ -175,6 +175,7 @@ public class RedisBasedRateLimiter implements IRateLimiter {
                 }
             } catch (Exception e) {
                 log.error("error in acquiring lock: name={}, retryCount={}", rateLimiterConfig.getName(), retry, e);
+                sleep(50);
             }
         }
     }
