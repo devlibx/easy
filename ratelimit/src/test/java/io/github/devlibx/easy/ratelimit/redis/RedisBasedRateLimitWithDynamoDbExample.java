@@ -17,7 +17,6 @@ import io.gitbub.devlibx.easy.helper.LoggingHelper;
 import io.gitbub.devlibx.easy.helper.json.JsonUtils;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.gitbub.devlibx.easy.helper.yaml.YamlUtils;
-import io.github.devlibx.easy.ratelimit.IRateLimiter;
 import io.github.devlibx.easy.ratelimit.IRateLimiterFactory;
 import io.github.devlibx.easy.ratelimit.RateLimiterFactoryConfig;
 import io.github.devlibx.easy.ratelimit.impl.RateLimiterFactory;
@@ -68,11 +67,17 @@ public class RedisBasedRateLimitWithDynamoDbExample {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
+                    AtomicInteger permits = new AtomicInteger();
                     for (int i = 0; i < 1_000_000; i++) {
                         try {
                             int val = counter.incrementAndGet();
                             Data data = Data.builder().id("id_" + val).data("data_" + val).build();
-                            rateLimiterFactory.get(rateLimiterName).ifPresent(IRateLimiter::acquire);
+                            if (permits.decrementAndGet() <= 0) {
+                                rateLimiterFactory.get(rateLimiterName).ifPresent(rateLimiter -> {
+                                    rateLimiter.acquire(25);
+                                    permits.set(25);
+                                });
+                            }
                             table.putItem(Item.fromJSON(JsonUtils.asJson(data)));
                             if (val % 100 == 0) {
                                 System.out.println("Write done - " + val);

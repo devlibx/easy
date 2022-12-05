@@ -168,9 +168,7 @@ public class RedisBasedRateLimiter implements IRateLimiter {
                 limiterLock.unlock();
 
                 if (_limiter != null) {
-                    long start = System.currentTimeMillis();
                     _limiter.acquire(permits);
-                    System.out.println("Time taken = " + (System.currentTimeMillis() - start));
                     retry = -1;
                 } else {
                     sleep(10);
