@@ -2,6 +2,7 @@ package io.github.devlibx.easy.ratelimit.redis;
 
 import io.gitbub.devlibx.easy.helper.ApplicationContext;
 import io.gitbub.devlibx.easy.helper.Safe;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.github.devlibx.easy.ratelimit.IRateLimiter;
 import io.github.devlibx.easy.ratelimit.RateLimiterConfig;
@@ -204,6 +205,16 @@ public class RedisBasedRateLimiter implements IRateLimiter {
         } finally {
             limiterLock.unlock();
         }
+    }
+
+    @Override
+    public StringObjectMap debug() {
+        return StringObjectMap.of(
+                "rateType", rateLimiterConfig.getRateType(),
+                "rate", rateLimiterConfig.getRate(),
+                "rateInterval", rateLimiterConfig.getRateInterval(),
+                "rateIntervalUnit", rateLimiterConfig.getRateIntervalUnit()
+        );
     }
 
     private RateIntervalUnit convert(TimeUnit rateIntervalUnit) {

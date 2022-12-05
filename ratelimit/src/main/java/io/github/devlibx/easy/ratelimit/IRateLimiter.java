@@ -1,9 +1,16 @@
 package io.github.devlibx.easy.ratelimit;
 
 
-import java.util.concurrent.TimeUnit;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 
 public interface IRateLimiter {
+
+    /**
+     * @return debug info
+     */
+    default StringObjectMap debug() {
+        return new StringObjectMap();
+    }
 
     /**
      * Start rate limiter
