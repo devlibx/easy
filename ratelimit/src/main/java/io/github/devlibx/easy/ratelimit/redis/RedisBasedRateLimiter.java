@@ -60,7 +60,7 @@ public class RedisBasedRateLimiter implements IRateLimiter {
                 }
             }
             limiter = redissonClient.getRateLimiter(rateLimiterConfig.getName());
-            applyRate();
+            applyRate(limiter);
 
             // Start rate limit job
             rateLimiterConfig.getRateLimitJob().ifPresent(rateLimitJob -> {
@@ -74,7 +74,8 @@ public class RedisBasedRateLimiter implements IRateLimiter {
 
 
     // Apply rate to limiter
-    private boolean applyRate() {
+    private boolean applyRate(RRateLimiter limiter) {
+        if (limiter == null) return false;
         return limiter.trySetRate(
                 org.redisson.api.RateType.valueOf(rateLimiterConfig.getRateType().name()),
                 rateLimiterConfig.getRate(),
@@ -87,7 +88,12 @@ public class RedisBasedRateLimiter implements IRateLimiter {
     public boolean trySetRate(long rate) {
         rateLimiterConfig.setRate((int) rate);
         safeDeleteRateLimit();
-        return applyRate();
+
+        limiterLock.lock();
+        RRateLimiter _limiter = limiter;
+        limiterLock.unlock();
+
+        return applyRate(_limiter);
     }
 
     // update the rate limit
@@ -166,20 +172,13 @@ public class RedisBasedRateLimiter implements IRateLimiter {
                 return;
             } catch (Exception e) {
                 if (e.getMessage().contains("ERR user_script:1: RateLimiter is not initialized script")) {
-                    try {
-                        Thread.sleep(5);
-                        limiterLock.lock();
-                        try {
-                            if (limiter != null) {
-                                applyRate();
-                            }
-                        } finally {
-                            limiterLock.unlock();
-                        }
-                    } catch (InterruptedException ignored) {
-                    }
+                    sleep(5);
+                    limiterLock.lock();
+                    RRateLimiter _limiter = limiter;
+                    limiterLock.unlock();
+                    applyRate(_limiter);
                 } else {
-                    // throw e;
+                    log.error("error in acquiring lock: name={}", rateLimiterConfig.getName(), e);
                 }
             }
         }
