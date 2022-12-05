@@ -2,6 +2,7 @@ package io.github.devlibx.easy.ratelimit;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Strings;
 import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import lombok.AllArgsConstructor;
@@ -62,15 +63,40 @@ public class RateLimiterConfig {
         @Builder.Default
         private String strategy = "single-server";
 
+        @Builder.Default
+        private int timeout = 3000;
+
+        @Builder.Default
+        @JsonProperty("connect_timeout")
+        private int connectTimeout = 10000;
+
+        @Builder.Default
+        @JsonProperty("idle_connection_timeout")
+        private int idleConnectionTimeout = 10000;
+
+        @Builder.Default
+        @JsonProperty("ping_connection_interval")
+        private int pingConnectionInterval = 30000;
+
         @JsonIgnore
         public Config getRedissonConfig() {
             Config config = new Config();
             if (Objects.equals(strategy, "single-server")) {
                 String redisAddress = String.format("redis://%s:%s", host, port);
-                config.useSingleServer().setAddress(redisAddress);
+                config.useSingleServer()
+                        .setTimeout(timeout)
+                        .setConnectTimeout(connectTimeout)
+                        .setIdleConnectionTimeout(idleConnectionTimeout)
+                        .setPingConnectionInterval(pingConnectionInterval)
+                        .setAddress(redisAddress);
             } else if (Objects.equals(strategy, "localhost")) {
                 String redisAddress = String.format("redis://%s:%s", host, port);
-                config.useSingleServer().setAddress(redisAddress);
+                config.useSingleServer()
+                        .setTimeout(timeout)
+                        .setConnectTimeout(connectTimeout)
+                        .setIdleConnectionTimeout(idleConnectionTimeout)
+                        .setPingConnectionInterval(pingConnectionInterval)
+                        .setAddress(redisAddress);
             }
             return config;
         }
