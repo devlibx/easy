@@ -64,7 +64,7 @@ public class RedisBasedRateLimitWithDynamoDbExample {
         Table table = dynamoDB.getTable(rateLimiterFactoryConfig.getRateLimiters().get(rateLimiterName).getRateLimitJobConfig().getString("table"));
 
         AtomicInteger counter = new AtomicInteger();
-        for (int j=0; j < 10; j++) {
+        for (int j=0; j < 50; j++) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
