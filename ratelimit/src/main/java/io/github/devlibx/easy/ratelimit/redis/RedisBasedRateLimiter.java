@@ -157,12 +157,11 @@ public class RedisBasedRateLimiter implements IRateLimiter {
         while (retry-- >= 0) {
             try {
                 limiterLock.lock();
-                try {
-                    if (limiter != null) {
-                        limiter.acquire(permits);
-                    }
-                } finally {
-                    limiterLock.unlock();
+                RRateLimiter _limiter = limiter;
+                limiterLock.unlock();
+
+                if (_limiter != null) {
+                    _limiter.acquire(permits);
                 }
                 return;
             } catch (Exception e) {

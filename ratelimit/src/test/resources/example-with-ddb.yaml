@@ -14,7 +14,7 @@ rate_limit_factory:
         refresh-time-in-sec: 1
         rate-limit-by-write: true
         rate-limit-class: io.github.devlibx.easy.ratelimit.job.ddb.DynamoDbWriteRateLimitJob
-        rate-limit-factor: 0.9
+        rate-limit-factor: 0.99
         region: ap-south-1
         enabled: true
         table: test

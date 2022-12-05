@@ -28,6 +28,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class RedisBasedRateLimitWithDynamoDbExample {
 
@@ -62,16 +63,29 @@ public class RedisBasedRateLimitWithDynamoDbExample {
         DynamoDB dynamoDB = new DynamoDB(client);
         Table table = dynamoDB.getTable(rateLimiterFactoryConfig.getRateLimiters().get(rateLimiterName).getRateLimitJobConfig().getString("table"));
 
-        for (int i = 0; i < 1_000_000; i++) {
-            try {
-                Data data = Data.builder().id("id_" + i).data("data_" + i).build();
-                rateLimiterFactory.get(rateLimiterName).ifPresent(IRateLimiter::acquire);
-                table.putItem(Item.fromJSON(JsonUtils.asJson(data)));
-                System.out.println("Write done - " + i);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        AtomicInteger counter = new AtomicInteger();
+        for (int j=0; j < 10; j++) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < 1_000_000; i++) {
+                        try {
+                            int val = counter.incrementAndGet();
+                            Data data = Data.builder().id("id_" + val).data("data_" + val).build();
+                            rateLimiterFactory.get(rateLimiterName).ifPresent(IRateLimiter::acquire);
+                            table.putItem(Item.fromJSON(JsonUtils.asJson(data)));
+                            if (val % 100 == 0) {
+                                System.out.println("Write done - " + val);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }).start();
         }
+
+        Thread.sleep(100000);
     }
 
     @NoArgsConstructor
