@@ -15,7 +15,22 @@ rateLimiterFactory.get(rateLimiterName).ifPresent(rateLimiter->{
         });
 ```
 
+```yaml
+rate_limit_factory:
+  enabled: true
+  rate_limiters:
+    example-config-normal:
+      enabled: true
+      redis:
+        host: localhost
+        port: 6379      
+      rate: 1                         <<< How many requests are permitted
+      rate_interval: 1                <<< After how long rate limit will reset (value)
+      rate_interval_unit: SECONDS     <<< After how long rate limit will reset (unit)
+```
+
 ```java
+
 package io.github.devlibx.easy.ratelimit.redis;
 
 import ch.qos.logback.classic.Level;
@@ -79,6 +94,28 @@ public class RedisBasedRateLimitExample {
 
 full
 code ```https://github.com/devlibx/easy/tree/master/ratelimit/src/test/java/io/github/devlibx/easy/ratelimit/redis/RedisBasedRateLimitWithDynamoDbExample.java```
+
+```yaml
+rate_limit_factory:
+  enabled: true
+  rate_limiters:
+    example-config-normal:
+      enabled: true
+      redis:
+        host: localhost
+        port: 6379
+      rate: 1
+      rate_interval: 1
+      rate_interval_unit: SECONDS
+      rate_limit_job_config:
+        refresh-time-in-sec: 1            <<< refresh rate-limit every N seconds DDB 
+        rate-limit-by-write: true         <<< if true, set write limit, if false set read limit 
+        rate-limit-class: io.github.devlibx.easy.ratelimit.job.ddb.DynamoDbWriteRateLimitJob
+        rate-limit-factor: 0.9            <<< Max rate limit allowed e.g. if DDB has 100 write unit per sec, then (0.9 * 100) = 90 per sec is allowed
+        region: ap-south-1              
+        enabled: true
+        table: test                       <<< Name of the table to check the write/read units
+```
 
 ```java
 package io.github.devlibx.easy.ratelimit.redis;
