@@ -63,10 +63,14 @@ public class RedisBasedRateLimitWithDynamoDbExample {
         Table table = dynamoDB.getTable(rateLimiterFactoryConfig.getRateLimiters().get(rateLimiterName).getRateLimitJobConfig().getString("table"));
 
         for (int i = 0; i < 1_000_000; i++) {
-            Data data = Data.builder().id("id_" + i).data("data_" + i).build();
-            rateLimiterFactory.get(rateLimiterName).ifPresent(IRateLimiter::acquire);
-            table.putItem(Item.fromJSON(JsonUtils.asJson(data)));
-            System.out.println("Write done - " + i);
+            try {
+                Data data = Data.builder().id("id_" + i).data("data_" + i).build();
+                rateLimiterFactory.get(rateLimiterName).ifPresent(IRateLimiter::acquire);
+                table.putItem(Item.fromJSON(JsonUtils.asJson(data)));
+                System.out.println("Write done - " + i);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

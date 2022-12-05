@@ -75,35 +75,20 @@ public class RedisBasedRateLimiter implements IRateLimiter {
 
     // Apply rate to limiter
     private boolean applyRate() {
-        limiterLock.lock();
-        try {
-            return limiter.trySetRate(
-                    org.redisson.api.RateType.valueOf(rateLimiterConfig.getRateType().name()),
-                    rateLimiterConfig.getRate(),
-                    rateLimiterConfig.getRateInterval(),
-                    convert(rateLimiterConfig.getRateIntervalUnit())
-            );
-        } finally {
-            limiterLock.unlock();
-        }
+        return limiter.trySetRate(
+                org.redisson.api.RateType.valueOf(rateLimiterConfig.getRateType().name()),
+                rateLimiterConfig.getRate(),
+                rateLimiterConfig.getRateInterval(),
+                convert(rateLimiterConfig.getRateIntervalUnit())
+        );
     }
 
     @Override
     public boolean trySetRate(long rate) {
-
-        // update the new rate
         rateLimiterConfig.setRate((int) rate);
-
-        // Apply change
-        limiterLock.lock();
-        try {
-            safeDeleteRateLimit();
-            return true ? applyRate() : false;
-        } finally {
-            limiterLock.unlock();
-        }
+        safeDeleteRateLimit();
+        return applyRate();
     }
-
 
     // update the rate limit
     private void safeDeleteRateLimit() {
@@ -122,28 +107,36 @@ public class RedisBasedRateLimiter implements IRateLimiter {
             // Take a lock to update the rate limiter
             redisLockToModifyRateLimit.lock(10, TimeUnit.SECONDS);
 
-            // if config is changed then apply this rate limit again
-            org.redisson.api.RateLimiterConfig configFromRedis;
+            limiterLock.lock();
             try {
-                configFromRedis = limiter.getConfig();
-            } catch (Exception e) {
-                log.warn("trying to update the ratelimit-update-lock-{}, and this error is expected 2-3 times at boot: error={}", rateLimiterConfig.getName(), e.getMessage());
-                if (e.getCause() instanceof NumberFormatException) {
-                    configFromRedis = new org.redisson.api.RateLimiterConfig(RateType.OVERALL, 0L, 0L);
-                } else {
-                    throw e;
+                // if config is changed then apply this rate limit again
+                org.redisson.api.RateLimiterConfig configFromRedis;
+                try {
+                    configFromRedis = limiter.getConfig();
+                } catch (Exception e) {
+                    log.warn("trying to update the ratelimit-update-lock-{}, and this error is expected 2-3 times at boot: error={}", rateLimiterConfig.getName(), e.getMessage());
+                    if (e.getCause() instanceof NumberFormatException) {
+                        configFromRedis = new org.redisson.api.RateLimiterConfig(RateType.OVERALL, 0L, 0L);
+                    } else {
+                        configFromRedis = new org.redisson.api.RateLimiterConfig(RateType.OVERALL, 0L, 0L);
+                        // throw e;
+                    }
                 }
+
+                // Delete and create this limiter again
+                if (configFromRedis.getRate() != rateLimiterConfig.getRate()) {
+                    try {
+                        limiter.delete();
+                    } catch (Exception e) {
+                        log.error("trying to update the ratelimit-update-lock-{} - this requires us to delete the old limit. Something is wrong, we could not delete it", rateLimiterConfig.getName(), e);
+                    }
+                    limiter = redissonClient.getRateLimiter(rateLimiterConfig.getName());
+                }
+            } finally {
+                limiterLock.unlock();
             }
 
-            // Delete and create this limiter again
-            if (configFromRedis.getRate() != rateLimiterConfig.getRate()) {
-                try {
-                    limiter.delete();
-                } catch (Exception e) {
-                    log.error("trying to update the ratelimit-update-lock-{} - this requires us to delete the old limit. Something is wrong, we could not delete it", rateLimiterConfig.getName(), e);
-                }
-                limiter = redissonClient.getRateLimiter(rateLimiterConfig.getName());
-            }
+        } catch (Exception ignored) {
 
         } finally {
             try {
@@ -160,35 +153,38 @@ public class RedisBasedRateLimiter implements IRateLimiter {
 
     @Override
     public void acquire(long permits) {
-        limiterLock.lock();
         int retry = 10;
-        try {
-            if (limiter != null) {
-                while (retry-- >= 0) {
-                    try {
-                        if (permits == 1) {
-                            limiter.acquire();
-                        } else {
-                            limiter.acquire(permits);
-                        }
-                        return;
-                    } catch (Exception e) {
-                        if (e.getMessage().contains("ERR user_script:1: RateLimiter is not initialized script")) {
-                            try {
-                                Thread.sleep(5);
-                                applyRate();
-                            } catch (InterruptedException ignored) {
-                            }
-                        } else {
-                            throw e;
-                        }
+        while (retry-- >= 0) {
+            try {
+                limiterLock.lock();
+                try {
+                    if (limiter != null) {
+                        limiter.acquire(permits);
                     }
+                } finally {
+                    limiterLock.unlock();
                 }
-                log.error("failed to acquire lock: {}", rateLimiterConfig.getName());
+                return;
+            } catch (Exception e) {
+                if (e.getMessage().contains("ERR user_script:1: RateLimiter is not initialized script")) {
+                    try {
+                        Thread.sleep(5);
+                        limiterLock.lock();
+                        try {
+                            if (limiter != null) {
+                                applyRate();
+                            }
+                        } finally {
+                            limiterLock.unlock();
+                        }
+                    } catch (InterruptedException ignored) {
+                    }
+                } else {
+                    // throw e;
+                }
             }
-        } finally {
-            limiterLock.unlock();
         }
+        log.error("failed to acquire lock: {}", rateLimiterConfig.getName());
     }
 
     @Override
