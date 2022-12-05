@@ -154,13 +154,22 @@ public class RedisBasedRateLimiter implements IRateLimiter {
 
     @Override
     public void acquire() {
+        acquire(1);
+    }
+
+    @Override
+    public void acquire(long permits) {
         limiterLock.lock();
         int retry = 10;
         try {
             if (limiter != null) {
                 while (retry-- >= 0) {
                     try {
-                        limiter.acquire();
+                        if (permits == 1) {
+                            limiter.acquire();
+                        } else {
+                            limiter.acquire(permits);
+                        }
                         return;
                     } catch (Exception e) {
                         if (e.getMessage().contains("ERR user_script:1: RateLimiter is not initialized script")) {

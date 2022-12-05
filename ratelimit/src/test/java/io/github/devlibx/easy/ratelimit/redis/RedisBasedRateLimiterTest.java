@@ -2,6 +2,12 @@ package io.github.devlibx.easy.ratelimit.redis;
 
 
 import ch.qos.logback.classic.Level;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.Table;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -15,11 +21,13 @@ import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.gitbub.devlibx.easy.helper.yaml.YamlUtils;
 import io.github.devlibx.easy.ratelimit.IRateLimitJob;
+import io.github.devlibx.easy.ratelimit.IRateLimiter;
 import io.github.devlibx.easy.ratelimit.IRateLimiterFactory;
 import io.github.devlibx.easy.ratelimit.RateLimiterConfig;
 import io.github.devlibx.easy.ratelimit.RateLimiterFactoryConfig;
 import io.github.devlibx.easy.ratelimit.impl.RateLimiterFactory;
 import io.github.devlibx.easy.ratelimit.job.ddb.DynamoDbWriteRateLimitJob;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
@@ -131,6 +139,20 @@ public class RedisBasedRateLimiterTest {
         IRateLimiterFactory rateLimiterFactory = injector.getInstance(IRateLimiterFactory.class);
         rateLimiterFactory.start();
 
+
+        AmazonDynamoDB client = AmazonDynamoDBClientBuilder
+                .standard()
+                .withRegion(Regions.AP_SOUTH_1)
+                .build();
+        DynamoDB dynamoDB = new DynamoDB(client);
+        Table table = dynamoDB.getTable("test");
+        for (int i = 0; i < 1_000_000; i++) {
+            Data data = Data.builder().id("id_" + i).data("data_" + i).build();
+            rateLimiterFactory.get(rateLimiterName).ifPresent(IRateLimiter::acquire);
+            table.putItem(Item.fromJSON(JsonUtils.asJson(data)));
+            System.out.println("Write done - " + i);
+        }
+
         Thread.sleep(100 * 1000);
     }
 
@@ -138,5 +160,12 @@ public class RedisBasedRateLimiterTest {
     private static class Config {
         @JsonProperty("rate_limit_factory")
         private RateLimiterFactoryConfig config;
+    }
+
+    @lombok.Data
+    @Builder
+    private static class Data {
+        private String id;
+        private String data;
     }
 }

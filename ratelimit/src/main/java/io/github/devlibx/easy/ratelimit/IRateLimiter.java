@@ -31,6 +31,18 @@ public interface IRateLimiter {
     void acquire();
 
     /**
+     * Acquires a specified <code>permits</code> from this RateLimiter,
+     * blocking until one is available.
+     *
+     * <p>Acquires the given number of permits, if they are available
+     * and returns immediately, reducing the number of available permits
+     * by the given amount.
+     *
+     * @param permits the number of permits to acquire
+     */
+    void acquire(long permits);
+
+    /**
      * No op implementation
      */
     class NoOpRateLimiter implements IRateLimiter {
@@ -50,6 +62,10 @@ public interface IRateLimiter {
 
         @Override
         public void acquire() {
+        }
+
+        @Override
+        public void acquire(long permits) {
         }
     }
 }
