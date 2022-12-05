@@ -35,6 +35,13 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
             new Thread(() -> {
                 while (keepRunning.get()) {
 
+                    // Try to update the value
+                    try {
+                        updateRateLimit(rateLimiterConfig);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                     // Wait for next run
                     try {
                         int sleep = rateLimiterConfig.getRateLimitJobConfig().getInt("refresh-time-in-sec", 5);
@@ -42,12 +49,6 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
                     } catch (InterruptedException ignored) {
                     }
 
-                    // Try to update the value
-                    try {
-                        updateRateLimit(rateLimiterConfig);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
                 }
             }).start();
 
