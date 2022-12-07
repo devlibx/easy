@@ -47,6 +47,9 @@ public class RateLimiterConfig {
     @Builder.Default
     private StringObjectMap rateLimitJobConfig = new StringObjectMap();
 
+    @Builder.Default
+    private StringObjectMap properties = new StringObjectMap();
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

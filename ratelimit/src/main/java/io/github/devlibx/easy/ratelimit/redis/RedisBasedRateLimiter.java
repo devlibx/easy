@@ -6,6 +6,10 @@ import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.github.devlibx.easy.ratelimit.IRateLimiter;
 import io.github.devlibx.easy.ratelimit.RateLimiterConfig;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RFuture;
 import org.redisson.api.RLock;
@@ -28,12 +32,22 @@ public class RedisBasedRateLimiter implements IRateLimiter {
     private RedissonClient redissonClient;
     private RRateLimiter limiter;
     private final Lock limiterLock;
+    private final CircuitBreaker circuitBreaker;
 
     @Inject
     public RedisBasedRateLimiter(RateLimiterConfig rateLimiterConfig, IMetrics metrics) {
         this.rateLimiterConfig = rateLimiterConfig;
         this.metrics = metrics;
         this.limiterLock = new ReentrantLock();
+
+        // Set-up a circuit breaker if redis is down
+        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
+                .failureRateThreshold(rateLimiterConfig.getProperties().getInt("circuit-breaker-config-failureRateThreshold", 50))
+                .minimumNumberOfCalls(rateLimiterConfig.getProperties().getInt("circuit-breaker-config-minimumNumberOfCalls", 10))
+                .enableAutomaticTransitionFromOpenToHalfOpen()
+                .build();
+        CircuitBreakerRegistry circuitBreakerRegistry = CircuitBreakerRegistry.of(circuitBreakerConfig);
+        circuitBreaker = circuitBreakerRegistry.circuitBreaker(rateLimiterConfig.getName());
     }
 
     @Override
@@ -168,11 +182,17 @@ public class RedisBasedRateLimiter implements IRateLimiter {
                 limiterLock.unlock();
 
                 if (_limiter != null) {
-                    _limiter.acquire(permits);
+                    Runnable runnable = CircuitBreaker.decorateRunnable(circuitBreaker, () -> {
+                        _limiter.acquire(permits);
+                    });
+                    runnable.run();
                     retry = -1;
                 } else {
                     sleep(10);
                 }
+            } catch (CallNotPermittedException e) {
+                log.error("circuit open in taking lock. Lock is taken: name={}, retryCount={}, error={}", rateLimiterConfig.getName(), retry, e.getMessage());
+                retry = -1;
             } catch (Exception e) {
                 log.error("error in acquiring lock: name={}, retryCount={}", rateLimiterConfig.getName(), retry, e);
                 sleep(50);
