@@ -16,7 +16,9 @@ import io.gitbub.devlibx.easy.helper.ApplicationContext;
 import io.gitbub.devlibx.easy.helper.LoggingHelper;
 import io.gitbub.devlibx.easy.helper.json.JsonUtils;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
+import io.gitbub.devlibx.easy.helper.metrics.MetricsConfig;
 import io.gitbub.devlibx.easy.helper.yaml.YamlUtils;
+import io.github.devlibx.easy.metrics.statsd.StatsdMetrics;
 import io.github.devlibx.easy.ratelimit.IRateLimiterFactory;
 import io.github.devlibx.easy.ratelimit.RateLimiterFactoryConfig;
 import io.github.devlibx.easy.ratelimit.impl.RateLimiterFactory;
@@ -35,6 +37,19 @@ public class RedisBasedRateLimitWithDynamoDbExample {
         LoggingHelper.setupLogging();
         LoggingHelper.getLogger(DynamoDbWriteRateLimitJob.class).setLevel(Level.DEBUG);
 
+        String host = System.getenv("statsd");
+        MetricsConfig metricsConfig = null;
+        if (false) {
+            metricsConfig = MetricsConfig.builder()
+                    .env("stage")
+                    .host(host)
+                    .port(80)
+                    .prefix("p")
+                    .serviceName("tests")
+                    .pushInterval(100)
+                    .enabled(true).build();
+        }
+
         //  Setup 1 - read config from your yaml file
         String rateLimiterName = "example-config-normal";
         String testFilePath = new File(".").getAbsoluteFile().getAbsolutePath() + "/ratelimit/src/test/resources/example-with-ddb.yaml";
@@ -47,8 +62,13 @@ public class RedisBasedRateLimitWithDynamoDbExample {
             @Override
             protected void configure() {
                 bind(IRateLimiterFactory.class).to(RateLimiterFactory.class).in(Scopes.SINGLETON);
-                bind(IMetrics.class).to(IMetrics.NoOpMetrics.class);
                 bind(RateLimiterFactoryConfig.class).toInstance(rateLimiterFactoryConfig);
+                if (metricsConfig != null) {
+                    bind(IMetrics.class).to(StatsdMetrics.class);
+                    bind(MetricsConfig.class).toInstance(metricsConfig);
+                } else {
+                    bind(IMetrics.class).to(IMetrics.NoOpMetrics.class);
+                }
             }
         });
         ApplicationContext.setInjector(injector);

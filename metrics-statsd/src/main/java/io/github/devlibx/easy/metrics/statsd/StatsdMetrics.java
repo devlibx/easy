@@ -44,6 +44,13 @@ public class StatsdMetrics implements IMetrics {
     }
 
     @Override
+    public void inc(String name, long count, String... labels) {
+        name = String.format("%s.%s", getPrefix(), name);
+        String metricString = handleLabels(name, labels);
+        statsDClient.count(metricString, count);
+    }
+
+    @Override
     public <T> T time(String name, Callable<T> callable, String... labels) {
         try {
             return callable.call();

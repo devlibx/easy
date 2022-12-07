@@ -184,17 +184,21 @@ public class RedisBasedRateLimiter implements IRateLimiter {
                 if (_limiter != null) {
                     Runnable runnable = CircuitBreaker.decorateRunnable(circuitBreaker, () -> {
                         _limiter.acquire(permits);
+                        metrics.inc("rate_limiter", (int) permits, "name", rateLimiterConfig.getName(), "status", "ok");
                     });
                     runnable.run();
                     retry = -1;
                 } else {
+                    metrics.inc("rate_limiter", (int) permits, "name", rateLimiterConfig.getName(), "status", "error", "error", "linter_null");
                     sleep(10);
                 }
             } catch (CallNotPermittedException e) {
                 log.error("circuit open in taking lock. Lock is taken: name={}, retryCount={}, error={}", rateLimiterConfig.getName(), retry, e.getMessage());
                 retry = -1;
+                metrics.inc("rate_limiter", (int) permits, "name", rateLimiterConfig.getName(), "status", "error", "error", "circuit_open");
             } catch (Exception e) {
                 log.error("error in acquiring lock: name={}, retryCount={}", rateLimiterConfig.getName(), retry, e);
+                metrics.inc("rate_limiter", (int) permits, "name", rateLimiterConfig.getName(), "status", "error", "error", "unknown");
                 sleep(50);
             }
         }
