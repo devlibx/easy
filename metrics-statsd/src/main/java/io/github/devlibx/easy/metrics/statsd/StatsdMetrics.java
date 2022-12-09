@@ -8,7 +8,10 @@ import io.gitbub.devlibx.easy.helper.metrics.MetricsConfig;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 public class StatsdMetrics implements IMetrics {
@@ -30,11 +33,18 @@ public class StatsdMetrics implements IMetrics {
         return null;
     }
 
-    /*@Override
+    @Override
     public void observe(String name, double amt) {
         name = String.format("%s.%s", getPrefix(), name);
         statsDClient.recordExecutionTime(name, (long) amt);
-    }*/
+    }
+
+    @Override
+    public void observe(String name, double amt, String... labels) {
+        name = String.format("%s.%s", getPrefix(), name);
+        String metricString = handleLabels(name, labels);
+        statsDClient.recordExecutionTime(metricString, (long) amt);
+    }
 
     @Override
     public void inc(String name, String... labels) {
@@ -67,7 +77,7 @@ public class StatsdMetrics implements IMetrics {
     public void registerTimer(String name, String help, String... labelNames) {
     }
 
-    private String handleLabels(String name, String... labels) {
+    String _handleLabels(String name, String... labels) {
         if (labels == null || labels.length == 0 || labels.length % 2 != 0) {
             return name;
         }
@@ -80,6 +90,27 @@ public class StatsdMetrics implements IMetrics {
         }
         return String.join(",", l);
     }
+
+    String handleLabels(String name, String... labels) {
+        if (labels == null || labels.length == 0 || labels.length % 2 != 0) {
+            return name;
+        }
+        List<String> keys = new ArrayList<>();
+        Map<String, String> tags = new HashMap<>();
+        for (int i = 0; i < labels.length; i = i + 2) {
+            keys.add(labels[i]);
+            tags.put(labels[i], labels[i] + "=" + labels[i + 1]);
+        }
+        Collections.sort(keys);
+
+        List<String> sortedList = new ArrayList<>();
+        sortedList.add(name);
+        for (String k : keys) {
+            sortedList.add(tags.get(k));
+        }
+        return String.join(",", sortedList);
+    }
+
 
     private String getPrefix() {
         return String.format("%s.metrics", metricsConfig.getEnv());
