@@ -138,7 +138,7 @@ public class RedisBasedRateLimitWithDynamoDbV3Example {
                                 System.out.println("Write done - " + val);
                             }
                             // Thread.sleep(ThreadLocalRandom.current().nextInt(00, 300));
-                            // ApplicationContext.getInstance(IMetrics.class).inc("ddb_write_testing");
+                            ApplicationContext.getInstance(IMetrics.class).inc("ddb_write_testing");
 
                             metricRegistry.counter("ddb").inc();
                         } catch (Exception e) {

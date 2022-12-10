@@ -1,7 +1,6 @@
 package io.github.devlibx.easy.metrics.statsd;
 
 import com.timgroup.statsd.NoOpStatsDClient;
-import com.timgroup.statsd.NonBlockingStatsDClient;
 import com.timgroup.statsd.StatsDClient;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.gitbub.devlibx.easy.helper.metrics.MetricsConfig;
