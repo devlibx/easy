@@ -22,7 +22,7 @@ public interface IMetrics {
      * Count this metrics
      */
     default void inc(String name, long count, String... labels) {
-        inc(name, 1, labels);
+        inc(name, labels);
     }
 
     /**
