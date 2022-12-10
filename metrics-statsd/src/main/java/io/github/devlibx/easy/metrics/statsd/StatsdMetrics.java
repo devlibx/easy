@@ -23,7 +23,12 @@ public class StatsdMetrics implements IMetrics {
         if (!metricsConfig.isEnabled()) {
             statsDClient = new NoOpStatsDClient();
         } else {
-            statsDClient = new NonBlockingStatsDClient(metricsConfig.getServiceName(), metricsConfig.getHost(), metricsConfig.getPort());
+            statsDClient = new NonBlockingStatsDClient(
+                    metricsConfig.getServiceName(),
+                    metricsConfig.getHost(),
+                    metricsConfig.getPort(),
+                    metricsConfig.getProperties().getInt("buffer-size", 1_000_000)
+            );
         }
     }
 

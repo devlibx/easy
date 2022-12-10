@@ -1,5 +1,6 @@
 package io.github.devlibx.easy.metrics.statsd;
 
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import io.gitbub.devlibx.easy.helper.metrics.MetricsConfig;
 import org.junit.Assert;
 import org.junit.Test;
@@ -27,10 +28,9 @@ public class StatsdMetricsTest {
         Random random = new Random();
         for (int i = 0; i < 1_000_000; i++) {
             statsdMetrics.observe("sample_1_time", random.nextInt(50), "city", "bangalore", "id", "10");
-            Thread.sleep(1);
+            // Thread.sleep(1);
         }
-
-        Thread.sleep(1000);
+        Thread.sleep(10000);
     }
 
     @Test
