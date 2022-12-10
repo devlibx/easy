@@ -58,6 +58,9 @@ public class RateLimiterConfig {
     public static class Redis {
 
         @Builder.Default
+        private String version = "v2";
+
+        @Builder.Default
         private String host = "localhost";
 
         @Builder.Default

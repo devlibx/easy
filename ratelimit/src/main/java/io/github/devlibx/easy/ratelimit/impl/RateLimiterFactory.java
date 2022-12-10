@@ -6,10 +6,12 @@ import io.github.devlibx.easy.ratelimit.IRateLimiter;
 import io.github.devlibx.easy.ratelimit.IRateLimiterFactory;
 import io.github.devlibx.easy.ratelimit.RateLimiterFactoryConfig;
 import io.github.devlibx.easy.ratelimit.redis.RedisBasedRateLimiter;
+import io.github.devlibx.easy.ratelimit.redis.RedisBasedRateLimiterV2;
 
 import javax.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RateLimiterFactory implements IRateLimiterFactory {
@@ -32,7 +34,12 @@ public class RateLimiterFactory implements IRateLimiterFactory {
                 if (rateLimiterConfig.getRedis() != null) {
 
                     // Create a rate limiter
-                    IRateLimiter rateLimiter = new RedisBasedRateLimiter(rateLimiterConfig, metrics);
+                    IRateLimiter rateLimiter;
+                    if (Objects.equals(rateLimiterConfig.getRedis().getVersion(), "v2")) {
+                        rateLimiter = new RedisBasedRateLimiterV2(rateLimiterConfig, metrics);
+                    } else {
+                        rateLimiter = new RedisBasedRateLimiter(rateLimiterConfig, metrics);
+                    }
                     rateLimiter.start();
 
                     // Set the rate limit (try for 3 times)

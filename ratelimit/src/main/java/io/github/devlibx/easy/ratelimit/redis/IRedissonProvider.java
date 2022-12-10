@@ -6,6 +6,7 @@ import org.redisson.api.RedissonClient;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -28,7 +29,13 @@ public interface IRedissonProvider {
             try {
                 return redissonClientMap.computeIfAbsent(redis.uniqueKey(), key -> {
                     org.redisson.config.Config redissonConfig = redis.getRedissonConfig();
-                    return Redisson.create(redissonConfig);
+                    if (Objects.equals(redis.getVersion(), "v1")) {
+                        return Redisson.create(redissonConfig);
+                    } else if (Objects.equals(redis.getVersion(), "v2")) {
+                        return RedissonExt.create(redissonConfig);
+                    } else {
+                        return Redisson.create(redissonConfig);
+                    }
                 });
             } finally {
                 lock.unlock();
