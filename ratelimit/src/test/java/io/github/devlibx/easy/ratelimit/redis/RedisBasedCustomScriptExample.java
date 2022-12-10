@@ -16,11 +16,9 @@ import io.github.devlibx.easy.ratelimit.impl.RateLimiterFactory;
 import io.github.devlibx.easy.ratelimit.job.ddb.DynamoDbWriteRateLimitJob;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.FileUtils;
-import org.joda.time.DateTime;
 
 import java.io.File;
 import java.nio.charset.Charset;
-import java.util.Collections;
 
 public class RedisBasedCustomScriptExample {
 
@@ -30,7 +28,7 @@ public class RedisBasedCustomScriptExample {
 
         //  Setup 1 - read config from your yaml file
         String rateLimiterName = "example-config-normal";
-        String testFilePath = new File(".").getAbsoluteFile().getAbsolutePath() + "/ratelimit/src/test/resources/example.yaml";
+        String testFilePath = new File(".").getAbsoluteFile().getAbsolutePath() + "/ratelimit/src/test/resources/example-v3.yaml";
         String content = FileUtils.readFileToString(new File(testFilePath), Charset.defaultCharset());
         RateLimiterFactoryConfig rateLimiterFactoryConfig = YamlUtils.readYamlFromString(content, Config.class).config;
 
@@ -54,29 +52,22 @@ public class RedisBasedCustomScriptExample {
         testFilePath = new File(".").getAbsoluteFile().getAbsolutePath() + "/ratelimit/src/test/resources/ratelimit.lua";
         String script = FileUtils.readFileToString(new File(testFilePath), Charset.defaultCharset());
 
+        rateLimiterFactoryConfig.getRateLimiters().get(rateLimiterName)
+                .getProperties()
+                .put("script", script);
+
 
         // This will update the rate limit every 1 sec
         rateLimiterFactory.get(rateLimiterName).ifPresent(rateLimiter -> {
-            if (rateLimiter instanceof RedisBasedRateLimiterV2) {
-                RedissonRateLimiterExt rl = (RedissonRateLimiterExt) ((RedisBasedRateLimiterV2) rateLimiter).getLimiter();
-                for (int i = 0; i < 100000; i++) {
-                    DateTime now = DateTime.now();
-                    String result = rl.executeCustomScript(
-                            script,
-                            Collections.EMPTY_LIST,
-                            new Long(now.getMillis() / 1000),                   // Max time i.e. the current time
-                            new Long(now.minusSeconds(5).getMillis() / 1000),   // Lowest time i.e. the lowest value
-                            new Long(10),                                       // Rate limit,
-                            2,                                                  // Permit
-                            rateLimiterName.replace("-", ""),                   // Pass the set name
-                            300                                                // TTL value
-                    );
-                    System.out.println(result);
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+            // RedisBasedRateLimiterV3 rl = (RedisBasedRateLimiterV3) rateLimiter;
+            // rl.setRateLimiterConfig(rateLimiterFactoryConfig.getRateLimiters().get(rateLimiterName));
+            for (int i = 0; i < 100000; i++) {
+                rateLimiter.acquire(1);
+                System.out.println("Local taken");
+                try {
+                    Thread.sleep(1);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             }
         });

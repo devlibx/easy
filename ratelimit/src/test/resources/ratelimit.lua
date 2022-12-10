@@ -11,6 +11,7 @@ local rateParam = ARGV[3];
 local permits = ARGV[4];
 local zset = ARGV[5];
 local ttlValue = ARGV[6];
+local currentTime = ARGV[7];
 
 -- We have 2 data structure:
 -- 1 - a sorted set of last N seconds (we make sure we only keep last N seconds keys here)
@@ -73,12 +74,14 @@ end
 
 local resultToReturn = -1
 local debugToReturn = ''
+local delay = 0
 if enableDebugLogging then
     if value >= 0 then
         resultToReturn = value
         debugToReturn = debug
     else
         resultToReturn = -1
+        delay = ((currentTimeParam + 1) * 1000) - currentTime;
         debugToReturn = debug .. ' Final value suppress to -1'
     end
 else
@@ -86,8 +89,10 @@ else
         resultToReturn = value
     else
         resultToReturn = -1
+        delay = ((currentTimeParam + 1) * 1000) - currentTime;
     end
 end
 
 -- Meta class
-return resultToReturn .. ''
+
+return { resultToReturn .. '', delay .. '', debugToReturn }
