@@ -26,7 +26,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
-@Deprecated
 public class RedisBasedRateLimiter implements IRateLimiter {
     private final RateLimiterConfig rateLimiterConfig;
     private final IMetrics metrics;
