@@ -83,7 +83,7 @@ public class RedisBasedRateLimitWithDynamoDbV3Example {
                 bind(IRateLimiterFactory.class).to(RateLimiterFactory.class).in(Scopes.SINGLETON);
                 bind(RateLimiterFactoryConfig.class).toInstance(rateLimiterFactoryConfig);
                 if (metricsConfig1 != null) {
-                    bind(IMetrics.class).to(StatsdMetrics.class);
+                    bind(IMetrics.class).to(StatsdMetrics.class).in(Scopes.SINGLETON);
                     bind(MetricsConfig.class).toInstance(metricsConfig1);
                 } else {
                     bind(IMetrics.class).to(IMetrics.NoOpMetrics.class);

@@ -23,12 +23,20 @@ public class StatsdMetrics implements IMetrics {
         if (!metricsConfig.isEnabled()) {
             statsDClient = new NoOpStatsDClient();
         } else {
-            statsDClient = new NonBlockingStatsDClient(
-                    metricsConfig.getServiceName(),
-                    metricsConfig.getHost(),
-                    metricsConfig.getPort(),
-                    metricsConfig.getProperties().getInt("buffer-size", 1_000_000)
-            );
+            if (metricsConfig.getProperties().getBoolean("user-timgroup-statsd-client", true)) {
+                statsDClient = new com.timgroup.statsd.NonBlockingStatsDClient(
+                        metricsConfig.getServiceName(),
+                        metricsConfig.getHost(),
+                        metricsConfig.getPort()
+                );
+            } else {
+                statsDClient = new NonBlockingStatsDClient(
+                        metricsConfig.getServiceName(),
+                        metricsConfig.getHost(),
+                        metricsConfig.getPort(),
+                        metricsConfig.getProperties().getInt("buffer-size", 1_000_000)
+                );
+            }
         }
     }
 

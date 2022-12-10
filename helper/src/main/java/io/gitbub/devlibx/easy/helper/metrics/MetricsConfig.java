@@ -27,6 +27,9 @@ public class MetricsConfig {
      * buffer-size - default = 1000000 (Only for StatsD). It works on UDP, and we do not want to block on send. So we
      * have a buffer queue of fixed size. If we are not able to send messages fast enough, it will be full and we will
      * drop stats.
+     * <p>
+     * user-timgroup-statsd-client - default - true
+     * if you do not want to use " com.timgroup.statsd" package for statsD clients then set it false
      */
     @Builder.Default
     private StringObjectMap properties = new StringObjectMap();
