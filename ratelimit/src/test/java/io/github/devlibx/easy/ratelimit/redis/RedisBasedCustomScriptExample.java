@@ -73,7 +73,7 @@ public class RedisBasedCustomScriptExample {
                     );
                     System.out.println(result);
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(1);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }

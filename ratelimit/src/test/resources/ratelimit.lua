@@ -63,7 +63,9 @@ if value < 0 then
             debug = debug .. ' [found value from key ' .. v .. ' with value ' .. value
             break
         else
-            redis.call('DEL', v)
+            if v ~= redisCurrentTimeKey then
+                redis.call('DEL', v)
+            end
         end
 
     end
