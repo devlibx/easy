@@ -60,8 +60,8 @@ public final class NonBlockingStatsDClient extends ConvenienceMethodProvidingSta
      * @param port     the port of the targeted StatsD server
      * @throws StatsDClientException if the client could not be started
      */
-    public NonBlockingStatsDClient(String prefix, String hostname, int port) throws StatsDClientException {
-        this(prefix, hostname, port, NO_OP_HANDLER);
+    public NonBlockingStatsDClient(String prefix, String hostname, int port, int bufferSize) throws StatsDClientException {
+        this(prefix, hostname, port, NO_OP_HANDLER, bufferSize);
     }
 
     /**
@@ -81,11 +81,11 @@ public final class NonBlockingStatsDClient extends ConvenienceMethodProvidingSta
      * @param errorHandler handler to use when an exception occurs during usage
      * @throws StatsDClientException if the client could not be started
      */
-    public NonBlockingStatsDClient(String prefix, String hostname, int port, StatsDClientErrorHandler errorHandler) throws StatsDClientException {
+    public NonBlockingStatsDClient(String prefix, String hostname, int port, StatsDClientErrorHandler errorHandler, int bufferSize) throws StatsDClientException {
         this.prefix = (prefix == null || prefix.trim().isEmpty()) ? "" : (prefix.trim() + ".");
 
         try {
-            this.sender = new NonBlockingUdpSender(hostname, port, STATS_D_ENCODING, errorHandler);
+            this.sender = new NonBlockingUdpSender(hostname, port, STATS_D_ENCODING, errorHandler, bufferSize);
         } catch (Exception e) {
             throw new StatsDClientException("Failed to start StatsD client", e);
         }
