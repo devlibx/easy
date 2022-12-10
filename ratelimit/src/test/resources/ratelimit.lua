@@ -71,17 +71,23 @@ if value < 0 then
     end
 end
 
+local resultToReturn = -1
+local debugToReturn = ''
 if enableDebugLogging then
     if value >= 0 then
-        return debug .. ' Final value - [' .. value .. ']'
+        resultToReturn = value
+        debugToReturn = debug
     else
-        value = -1
-        return debug .. ' Final value suppress to 0 - [' .. value .. ']'
+        resultToReturn = -1
+        debugToReturn = debug .. ' Final value suppress to -1'
     end
 else
     if value >= 0 then
-        return value
+        resultToReturn = value
     else
-        return '..' - 1
+        resultToReturn = -1
     end
 end
+
+-- Meta class
+return resultToReturn .. ''

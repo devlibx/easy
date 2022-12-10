@@ -43,7 +43,7 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
             return result.get();
         } catch (Exception e) {
             e.printStackTrace();
-            return "error";
+            return "-1";
         }
     }
 }
