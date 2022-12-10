@@ -66,13 +66,12 @@ public class RedisBasedRateLimitWithDynamoDbV3Example {
         String content = FileUtils.readFileToString(new File(testFilePath), Charset.defaultCharset());
         RateLimiterFactoryConfig rateLimiterFactoryConfig = YamlUtils.readYamlFromString(content, Config.class).config;
 
-        /*
         testFilePath = new File(".").getAbsoluteFile().getAbsolutePath() + "/ratelimit/src/test/resources/ratelimit.lua";
         String script = FileUtils.readFileToString(new File(testFilePath), Charset.defaultCharset());
         rateLimiterFactoryConfig.getRateLimiters().get(rateLimiterName)
                 .getProperties()
                 .put("script", script);
-         */
+
 
 
         // Setup 2 - Start the rate limiter

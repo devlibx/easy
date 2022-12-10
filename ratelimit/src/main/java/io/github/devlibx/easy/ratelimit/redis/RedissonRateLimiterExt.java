@@ -1,5 +1,6 @@
 package io.github.devlibx.easy.ratelimit.redis;
 
+import io.gitbub.devlibx.easy.helper.json.JsonUtils;
 import io.github.devlibx.easy.ratelimit.RateLimiterConfig;
 import lombok.Setter;
 import org.joda.time.DateTime;
@@ -84,10 +85,14 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
                 return;
             }
 
+            // Debug
+            if (rateLimiterConfig != null && rateLimiterConfig.getProperties().getBoolean("debug", false)) {
+                if (count.incrementAndGet() % rateLimiterConfig.getProperties().getInt("debug-percentage", 100) == 0) {
+                    System.out.println(JsonUtils.asJson(_delay));
+                }
+            }
+
             Long delay = Long.parseLong(_delay.get(1).toString());
-            // if (count.incrementAndGet() % 100 == 0) {
-            // System.out.println(JsonUtils.asJson(_delay));
-            //}
             if (delay <= 0) {
                 delay = null;
             }
@@ -140,7 +145,8 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
                 value,
                 getName().replace("-", ""),
                 rateLimiterConfig.getProperties().getInt("ttl", 300),
-                now.getMillis()
+                now.getMillis(),
+                getName() + "-" + rateLimiterConfig.getPrefix()
         );
     }
 
@@ -155,16 +161,17 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
             "-- What is per second rate, how many permits are required, what is the name of this sorted set, what is the TTL value\n" +
             "local rateParam = ARGV[3];\n" +
             "local permits = ARGV[4];\n" +
-            "local zset = ARGV[5];\n" +
+            "local zset = ARGV[8] .. '-' .. ARGV[5];\n" +
             "local ttlValue = ARGV[6];\n" +
             "local currentTime = ARGV[7];\n" +
+            "local keyPrefix = ARGV[8];\n" +
             "\n" +
             "-- We have 2 data structure:\n" +
             "-- 1 - a sorted set of last N seconds (we make sure we only keep last N seconds keys here)\n" +
             "-- 2 - for each time time seconds a rate limit counter\n" +
             "\n" +
             "-- This is the redis key to get current time key\n" +
-            "local redisCurrentTimeKey = currentTimeParamString;\n" +
+            "local redisCurrentTimeKey = keyPrefix .. '-' .. currentTimeParamString;\n" +
             "\n" +
             "-- This is the value to return\n" +
             "local value = -1\n" +
@@ -181,7 +188,7 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
             "    redis.call('SET', redisCurrentTimeKey, rateParam, 'EX', ttlValue);\n" +
             "\n" +
             "    -- Add current value to the sorted list\n" +
-            "    redis.call('ZADD', zset, currentTimeParam, currentTimeParamString);\n" +
+            "    redis.call('ZADD', zset, currentTimeParam, redisCurrentTimeKey);\n" +
             "\n" +
             "    -- Make sure we flush old keys (to free up any old value)\n" +
             "    redis.call('ZREMRANGEBYSCORE', zset, 0, lowestTimeParam);\n" +
@@ -207,11 +214,16 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
             "        value = redis.call(\"DECRBY\", v, permits)\n" +
             "\n" +
             "        if value > 0 then\n" +
-            "            debug = debug .. ' [found value from key ' .. v .. ' with value ' .. value\n" +
+            "            if enableDebugLogging then\n" +
+            "                debug = debug .. ' [found value from key ' .. v .. ' with value ' .. value\n" +
+            "            end\n" +
             "            break\n" +
             "        else\n" +
             "            if v ~= redisCurrentTimeKey then\n" +
             "                redis.call('DEL', v)\n" +
+            "                if enableDebugLogging then\n" +
+            "                    debug = debug .. ' DeleteFromZRange: ' .. v .. ','\n" +
+            "                end\n" +
             "            end\n" +
             "        end\n" +
             "\n" +
@@ -228,7 +240,9 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
             "    else\n" +
             "        resultToReturn = -1\n" +
             "        delay = ((currentTimeParam + 1) * 1000) - currentTime;\n" +
-            "        debugToReturn = debug .. ' Final value suppress to -1'\n" +
+            "        if enableDebugLogging then\n" +
+            "            debugToReturn = debug .. ' Final value suppress to -1'\n" +
+            "        end\n" +
             "    end\n" +
             "else\n" +
             "    if value >= 0 then\n" +

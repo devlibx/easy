@@ -1,5 +1,6 @@
 package io.github.devlibx.easy.ratelimit.impl;
 
+import com.google.common.base.Strings;
 import io.gitbub.devlibx.easy.helper.Safe;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.github.devlibx.easy.ratelimit.IRateLimiter;
@@ -32,6 +33,9 @@ public class RateLimiterFactory implements IRateLimiterFactory {
         if (rateLimiterFactoryConfig.isEnabled()) {
             rateLimiterFactoryConfig.getRateLimiters().forEach((name, rateLimiterConfig) -> {
                 rateLimiterConfig.setName(name);
+                if (Strings.isNullOrEmpty(rateLimiterConfig.getPrefix())) {
+                    rateLimiterConfig.setPrefix(rateLimiterFactoryConfig.getPrefix());
+                }
                 if (rateLimiterConfig.getRedis() != null) {
 
                     // Create a rate limiter

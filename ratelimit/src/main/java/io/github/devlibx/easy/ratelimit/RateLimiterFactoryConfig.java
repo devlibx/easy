@@ -17,6 +17,8 @@ public class RateLimiterFactoryConfig {
     @Builder.Default
     private boolean enabled = true;
 
+    private String prefix;
+
     @Builder.Default
     private Map<String, RateLimiterConfig> rateLimiters = new HashMap<>();
 }

@@ -32,6 +32,8 @@ public class RateLimiterConfig {
 
     private String name;
 
+    private String prefix;
+
     @Builder.Default
     private RateType rateType = RateType.OVERALL;
 

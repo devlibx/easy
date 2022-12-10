@@ -9,16 +9,17 @@ local lowestTimeParamString = lowestTimeParam .. "";
 -- What is per second rate, how many permits are required, what is the name of this sorted set, what is the TTL value
 local rateParam = ARGV[3];
 local permits = ARGV[4];
-local zset = ARGV[5];
+local zset = ARGV[8] .. '-' .. ARGV[5];
 local ttlValue = ARGV[6];
 local currentTime = ARGV[7];
+local keyPrefix = ARGV[8];
 
 -- We have 2 data structure:
 -- 1 - a sorted set of last N seconds (we make sure we only keep last N seconds keys here)
 -- 2 - for each time time seconds a rate limit counter
 
 -- This is the redis key to get current time key
-local redisCurrentTimeKey = currentTimeParamString;
+local redisCurrentTimeKey = keyPrefix .. '-' .. currentTimeParamString;
 
 -- This is the value to return
 local value = -1
@@ -35,7 +36,7 @@ if redis.call('GETEX', redisCurrentTimeKey) == false then
     redis.call('SET', redisCurrentTimeKey, rateParam, 'EX', ttlValue);
 
     -- Add current value to the sorted list
-    redis.call('ZADD', zset, currentTimeParam, currentTimeParamString);
+    redis.call('ZADD', zset, currentTimeParam, redisCurrentTimeKey);
 
     -- Make sure we flush old keys (to free up any old value)
     redis.call('ZREMRANGEBYSCORE', zset, 0, lowestTimeParam);
@@ -61,11 +62,16 @@ if value < 0 then
         value = redis.call("DECRBY", v, permits)
 
         if value > 0 then
-            debug = debug .. ' [found value from key ' .. v .. ' with value ' .. value
+            if enableDebugLogging then
+                debug = debug .. ' [found value from key ' .. v .. ' with value ' .. value
+            end
             break
         else
             if v ~= redisCurrentTimeKey then
                 redis.call('DEL', v)
+                if enableDebugLogging then
+                    debug = debug .. ' DeleteFromZRange: ' .. v .. ','
+                end
             end
         end
 
@@ -82,7 +88,9 @@ if enableDebugLogging then
     else
         resultToReturn = -1
         delay = ((currentTimeParam + 1) * 1000) - currentTime;
-        debugToReturn = debug .. ' Final value suppress to -1'
+        if enableDebugLogging then
+            debugToReturn = debug .. ' Final value suppress to -1'
+        end
     end
 else
     if value >= 0 then

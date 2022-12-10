@@ -1,5 +1,6 @@
 rate_limit_factory:
   enabled: true
+  prefix: test_easy
   rate_limiters:
     example-config-normal:
       enabled: true
@@ -11,6 +12,8 @@ rate_limit_factory:
       rate: 2
       rate_interval: 1
       rate_interval_unit: SECONDS
+      properties:
+        debug: false
       rate_limit_job_config:
         refresh-time-in-sec: 10
         rate-limit-by-write: true

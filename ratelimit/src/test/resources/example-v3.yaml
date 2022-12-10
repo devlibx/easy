@@ -1,5 +1,6 @@
 rate_limit_factory:
   enabled: true
+  prefix: my_prefix
   rate_limiters:
     example-config-normal:
       enabled: true
