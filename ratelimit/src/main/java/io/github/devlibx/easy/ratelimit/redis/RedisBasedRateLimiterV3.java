@@ -13,17 +13,14 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RRateLimiter;
-import org.redisson.api.RateIntervalUnit;
-import org.redisson.api.RateType;
 import org.redisson.api.RedissonClient;
 
 import javax.inject.Inject;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
-public class RedisBasedRateLimiterV2 implements IRateLimiter {
+public class RedisBasedRateLimiterV3 implements IRateLimiter {
     private final RateLimiterConfig rateLimiterConfig;
     private final IMetrics metrics;
     private RedissonClient redissonClient;
@@ -34,7 +31,7 @@ public class RedisBasedRateLimiterV2 implements IRateLimiter {
     private final CircuitBreaker circuitBreaker;
 
     @Inject
-    public RedisBasedRateLimiterV2(RateLimiterConfig rateLimiterConfig, IMetrics metrics) {
+    public RedisBasedRateLimiterV3(RateLimiterConfig rateLimiterConfig, IMetrics metrics) {
         this.rateLimiterConfig = rateLimiterConfig;
         this.metrics = metrics;
         this.limiterLock = new ReentrantLock();
@@ -78,16 +75,10 @@ public class RedisBasedRateLimiterV2 implements IRateLimiter {
         }
     }
 
-
     // Apply rate to limiter
     private boolean applyRate(RRateLimiter limiter) {
         if (limiter == null) return false;
-        return limiter.trySetRate(
-                RateType.valueOf(rateLimiterConfig.getRateType().name()),
-                rateLimiterConfig.getRate(),
-                rateLimiterConfig.getRateInterval(),
-                convert(rateLimiterConfig.getRateIntervalUnit())
-        );
+        return true;
     }
 
     @Override
@@ -108,7 +99,9 @@ public class RedisBasedRateLimiterV2 implements IRateLimiter {
             try {
                 if (limiter != null) {
                     Runnable runnable = CircuitBreaker.decorateRunnable(circuitBreaker, () -> {
-                        limiter.acquire(permits);
+                        RedissonRateLimiterExt redissonRateLimiterExt = (RedissonRateLimiterExt) limiter;
+                        redissonRateLimiterExt.setRateLimiterConfig(rateLimiterConfig);
+                        redissonRateLimiterExt.acquireExtV3(permits);
                         metrics.inc("rate_limiter", (int) permits, "name", rateLimiterConfig.getName(), "status", "ok");
                     });
                     runnable.run();
@@ -153,24 +146,6 @@ public class RedisBasedRateLimiterV2 implements IRateLimiter {
                 "rateInterval", rateLimiterConfig.getRateInterval(),
                 "rateIntervalUnit", rateLimiterConfig.getRateIntervalUnit()
         );
-    }
-
-    private RateIntervalUnit convert(TimeUnit rateIntervalUnit) {
-        RateIntervalUnit unit;
-        if (rateIntervalUnit == TimeUnit.DAYS) {
-            unit = RateIntervalUnit.DAYS;
-        } else if (rateIntervalUnit == TimeUnit.HOURS) {
-            unit = RateIntervalUnit.HOURS;
-        } else if (rateIntervalUnit == TimeUnit.MINUTES) {
-            unit = RateIntervalUnit.MINUTES;
-        } else if (rateIntervalUnit == TimeUnit.SECONDS) {
-            unit = RateIntervalUnit.SECONDS;
-        } else if (rateIntervalUnit == TimeUnit.MILLISECONDS) {
-            unit = RateIntervalUnit.MILLISECONDS;
-        } else {
-            unit = RateIntervalUnit.SECONDS;
-        }
-        return unit;
     }
 
     private void sleep(long l) {

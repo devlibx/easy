@@ -33,6 +33,8 @@ public interface IRedissonProvider {
                         return Redisson.create(redissonConfig);
                     } else if (Objects.equals(redis.getVersion(), "v2")) {
                         return RedissonExt.create(redissonConfig);
+                    } else if (Objects.equals(redis.getVersion(), "v3")) {
+                        return RedissonExt.create(redissonConfig);
                     } else {
                         return Redisson.create(redissonConfig);
                     }

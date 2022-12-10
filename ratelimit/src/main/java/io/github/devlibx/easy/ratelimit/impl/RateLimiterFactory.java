@@ -7,6 +7,7 @@ import io.github.devlibx.easy.ratelimit.IRateLimiterFactory;
 import io.github.devlibx.easy.ratelimit.RateLimiterFactoryConfig;
 import io.github.devlibx.easy.ratelimit.redis.RedisBasedRateLimiter;
 import io.github.devlibx.easy.ratelimit.redis.RedisBasedRateLimiterV2;
+import io.github.devlibx.easy.ratelimit.redis.RedisBasedRateLimiterV3;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -37,6 +38,8 @@ public class RateLimiterFactory implements IRateLimiterFactory {
                     IRateLimiter rateLimiter;
                     if (Objects.equals(rateLimiterConfig.getRedis().getVersion(), "v2")) {
                         rateLimiter = new RedisBasedRateLimiterV2(rateLimiterConfig, metrics);
+                    } else if (Objects.equals(rateLimiterConfig.getRedis().getVersion(), "v3")) {
+                        rateLimiter = new RedisBasedRateLimiterV3(rateLimiterConfig, metrics);
                     } else {
                         rateLimiter = new RedisBasedRateLimiter(rateLimiterConfig, metrics);
                     }
