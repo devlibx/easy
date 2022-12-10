@@ -6,15 +6,16 @@ rate_limit_factory:
       redis:
         host: localhost
         port: 6379
+        version: v2
       rate_type: OVERALL
-      rate: 50
+      rate: 100
       rate_interval: 1
       rate_interval_unit: SECONDS
       rate_limit_job_config:
-        refresh-time-in-sec: 15
+        refresh-time-in-sec: 10
         rate-limit-by-write: true
         rate-limit-class: io.github.devlibx.easy.ratelimit.job.ddb.DynamoDbWriteRateLimitJob
-        rate-limit-factor: 0.99
+        rate-limit-factor: 2
         region: ap-south-1
         enabled: true
         table: test

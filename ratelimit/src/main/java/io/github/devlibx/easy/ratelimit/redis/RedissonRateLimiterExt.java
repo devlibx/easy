@@ -9,6 +9,7 @@ import org.redisson.client.protocol.RedisCommands;
 import org.redisson.command.CommandAsyncExecutor;
 
 import java.util.Collections;
+import java.util.List;
 
 /**
  * This class is extended to provide support to allow changign the rate limit in the rate limiter
@@ -30,5 +31,19 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
                         + " redis.call('hset', KEYS[1], 'type', ARGV[3]);"
                         + " return 1;",
                 Collections.singletonList(getName()), rate, unit.toMillis(rateInterval), type.ordinal());
+    }
+
+    public String executeCustomScript(String script, List<Object> keys, Object... params) {
+        try {
+            RFuture<String> result = commandExecutor.evalWriteAsync(getName(), LongCodec.INSTANCE, RedisCommands.EVAL_STRING_DATA,
+                    script,
+                    keys,
+                    params
+            );
+            return result.get();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "error";
+        }
     }
 }

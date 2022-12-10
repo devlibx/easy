@@ -6,6 +6,7 @@ rate_limit_factory:
       redis:
         host: localhost
         port: 6379
+        version: v2
       rate_type: OVERALL
       rate: 1
       rate_interval: 1

@@ -94,8 +94,8 @@ public class RedisBasedRateLimitWithDynamoDbExample {
                             Data data = Data.builder().id("id_" + val).data("data_" + val).build();
                             if (permits.decrementAndGet() <= 0) {
                                 rateLimiterFactory.get(rateLimiterName).ifPresent(rateLimiter -> {
-                                    rateLimiter.acquire(25);
-                                    permits.set(25);
+                                    rateLimiter.acquire(1);
+                                    permits.set(1);
                                 });
                             }
                             table.putItem(Item.fromJSON(JsonUtils.asJson(data)));

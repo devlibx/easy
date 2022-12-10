@@ -10,6 +10,7 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RateIntervalUnit;
@@ -26,6 +27,8 @@ public class RedisBasedRateLimiterV2 implements IRateLimiter {
     private final RateLimiterConfig rateLimiterConfig;
     private final IMetrics metrics;
     private RedissonClient redissonClient;
+
+    @Getter
     private RRateLimiter limiter;
     private final Lock limiterLock;
     private final CircuitBreaker circuitBreaker;
