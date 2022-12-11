@@ -1,0 +1,17 @@
+rate_limit_factory:
+  prefix: test_easy
+  rate_limiters:
+    example-config-normal:
+      redis:
+        host: localhost
+        port: 6379
+        version: v3
+      rate: 2
+      properties:
+        enable-acquire-optimization: true
+      rate_limit_job_config:
+        rate-limit-class: io.github.devlibx.easy.ratelimit.job.ddb.DynamoDbWriteRateLimitJob
+        rate-limit-factor: 1
+        region: ap-south-1
+        enabled: true
+        table: test
