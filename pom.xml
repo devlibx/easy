@@ -5,7 +5,7 @@
     <groupId>io.github.devlibx.easy</groupId>
     <artifactId>easy</artifactId>
     <packaging>pom</packaging>
-    <version>2.java-17.1</version>
+    <version>3.java-17.1-SNAPSHOT</version>
     <modules>
         <module>helper</module>
         <module>database</module>
@@ -32,7 +32,7 @@
         <connection>scm:git:https://github.com/devlibx/easy.git</connection>
         <developerConnection>scm:git:https://github.com/devlibx/easy.git</developerConnection>
         <url>https://github.com/devlibx/easy/tree/master</url>
-        <tag>v2.java-17.1</tag>
+        <tag>0.0.45</tag>
     </scm>
 
     <properties>
