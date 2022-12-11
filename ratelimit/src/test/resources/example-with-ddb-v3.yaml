@@ -1,0 +1,24 @@
+rate_limit_factory:
+  enabled: true
+  prefix: test_easy
+  rate_limiters:
+    example-config-normal:
+      enabled: true
+      redis:
+        host: localhost
+        port: 6379
+        version: v3
+      rate_type: OVERALL
+      rate: 2
+      rate_interval: 1
+      rate_interval_unit: SECONDS
+      properties:
+        debug: false
+      rate_limit_job_config:
+        refresh-time-in-sec: 10
+        rate-limit-by-write: true
+        rate-limit-class: io.github.devlibx.easy.ratelimit.job.ddb.DynamoDbWriteRateLimitJob
+        rate-limit-factor: 1
+        region: ap-south-1
+        enabled: true
+        table: test

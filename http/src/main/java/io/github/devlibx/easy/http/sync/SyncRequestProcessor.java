@@ -218,6 +218,14 @@ public class SyncRequestProcessor implements IRequestProcessor {
     }
 
     private URI generateURI(Server server, Api api, RequestObject request) throws URISyntaxException {
+        if (server.getPort() == -1) {
+            return new URIBuilder()
+                    .setScheme(server.isHttps() ? "https" : "http")
+                    .setHost(server.getHost())
+                    .setPath(resolvePath(server, api, request))
+                    .setParameters(getQueryParams(server, api, request))
+                    .build();
+        }
         return new URIBuilder()
                 .setScheme(server.isHttps() ? "https" : "http")
                 .setHost(server.getHost())

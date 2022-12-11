@@ -19,6 +19,13 @@ public interface IMetrics {
     void inc(String name, String... labels);
 
     /**
+     * Count this metrics
+     */
+    default void inc(String name, long count, String... labels) {
+        inc(name, labels);
+    }
+
+    /**
      * Time this callable
      */
     <T> T time(String name, Callable<T> callable, String... labels);
@@ -27,6 +34,13 @@ public interface IMetrics {
      * Add time taken to given metrics
      */
     default void observe(String name, double amt) {
+    }
+
+
+    /**
+     * Add time taken to given metrics
+     */
+    default void observe(String name, double amt, String... labelNames) {
     }
 
     /**

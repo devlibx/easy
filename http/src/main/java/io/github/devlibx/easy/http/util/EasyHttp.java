@@ -1,5 +1,6 @@
 package io.github.devlibx.easy.http.util;
 
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.github.devlibx.easy.http.config.Config;
 import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyBadRequestException;
 import io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyHttpRequestException;
@@ -17,6 +18,13 @@ public class EasyHttp {
      */
     public static void installEasyHttpImplementation(IEasyHttpImplementation easyHttpImplementor) {
         defaultEasyHttpImplementation = easyHttpImplementor;
+    }
+
+    /**
+     * Setup EasyHttp to make HTTP requests
+     */
+    public static void setup(Config config, IMetrics metrics) {
+        defaultEasyHttpImplementation.setup(config, metrics);
     }
 
     /**

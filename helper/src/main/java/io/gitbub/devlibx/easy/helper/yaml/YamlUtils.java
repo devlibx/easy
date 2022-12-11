@@ -10,6 +10,25 @@ import static io.gitbub.devlibx.easy.helper.file.FileHelper.readFileFromResource
 import static io.gitbub.devlibx.easy.helper.file.FileHelper.readStream;
 
 public class YamlUtils {
+
+    /**
+     * Read YAM content and convert to an object
+     */
+    public static <T> T readYamlFromString(String content, Class<T> cls) {
+        Yaml yaml = new Yaml();
+        Map<String, Object> obj = yaml.load(content);
+        return JsonUtils.readObject(new StringHelper().stringify(obj), cls);
+    }
+
+    /**
+     * Read YAM content (Camel Case) and convert to an object
+     */
+    public static <T> T readYamlFromCamelCaseString(String content, Class<T> cls) {
+        Yaml yaml = new Yaml();
+        Map<String, Object> obj = yaml.load(content);
+        return JsonUtils.getCamelCase().readObject(new StringHelper().stringify(obj), cls);
+    }
+
     /**
      * Read YAM file (Camel Case) and convert to a object
      */

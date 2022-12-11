@@ -30,6 +30,8 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import static io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyResilienceCircuitOpenException;
+import static io.github.devlibx.easy.http.exception.EasyHttpExceptions.EasyResilienceOverflowException;
 import static io.github.devlibx.easy.http.exception.EasyHttpExceptions.easyEasyResilienceException;
 
 @SuppressWarnings({"EmptyTryBlock", "CatchMayIgnoreException", "ConstantConditions"})
@@ -55,16 +57,27 @@ class EasyHttpObject implements IEasyHttpImplementation {
         resilienceManager = null;
     }
 
-
     /**
      * Setup EasyHttp to make HTTP requests
      */
     @Override
     public void setup(Config config) {
+        setup(config, null);
+    }
+
+    /**
+     * Setup EasyHttp to make HTTP requests
+     */
+    @Override
+    public void setup(Config config, IMetrics metricsObj) {
 
         // Get metrics class if provided
         try {
-            metrics = ApplicationContext.getInstance(IMetrics.class);
+            if (metrics == null) {
+                metrics = ApplicationContext.getInstance(IMetrics.class);
+            } else {
+                metrics = metricsObj;
+            }
         } catch (Exception e) {
             metrics = new IMetrics.NoOpMetrics();
         }
@@ -161,6 +174,7 @@ class EasyHttpObject implements IEasyHttpImplementation {
     public <T> T callSync(Call<T> call) {
         long start = System.currentTimeMillis();
         String key = call.getServer() + "_" + call.getApi() + "_call_error_time";
+        String code = "200";
         try {
             T t = internalCall(call).blockingFirst();
             key = call.getServer() + "_" + call.getApi() + "_call_time";
@@ -168,16 +182,45 @@ class EasyHttpObject implements IEasyHttpImplementation {
         } catch (EasyResilienceException e) {
             Optional<EasyResilienceException> ex = easyEasyResilienceException(e);
             if (ex.isPresent()) {
+                if (ex.get() instanceof EasyResilienceRequestTimeoutException) {
+                    code = "500-request-timeout";
+                } else if (ex.get() instanceof EasyResilienceOverflowException) {
+                    code = "500-request-overflow";
+                } else if (ex.get() instanceof EasyResilienceCircuitOpenException) {
+                    code = "500-circuit-open";
+                } else if (ex.get() instanceof EasyResilienceException) {
+                    code = "500-resilience-unknown";
+                }
                 throw ex.get();
             } else {
+                code = "500-resilience-unknown";
                 throw new EasyHttpRequestException(e);
             }
         } catch (EasyHttpRequestException e) {
+            code = e.getStatusCode() + "";
             throw e;
         } catch (Exception e) {
+            Optional<EasyResilienceException> ex = easyEasyResilienceException(e);
+            if (ex.isPresent()) {
+                if (ex.get() instanceof EasyResilienceRequestTimeoutException) {
+                    code = "500-request-timeout";
+                } else if (ex.get() instanceof EasyResilienceOverflowException) {
+                    code = "500-request-overflow";
+                } else if (ex.get() instanceof EasyResilienceCircuitOpenException) {
+                    code = "500-circuit-open";
+                } else if (ex.get() instanceof EasyResilienceException) {
+                    code = "500-resilience-unknown";
+                }
+                throw ex.get();
+            } else if (e instanceof java.net.SocketTimeoutException) {
+                code = 500 + "-socket-timeout";
+            } else {
+                code = 500 + "-unknown";
+            }
             throw easyEasyResilienceException(e).orElseThrow(() -> new RuntimeException(e));
         } finally {
             metrics.observe(key, System.currentTimeMillis() - start);
+            metrics.inc("easy_http_sync", "server", call.getServer(), "api", call.getApi(), "code", "" + code);
         }
     }
 

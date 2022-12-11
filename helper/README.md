@@ -45,6 +45,35 @@ public class Example {
 
 <hr>
 
+
+#### PID Controller
+NOTE - This MiniPID class is taken from ```https://github.com/tekdemo/MiniPID-Java.git```. This is the original code, but
+it was not available in maven, so I added it here.
+```java
+package io.gitbub.devlibx.easy.helper.pid;
+
+public abstract class MiniPIDExample {
+    public static void main(String[] args) throws InterruptedException {
+        MiniPID miniPID = new MiniPID(0.25, 0.01, 0.4);
+        miniPID.setSetpoint(100);
+        double actual = 0;
+        double output = 0;
+        double target = 50;
+        
+        System.err.printf("Target\tActual\tOutput\tError\n");
+        System.err.printf("%3.2f\t%3.2f\t%3.2f\t%3.2f\n", target, actual, output, (target-actual));
+
+        for (int i = 0; i < 100; i++) {
+            output = miniPID.getOutput(actual, target);
+            System.err.printf("%3.2f\t%3.2f\t%3.2f\t%3.2f\n", target, actual, output, (target-actual));
+            // output is the value to apply
+            actual = actual + output;
+            Thread.sleep(1000);
+        }
+    }
+}
+```
+
 #### Processing Queue for Spark
 
 There are times when you can read from underlying source, but the sink is slow. You may have to put data in sink with
