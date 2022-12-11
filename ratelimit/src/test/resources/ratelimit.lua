@@ -50,7 +50,13 @@ end
 
 -- Decrement by requested permits
 value = redis.call("DECRBY", redisCurrentTimeKey, permits)
-
+if enableDebugLogging then
+    if value > 0 then
+        debug = debug .. " value after decrement " .. value
+    else
+        debug = debug .. " value after decrement (-ve) " .. value
+    end
+end
 -- If we already consumed all limits, then try to get it from old tokesn
 if value < 0 then
 

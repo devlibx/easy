@@ -122,25 +122,29 @@ public class RedisBasedRateLimitWithDynamoDbV3Example {
                     for (int i = 0; i < 1_000_000; i++) {
                         try {
                             String currentSec = (DateTime.now().getMillis() / 1000) + "";
+                            // System.out.println("Asking for current sec = " + currentSec);
 
                             int val = counter.incrementAndGet();
                             totalCount.incrementAndGet();
                             Data data = Data.builder().id("id_" + val).data("data_" + val).build();
                             if (permits.decrementAndGet() <= 0) {
                                 rateLimiterFactory.get(rateLimiterName).ifPresent(rateLimiter -> {
-                                    rateLimiter.acquire(1);
-                                    permits.set(1);
+                                    rateLimiter.acquire(10);
+                                    permits.set(10);
                                 });
                             }
                             table.putItem(Item.fromJSON(JsonUtils.asJson(data)));
                             if (counter.incrementAndGet() % 1000 == 0) {
-                                System.out.println("Write done - " + val);
+                                // System.out.println("Write done - " + val);
                             }
                             // Thread.sleep(ThreadLocalRandom.current().nextInt(00, 300));
                             ApplicationContext.getInstance(IMetrics.class).inc("ddb_write_testing");
 
                             metricRegistry.counter("ddb").inc();
+
+                            // Thread.sleep(1);
                         } catch (Exception e) {
+                            ApplicationContext.getInstance(IMetrics.class).inc("ddb_write_testing_error");
                             e.printStackTrace();
                         }
                     }

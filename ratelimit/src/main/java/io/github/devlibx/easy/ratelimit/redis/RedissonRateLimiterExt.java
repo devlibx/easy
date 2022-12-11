@@ -29,8 +29,11 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
     @Setter
     private RateLimiterConfig rateLimiterConfig;
 
-    public RedissonRateLimiterExt(CommandAsyncExecutor commandExecutor, String name) {
+    private final RedissonExt redissonExt;
+
+    public RedissonRateLimiterExt(CommandAsyncExecutor commandExecutor, String name, RedissonExt redissonExt) {
         super(commandExecutor, name);
+        this.redissonExt = redissonExt;
     }
 
     @Override
@@ -47,6 +50,24 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
     }
 
     public void acquireExtV3(long permits) {
+        // example-config-normal-my_prefix-1670755323
+        long nowSec = DateTime.now().getMillis() / 1000;
+        String prefix = rateLimiterConfig.getName() + "-" + rateLimiterConfig.getPrefix() + "-" + nowSec;
+        if (rateLimiterConfig != null && rateLimiterConfig.getProperties().getBoolean("enable-acquire-optimization", false)) {
+            long value = redissonExt.getAtomicLong(prefix).get();
+            if (value > 0) {
+                value = redissonExt.getAtomicLong(prefix).addAndGet(-1 * permits);
+            }
+            if (value > 0) {
+                if (rateLimiterConfig != null && rateLimiterConfig.getProperties().getBoolean("debug-acquire-optimization", false)) {
+                    if (count.incrementAndGet() % rateLimiterConfig.getProperties().getInt("debug-acquire-optimization-percentage", 1) == 0) {
+                        System.out.println("Got it using atomic counter " + value);
+                    }
+                }
+                return;
+            }
+        }
+
         get(acquireAsyncExtV3(permits));
     }
 

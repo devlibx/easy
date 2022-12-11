@@ -21,6 +21,6 @@ public class RedissonExt extends Redisson {
 
     @Override
     public RRateLimiter getRateLimiter(String name) {
-        return new RedissonRateLimiterExt(connectionManager.getCommandExecutor(), name);
+        return new RedissonRateLimiterExt(connectionManager.getCommandExecutor(), name, this);
     }
 }
