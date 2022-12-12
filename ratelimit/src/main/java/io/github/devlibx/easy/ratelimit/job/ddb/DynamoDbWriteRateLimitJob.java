@@ -111,7 +111,8 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
                 log.debug("set ratelimit for DDB write table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
                 rateLimiter.trySetRate(value);
             } else {
-                log.warn("(OnDemand table) will not set ratelimit for DDB write table={} with rateLimitUsed={}", tableName, rateLimiter.debug());
+                rateLimiter.trySetRate(20000);
+                log.warn("(OnDemand table) will not set ratelimit=20000 for DDB write table={} with rateLimitUsed={}", tableName, rateLimiter.debug());
             }
         } catch (Exception e) {
             log.error("failed to setup write rate limiter: table={}", tableName, e);
@@ -128,7 +129,8 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
                 log.debug("set ratelimit for DDB read table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
                 rateLimiter.trySetRate(value);
             } else {
-                log.warn("(OnDemand table) will not set ratelimit for DDB read table={} with rateLimitUsed={}", tableName, rateLimiter.debug());
+                rateLimiter.trySetRate(20000);
+                log.warn("(OnDemand table) will not set ratelimit=20000 for DDB read table={} with rateLimitUsed={}", tableName, rateLimiter.debug());
             }
         } catch (Exception e) {
             log.error("failed to setup read rate limiter: table={}", tableName, e);
