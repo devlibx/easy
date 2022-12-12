@@ -1,4 +1,7 @@
-local enableDebugLogging = true
+local enableDebugLogging = true;
+if ARGV[9] == 'false' then
+    enableDebugLogging = false;
+end
 
 -- Algo will run between lowest value to current value
 local currentTimeParam = ARGV[1];
@@ -25,7 +28,7 @@ local redisCurrentTimeKey = keyPrefix .. '-' .. currentTimeParamString;
 local value = -1
 
 local debug = ''
-if enableDebugLogging then
+if enableDebugLogging  == true then
     debug = '[Set Name: ' .. zset .. ' Current Time: ' .. currentTimeParam .. ' currentTimeRedisKey:' .. redisCurrentTimeKey .. ']'
 end
 
@@ -41,7 +44,7 @@ if redis.call('GETEX', redisCurrentTimeKey) == false then
     -- Make sure we flush old keys (to free up any old value)
     redis.call('ZREMRANGEBYSCORE', zset, 0, lowestTimeParam);
 
-    if enableDebugLogging then
+    if enableDebugLogging  == true then
         debug = debug ..
                 ' [key did not existed - create new key with ttl:' .. ttlValue ..
                 ' Sorted key cleared:' .. 0 .. '-' .. lowestTimeParam
@@ -50,7 +53,7 @@ end
 
 -- Decrement by requested permits
 value = redis.call("DECRBY", redisCurrentTimeKey, permits)
-if enableDebugLogging then
+if enableDebugLogging  == true then
     if value > 0 then
         debug = debug .. " value after decrement " .. value
     else
@@ -68,14 +71,14 @@ if value < 0 then
         value = redis.call("DECRBY", v, permits)
 
         if value > 0 then
-            if enableDebugLogging then
+            if enableDebugLogging  == true then
                 debug = debug .. ' [found value from key ' .. v .. ' with value ' .. value
             end
             break
         else
             if v ~= redisCurrentTimeKey then
                 redis.call('DEL', v)
-                if enableDebugLogging then
+                if enableDebugLogging  == true then
                     debug = debug .. ' DeleteFromZRange: ' .. v .. ','
                 end
             end
@@ -87,14 +90,14 @@ end
 local resultToReturn = -1
 local debugToReturn = ''
 local delay = 0
-if enableDebugLogging then
+if enableDebugLogging  == true then
     if value >= 0 then
         resultToReturn = value
         debugToReturn = debug
     else
         resultToReturn = -1
         delay = ((currentTimeParam + 1) * 1000) - currentTime;
-        if enableDebugLogging then
+        if enableDebugLogging  == true then
             debugToReturn = debug .. ' Final value suppress to -1'
         end
     end
