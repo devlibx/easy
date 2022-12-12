@@ -10,8 +10,11 @@ rate_limit_factory:
       properties:
         enable-acquire-optimization: true
       rate_limit_job_config:
+        # If you use the AWS keys then update the following
+        # AWS_ACCESS_KEY_ID: <AWS key>
+        # AWS_SECRET_ACCESS_KEY: <AWS secret>
         rate-limit-class: io.github.devlibx.easy.ratelimit.job.ddb.DynamoDbWriteRateLimitJob
         rate-limit-factor: 1
-        region: ap-south-1
+        region: AP_SOUTH_1
         enabled: true
         table: test

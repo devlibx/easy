@@ -1,7 +1,7 @@
 package io.github.devlibx.easy.ratelimit.job.ddb;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicSessionCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -78,14 +78,13 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
 
         AmazonDynamoDB client;
         if (!Strings.isNullOrEmpty(config.getString("AWS_ACCESS_KEY_ID"))) {
-            BasicSessionCredentials bc = new BasicSessionCredentials(
+            BasicAWSCredentials awsCreds = new BasicAWSCredentials(
                     config.getString("AWS_ACCESS_KEY_ID"),
-                    config.getString("AWS_SECRET_ACCESS_KEY"),
-                    config.getString("AWS_SESSION_TOKEN")
+                    config.getString("AWS_SECRET_ACCESS_KEY")
             );
             client = AmazonDynamoDBClientBuilder
                     .standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(bc))
+                    .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                     .withRegion(Regions.valueOf(config.getString("region", "AP_SOUTH_1")))
                     .build();
         } else {

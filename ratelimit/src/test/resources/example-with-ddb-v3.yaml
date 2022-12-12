@@ -19,10 +19,13 @@ rate_limit_factory:
         debug-acquire-optimization: false
         debug-acquire-optimization-percentage: 1
       rate_limit_job_config:
+        # If you use the AWS keys then update the following
+        # AWS_ACCESS_KEY_ID: <AWS key>
+        # AWS_SECRET_ACCESS_KEY: <AWS secret>
         refresh-time-in-sec: 20
         rate-limit-by-write: true
         rate-limit-class: io.github.devlibx.easy.ratelimit.job.ddb.DynamoDbWriteRateLimitJob
         rate-limit-factor: 1
-        region: ap-south-1
+        region: AP_SOUTH_1
         enabled: true
         table: test
