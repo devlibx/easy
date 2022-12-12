@@ -18,8 +18,10 @@ import org.redisson.misc.RedissonPromise;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class is extended to provide support to allow changign the rate limit in the rate limiter
@@ -28,8 +30,8 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
 
     @Setter
     private RateLimiterConfig rateLimiterConfig;
-
     private final RedissonExt redissonExt;
+    private final AtomicReference<String> currentTimestampString = new AtomicReference<>();
 
     public RedissonRateLimiterExt(CommandAsyncExecutor commandExecutor, String name, RedissonExt redissonExt) {
         super(commandExecutor, name);
@@ -55,8 +57,9 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
         String prefix = rateLimiterConfig.getName() + "-" + rateLimiterConfig.getPrefix() + "-" + nowSec;
         if (rateLimiterConfig != null && rateLimiterConfig.getProperties().getBoolean("enable-acquire-optimization", false)) {
             long value = 0; //redissonExt.getAtomicLong(prefix).get();
-            if (redissonExt.getAtomicLong(prefix).isExists()) {
+            if (Objects.equals(currentTimestampString.get(), prefix) || redissonExt.getAtomicLong(prefix).isExists()) {
                 value = redissonExt.getAtomicLong(prefix).addAndGet(-1 * permits);
+                currentTimestampString.set(prefix);
             }
             if (value > 0) {
                 if (rateLimiterConfig != null && rateLimiterConfig.getProperties().getBoolean("debug-acquire-optimization", false)) {
