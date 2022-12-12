@@ -82,6 +82,19 @@ public class StatsdMetrics implements IMetrics {
     }
 
     @Override
+    public void gauge(String name, long value) {
+        name = String.format("%s.%s", getPrefix(), name);
+        statsDClient.gauge(name, value);
+    }
+
+    @Override
+    public void gauge(String name, long value, String... labels) {
+        name = String.format("%s.%s", getPrefix(), name);
+        String metricString = handleLabels(name, labels);
+        statsDClient.gauge(metricString, value);
+    }
+
+    @Override
     public void registerCounter(String name, String help, String... labelNames) {
     }
 

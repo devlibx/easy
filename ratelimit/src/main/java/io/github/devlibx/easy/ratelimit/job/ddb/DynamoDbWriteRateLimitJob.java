@@ -11,6 +11,7 @@ import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.google.common.base.Strings;
 import io.gitbub.devlibx.easy.helper.ApplicationContext;
 import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.github.devlibx.easy.ratelimit.IRateLimitJob;
 import io.github.devlibx.easy.ratelimit.IRateLimiter;
 import io.github.devlibx.easy.ratelimit.IRateLimiterFactory;
@@ -26,9 +27,18 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
     private Table dynamoTable;
     private String tableName;
     private final AtomicBoolean keepRunning = new AtomicBoolean(true);
+    private IMetrics metrics;
 
     @Override
     public void startRateLimitJob(RateLimiterConfig rateLimiterConfig) {
+
+        // Get the metrics class to record DDB rate
+        try {
+            metrics = ApplicationContext.getInstance(IMetrics.class);
+        } catch (Exception e) {
+            metrics = new IMetrics.NoOpMetrics();
+        }
+
         try {
             internalStartRateLimitJob(rateLimiterConfig);
 
@@ -110,8 +120,10 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
                 long finalValue = (long) (value * rateLimitFactor);
                 log.info("set ratelimit for DDB write table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
                 rateLimiter.trySetRate(value);
+                metrics.gauge("dynamodb-table-throughput-write", value, "table", tableName, "type", "provisioned");
             } else {
                 rateLimiter.trySetRate(20000);
+                metrics.gauge("dynamodb-table-throughput-write", 20000, "table", tableName, "type", "on-demand");
                 log.warn("(OnDemand table) will not set ratelimit=20000 for DDB write table={} with rateLimitUsed={}", tableName, rateLimiter.debug());
             }
         } catch (Exception e) {
@@ -128,8 +140,10 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
                 long finalValue = (long) (value * rateLimitFactor);
                 log.info("set ratelimit for DDB read table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
                 rateLimiter.trySetRate(value);
+                metrics.gauge("dynamodb-table-throughput-read", value, "table", tableName, "type", "provisioned");
             } else {
                 rateLimiter.trySetRate(20000);
+                metrics.gauge("dynamodb-table-throughput-read", 20000, "table", tableName, "type", "on-demand");
                 log.warn("(OnDemand table) will not set ratelimit=20000 for DDB read table={} with rateLimitUsed={}", tableName, rateLimiter.debug());
             }
         } catch (Exception e) {
