@@ -108,7 +108,7 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
             if (value > 0) {
                 float rateLimitFactor = config.getFloat("rate-limit-factor") != null ? config.getFloat("rate-limit-factor") : 0.8f;
                 long finalValue = (long) (value * rateLimitFactor);
-                log.debug("set ratelimit for DDB write table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
+                log.info("set ratelimit for DDB write table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
                 rateLimiter.trySetRate(value);
             } else {
                 rateLimiter.trySetRate(20000);
@@ -126,7 +126,7 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
             if (value > 0) {
                 float rateLimitFactor = config.getFloat("rate-limit-factor") != null ? config.getFloat("rate-limit-factor") : 0.8f;
                 long finalValue = (long) (value * rateLimitFactor);
-                log.debug("set ratelimit for DDB read table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
+                log.info("set ratelimit for DDB read table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
                 rateLimiter.trySetRate(value);
             } else {
                 rateLimiter.trySetRate(20000);
