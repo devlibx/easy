@@ -50,12 +50,12 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
     }
 
     public void acquireExtV3(long permits) {
-        // example-config-normal-my_prefix-1670755323
+
         long nowSec = DateTime.now().getMillis() / 1000;
         String prefix = rateLimiterConfig.getName() + "-" + rateLimiterConfig.getPrefix() + "-" + nowSec;
         if (rateLimiterConfig != null && rateLimiterConfig.getProperties().getBoolean("enable-acquire-optimization", false)) {
-            long value = redissonExt.getAtomicLong(prefix).get();
-            if (value > 0) {
+            long value = 0; //redissonExt.getAtomicLong(prefix).get();
+            if (redissonExt.getAtomicLong(prefix).isExists()) {
                 value = redissonExt.getAtomicLong(prefix).addAndGet(-1 * permits);
             }
             if (value > 0) {

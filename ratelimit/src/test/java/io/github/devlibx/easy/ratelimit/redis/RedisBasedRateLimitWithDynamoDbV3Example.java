@@ -66,11 +66,11 @@ public class RedisBasedRateLimitWithDynamoDbV3Example {
         String content = FileUtils.readFileToString(new File(testFilePath), Charset.defaultCharset());
         RateLimiterFactoryConfig rateLimiterFactoryConfig = YamlUtils.readYamlFromString(content, Config.class).config;
 
-        testFilePath = new File(".").getAbsoluteFile().getAbsolutePath() + "/ratelimit/src/test/resources/ratelimit.lua";
+       /* testFilePath = new File(".").getAbsoluteFile().getAbsolutePath() + "/ratelimit/src/test/resources/ratelimit.lua";
         String script = FileUtils.readFileToString(new File(testFilePath), Charset.defaultCharset());
         rateLimiterFactoryConfig.getRateLimiters().get(rateLimiterName)
                 .getProperties()
-                .put("script", script);
+                .put("script", script);*/
 
 
 
@@ -129,8 +129,8 @@ public class RedisBasedRateLimitWithDynamoDbV3Example {
                             Data data = Data.builder().id("id_" + val).data("data_" + val).build();
                             if (permits.decrementAndGet() <= 0) {
                                 rateLimiterFactory.get(rateLimiterName).ifPresent(rateLimiter -> {
-                                    rateLimiter.acquire(10);
-                                    permits.set(10);
+                                    rateLimiter.acquire(1);
+                                    permits.set(1);
                                 });
                             }
                             table.putItem(Item.fromJSON(JsonUtils.asJson(data)));
@@ -138,7 +138,7 @@ public class RedisBasedRateLimitWithDynamoDbV3Example {
                                 // System.out.println("Write done - " + val);
                             }
                             // Thread.sleep(ThreadLocalRandom.current().nextInt(00, 300));
-                            ApplicationContext.getInstance(IMetrics.class).inc("ddb_write_testing");
+                            // ApplicationContext.getInstance(IMetrics.class).inc("ddb_write_testing");
 
                             metricRegistry.counter("ddb").inc();
 
