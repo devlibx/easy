@@ -68,6 +68,8 @@ public class RateLimiterConfig {
         @Builder.Default
         private int port = 6379;
 
+        private String password;
+
         @Builder.Default
         private String strategy = "single-server";
 
@@ -89,7 +91,24 @@ public class RateLimiterConfig {
         @JsonIgnore
         public Config getRedissonConfig() {
             Config config = new Config();
-            if (Objects.equals(strategy, "single-server")) {
+            if (Objects.equals(strategy, "cluster-server-ssl")) {
+                String redisAddress = String.format("rediss://%s:%s", host, port);
+                config.useClusterServers()
+                        .setTimeout(timeout)
+                        .setPassword(password)
+                        .setConnectTimeout(connectTimeout)
+                        .setIdleConnectionTimeout(idleConnectionTimeout)
+                        .setPingConnectionInterval(pingConnectionInterval)
+                        .addNodeAddress(redisAddress);
+            } else if (Objects.equals(strategy, "cluster-server")) {
+                String redisAddress = String.format("redis://%s:%s", host, port);
+                config.useClusterServers()
+                        .setTimeout(timeout)
+                        .setConnectTimeout(connectTimeout)
+                        .setIdleConnectionTimeout(idleConnectionTimeout)
+                        .setPingConnectionInterval(pingConnectionInterval)
+                        .addNodeAddress(redisAddress);
+            } else if (Objects.equals(strategy, "single-server")) {
                 String redisAddress = String.format("redis://%s:%s", host, port);
                 config.useSingleServer()
                         .setTimeout(timeout)
