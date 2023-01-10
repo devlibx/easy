@@ -5,7 +5,7 @@
     <groupId>io.github.devlibx.easy</groupId>
     <artifactId>easy</artifactId>
     <packaging>pom</packaging>
-    <version>4.java-17.1-SNAPSHOT</version>
+    <version>0.0.134.java19-SNAPSHOT</version>
     <modules>
         <module>helper</module>
         <module>database</module>

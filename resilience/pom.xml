@@ -5,7 +5,7 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.devlibx.easy</groupId>
-        <version>4.java-17.1-SNAPSHOT</version>
+        <version>0.0.134.java19-SNAPSHOT</version>
     </parent>
     <artifactId>resilience</artifactId>
     <name>resilience</name>
