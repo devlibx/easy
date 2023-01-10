@@ -385,11 +385,14 @@ public class MySqlLockBuilderTest extends CommonBaseTestCase {
     }
 
     public static class LockInsideLockChildClass {
-        @SneakyThrows
+        // @SneakyThrows
         @DistributedLock(name = "lockInsideLock_Child", lockIdResolver = LockInsideLockDistributedLockIdResolver.class)
         public String lockInsideLock_Child(String param) {
             log.info("Inside lockInsideLock_Child");
-            Thread.sleep(100);
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ignored) {
+            }
             return "lockInsideLock_Child_" + param;
         }
     }

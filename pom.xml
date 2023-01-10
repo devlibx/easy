@@ -473,6 +473,7 @@
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <release>${maven.compiler.target}</release>
+                    <compilerArgs>--enable-preview</compilerArgs>
                     <annotationProcessorPaths>
                         <path>
                             <groupId>org.projectlombok</groupId>
@@ -485,6 +486,9 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
+                <configuration>
+                    <argLine>--enable-preview</argLine>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -553,6 +557,7 @@
                         <version>${maven-compiler-plugin.version}</version>
                         <configuration>
                             <release>${maven.compiler.target}</release>
+                            <compilerArgs>--enable-preview</compilerArgs>
                             <skip>true</skip>
                             <annotationProcessorPaths>
                                 <path>
@@ -698,6 +703,7 @@
                         <version>${maven-compiler-plugin.version}</version>
                         <configuration>
                             <release>${maven.compiler.target}</release>
+                            <compilerArgs>--enable-preview</compilerArgs>
                             <skip>true</skip>
                             <annotationProcessorPaths>
                                 <path>
@@ -748,6 +754,9 @@
                         <plugin>
                             <artifactId>maven-surefire-plugin</artifactId>
                             <version>2.22.1</version>
+                            <configuration>
+                                <argLine>--enable-preview</argLine>
+                            </configuration>
                         </plugin>
                         <plugin>
                             <artifactId>maven-jar-plugin</artifactId>
