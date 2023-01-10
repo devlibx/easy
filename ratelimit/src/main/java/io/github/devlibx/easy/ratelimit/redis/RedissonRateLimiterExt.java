@@ -18,8 +18,10 @@ import org.redisson.misc.RedissonPromise;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class is extended to provide support to allow changign the rate limit in the rate limiter
@@ -28,9 +30,12 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
 
     @Setter
     private RateLimiterConfig rateLimiterConfig;
+    private final RedissonExt redissonExt;
+    private final AtomicReference<String> currentTimestampString = new AtomicReference<>();
 
-    public RedissonRateLimiterExt(CommandAsyncExecutor commandExecutor, String name) {
+    public RedissonRateLimiterExt(CommandAsyncExecutor commandExecutor, String name, RedissonExt redissonExt) {
         super(commandExecutor, name);
+        this.redissonExt = redissonExt;
     }
 
     @Override
@@ -47,6 +52,25 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
     }
 
     public void acquireExtV3(long permits) {
+
+        long nowSec = DateTime.now().getMillis() / 1000;
+        String prefix = rateLimiterConfig.getName() + "-" + rateLimiterConfig.getPrefix() + "-" + nowSec;
+        if (rateLimiterConfig != null && rateLimiterConfig.getProperties().getBoolean("enable-acquire-optimization", false)) {
+            long value = 0; //redissonExt.getAtomicLong(prefix).get();
+            if (Objects.equals(currentTimestampString.get(), prefix) || redissonExt.getAtomicLong(prefix).isExists()) {
+                value = redissonExt.getAtomicLong(prefix).addAndGet(-1 * permits);
+                currentTimestampString.set(prefix);
+            }
+            if (value > 0) {
+                if (rateLimiterConfig != null && rateLimiterConfig.getProperties().getBoolean("debug-acquire-optimization", false)) {
+                    if (count.incrementAndGet() % rateLimiterConfig.getProperties().getInt("debug-acquire-optimization-percentage", 1) == 0) {
+                        System.out.println("Got it using atomic counter " + value);
+                    }
+                }
+                return;
+            }
+        }
+
         get(acquireAsyncExtV3(permits));
     }
 
@@ -146,11 +170,15 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
                 getName().replace("-", ""),
                 rateLimiterConfig.getProperties().getInt("ttl", 300),
                 now.getMillis(),
-                getName() + "-" + rateLimiterConfig.getPrefix()
+                getName() + "-" + rateLimiterConfig.getPrefix(),
+                rateLimiterConfig != null && rateLimiterConfig.getProperties().getBoolean("debug", false)
         );
     }
 
-    private static final String script = "local enableDebugLogging = true\n" +
+    private static final String script = "local enableDebugLogging = true;\n" +
+            "if ARGV[9] == 'false' then\n" +
+            "    enableDebugLogging = false;\n" +
+            "end\n" +
             "\n" +
             "-- Algo will run between lowest value to current value\n" +
             "local currentTimeParam = ARGV[1];\n" +
@@ -177,7 +205,7 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
             "local value = -1\n" +
             "\n" +
             "local debug = ''\n" +
-            "if enableDebugLogging then\n" +
+            "if enableDebugLogging  == true then\n" +
             "    debug = '[Set Name: ' .. zset .. ' Current Time: ' .. currentTimeParam .. ' currentTimeRedisKey:' .. redisCurrentTimeKey .. ']'\n" +
             "end\n" +
             "\n" +
@@ -193,7 +221,7 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
             "    -- Make sure we flush old keys (to free up any old value)\n" +
             "    redis.call('ZREMRANGEBYSCORE', zset, 0, lowestTimeParam);\n" +
             "\n" +
-            "    if enableDebugLogging then\n" +
+            "    if enableDebugLogging  == true then\n" +
             "        debug = debug ..\n" +
             "                ' [key did not existed - create new key with ttl:' .. ttlValue ..\n" +
             "                ' Sorted key cleared:' .. 0 .. '-' .. lowestTimeParam\n" +
@@ -202,7 +230,13 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
             "\n" +
             "-- Decrement by requested permits\n" +
             "value = redis.call(\"DECRBY\", redisCurrentTimeKey, permits)\n" +
-            "\n" +
+            "if enableDebugLogging  == true then\n" +
+            "    if value > 0 then\n" +
+            "        debug = debug .. \" value after decrement \" .. value\n" +
+            "    else\n" +
+            "        debug = debug .. \" value after decrement (-ve) \" .. value\n" +
+            "    end\n" +
+            "end\n" +
             "-- If we already consumed all limits, then try to get it from old tokesn\n" +
             "if value < 0 then\n" +
             "\n" +
@@ -214,14 +248,14 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
             "        value = redis.call(\"DECRBY\", v, permits)\n" +
             "\n" +
             "        if value > 0 then\n" +
-            "            if enableDebugLogging then\n" +
+            "            if enableDebugLogging  == true then\n" +
             "                debug = debug .. ' [found value from key ' .. v .. ' with value ' .. value\n" +
             "            end\n" +
             "            break\n" +
             "        else\n" +
             "            if v ~= redisCurrentTimeKey then\n" +
             "                redis.call('DEL', v)\n" +
-            "                if enableDebugLogging then\n" +
+            "                if enableDebugLogging  == true then\n" +
             "                    debug = debug .. ' DeleteFromZRange: ' .. v .. ','\n" +
             "                end\n" +
             "            end\n" +
@@ -233,14 +267,14 @@ public class RedissonRateLimiterExt extends RedissonRateLimiter {
             "local resultToReturn = -1\n" +
             "local debugToReturn = ''\n" +
             "local delay = 0\n" +
-            "if enableDebugLogging then\n" +
+            "if enableDebugLogging  == true then\n" +
             "    if value >= 0 then\n" +
             "        resultToReturn = value\n" +
             "        debugToReturn = debug\n" +
             "    else\n" +
             "        resultToReturn = -1\n" +
             "        delay = ((currentTimeParam + 1) * 1000) - currentTime;\n" +
-            "        if enableDebugLogging then\n" +
+            "        if enableDebugLogging  == true then\n" +
             "            debugToReturn = debug .. ' Final value suppress to -1'\n" +
             "        end\n" +
             "    end\n" +

@@ -44,6 +44,18 @@ public interface IMetrics {
     }
 
     /**
+     * Log gauge of given metric
+     */
+    default void gauge(String aspect, long value) {
+    }
+
+    /**
+     * Log gauge of given metric
+     */
+    default void gauge(String aspect, long value, String... labelNames) {
+    }
+
+    /**
      * Register a counter
      */
     void registerCounter(String name, String help, String... labelNames);

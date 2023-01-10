@@ -26,10 +26,16 @@ public class StatsdMetricsTest {
             statsdMetrics.inc("sample_1", "city", "bangalore", "id", "10");
         }
         Random random = new Random();
-        for (int i = 0; i < 1_000_000; i++) {
+        for (int i = 0; i < 1_000; i++) {
             statsdMetrics.observe("sample_1_time", random.nextInt(50), "city", "bangalore", "id", "10");
             // Thread.sleep(1);
         }
+
+        for (int i = 0; i < 1_000_000; i++) {
+            statsdMetrics.gauge("sample_1_gauge", random.nextInt(50), "city", "bangalore", "id", "10");
+             Thread.sleep(100);
+        }
+
         Thread.sleep(10000);
     }
 

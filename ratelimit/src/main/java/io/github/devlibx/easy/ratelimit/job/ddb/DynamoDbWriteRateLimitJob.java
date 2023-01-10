@@ -1,7 +1,7 @@
 package io.github.devlibx.easy.ratelimit.job.ddb;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicSessionCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
@@ -11,6 +11,7 @@ import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.google.common.base.Strings;
 import io.gitbub.devlibx.easy.helper.ApplicationContext;
 import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
+import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.github.devlibx.easy.ratelimit.IRateLimitJob;
 import io.github.devlibx.easy.ratelimit.IRateLimiter;
 import io.github.devlibx.easy.ratelimit.IRateLimiterFactory;
@@ -26,9 +27,18 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
     private Table dynamoTable;
     private String tableName;
     private final AtomicBoolean keepRunning = new AtomicBoolean(true);
+    private IMetrics metrics;
 
     @Override
     public void startRateLimitJob(RateLimiterConfig rateLimiterConfig) {
+
+        // Get the metrics class to record DDB rate
+        try {
+            metrics = ApplicationContext.getInstance(IMetrics.class);
+        } catch (Exception e) {
+            metrics = new IMetrics.NoOpMetrics();
+        }
+
         try {
             internalStartRateLimitJob(rateLimiterConfig);
 
@@ -68,14 +78,13 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
 
         AmazonDynamoDB client;
         if (!Strings.isNullOrEmpty(config.getString("AWS_ACCESS_KEY_ID"))) {
-            BasicSessionCredentials bc = new BasicSessionCredentials(
+            BasicAWSCredentials awsCreds = new BasicAWSCredentials(
                     config.getString("AWS_ACCESS_KEY_ID"),
-                    config.getString("AWS_SECRET_ACCESS_KEY"),
-                    config.getString("AWS_SESSION_TOKEN")
+                    config.getString("AWS_SECRET_ACCESS_KEY")
             );
             client = AmazonDynamoDBClientBuilder
                     .standard()
-                    .withCredentials(new AWSStaticCredentialsProvider(bc))
+                    .withCredentials(new AWSStaticCredentialsProvider(awsCreds))
                     .withRegion(Regions.valueOf(config.getString("region", "AP_SOUTH_1")))
                     .build();
         } else {
@@ -108,10 +117,13 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
             if (value > 0) {
                 float rateLimitFactor = config.getFloat("rate-limit-factor") != null ? config.getFloat("rate-limit-factor") : 0.8f;
                 long finalValue = (long) (value * rateLimitFactor);
-                log.debug("set ratelimit for DDB write table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
+                log.info("set ratelimit for DDB write table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
                 rateLimiter.trySetRate(value);
+                metrics.gauge("dynamodb-table-throughput-write", value, "table", tableName, "type", "provisioned");
             } else {
-                log.warn("(OnDemand table) will not set ratelimit for DDB write table={} with rateLimitUsed={}", tableName, rateLimiter.debug());
+                rateLimiter.trySetRate(20000);
+                metrics.gauge("dynamodb-table-throughput-write", 20000, "table", tableName, "type", "on-demand");
+                log.warn("(OnDemand table) will not set ratelimit=20000 for DDB write table={} with rateLimitUsed={}", tableName, rateLimiter.debug());
             }
         } catch (Exception e) {
             log.error("failed to setup write rate limiter: table={}", tableName, e);
@@ -125,10 +137,13 @@ public class DynamoDbWriteRateLimitJob implements IRateLimitJob {
             if (value > 0) {
                 float rateLimitFactor = config.getFloat("rate-limit-factor") != null ? config.getFloat("rate-limit-factor") : 0.8f;
                 long finalValue = (long) (value * rateLimitFactor);
-                log.debug("set ratelimit for DDB read table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
+                log.info("set ratelimit for DDB read table={} with value={}, factor={}, rateLimitUsed={}", tableName, value, rateLimitFactor, finalValue);
                 rateLimiter.trySetRate(value);
+                metrics.gauge("dynamodb-table-throughput-read", value, "table", tableName, "type", "provisioned");
             } else {
-                log.warn("(OnDemand table) will not set ratelimit for DDB read table={} with rateLimitUsed={}", tableName, rateLimiter.debug());
+                rateLimiter.trySetRate(20000);
+                metrics.gauge("dynamodb-table-throughput-read", 20000, "table", tableName, "type", "on-demand");
+                log.warn("(OnDemand table) will not set ratelimit=20000 for DDB read table={} with rateLimitUsed={}", tableName, rateLimiter.debug());
             }
         } catch (Exception e) {
             log.error("failed to setup read rate limiter: table={}", tableName, e);

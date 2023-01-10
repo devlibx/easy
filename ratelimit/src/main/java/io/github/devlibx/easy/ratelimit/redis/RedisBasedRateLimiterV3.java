@@ -84,6 +84,7 @@ public class RedisBasedRateLimiterV3 implements IRateLimiter {
     @Override
     public boolean trySetRate(long rate) {
         rateLimiterConfig.setRate((int) rate);
+        metrics.gauge("rate-limit-set", rate, "name", rateLimiterConfig.getName());
         return applyRate(limiter);
     }
 
