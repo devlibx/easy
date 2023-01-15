@@ -38,7 +38,9 @@ public class PrometheusMetrics implements IMetrics {
             if (!counterMap.containsKey(name)) {
                 registerCounter(name, name + " Help");
             }
-            counterMap.get(name).inc(labels);
+            if (counterMap.get(name) != null) {
+                counterMap.get(name).inc(labels);
+            }
         } catch (RuntimeException e) {
             log.error("error in metrics inc method (runtime exception) - e={}", e.getMessage());
             throw e;
@@ -55,7 +57,11 @@ public class PrometheusMetrics implements IMetrics {
             if (!summaryMap.containsKey(name)) {
                 registerTimer(name, name + " Help");
             }
-            return (T) summaryMap.get(name).time(callable, labels);
+            if (summaryMap.get(name) != null) {
+                return (T) summaryMap.get(name).time(callable, labels);
+            } else {
+                return callable.call();
+            }
         } catch (RuntimeException e) {
             log.error("error in timing method (runtime exception) - e={}", e.getMessage());
             throw e;
@@ -72,7 +78,9 @@ public class PrometheusMetrics implements IMetrics {
             if (!summaryMap.containsKey(name)) {
                 registerTimer(name, name + " Help");
             }
-            summaryMap.get(name).observe(amt);
+            if (summaryMap.get(name) != null) {
+                summaryMap.get(name).observe(amt);
+            }
         } catch (RuntimeException e) {
             log.error("error in timing method (runtime exception) - e={}", e.getMessage());
             throw e;
