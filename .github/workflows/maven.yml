@@ -37,7 +37,7 @@ jobs:
       - name: Publish to the Maven Central Repository
         run: |
           mvn clean install -DskipTests
-          mvn -B clean install -Dmaven.test.skip=true release:prepare release:perform -P release
+          mvn -B clean install -DskipTests -Dmaven.test.skip=true release:prepare release:perform -P release
         env:
           MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
