@@ -23,7 +23,7 @@ public class YamlUtilsTest {
         private MetricsConfig metricsConfig;
     }
 
-    @Test
+    /*@Test
     public void testJava19() {
         Thread.ofVirtual().start(new Runnable() {
             @Override
@@ -31,5 +31,5 @@ public class YamlUtilsTest {
                 System.out.println("Java 19 working");
             }
         });
-    }
+    }*/
 }

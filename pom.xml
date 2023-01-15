@@ -471,16 +471,51 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile-java-8</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <source>1.8</source>
+                            <target>1.8</target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-java-19</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>${maven.compiler.target}</release>
+                            <compilerArgs>--enable-preview</compilerArgs>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                    <version>${lombok.version}</version>
+                                </path>
+                            </annotationProcessorPaths>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${project.basedir}/src/main/java19</compileSourceRoot>
+                            </compileSourceRoots>
+                            <multiReleaseOutput>true</multiReleaseOutput>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
                 <configuration>
-                    <release>${maven.compiler.target}</release>
-                    <compilerArgs>--enable-preview</compilerArgs>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
+                    <archive>
+                        <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
@@ -555,18 +590,40 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <version>${maven-compiler-plugin.version}</version>
-                        <configuration>
-                            <release>${maven.compiler.target}</release>
-                            <compilerArgs>--enable-preview</compilerArgs>
-                            <skip>true</skip>
-                            <annotationProcessorPaths>
-                                <path>
-                                    <groupId>org.projectlombok</groupId>
-                                    <artifactId>lombok</artifactId>
-                                    <version>${lombok.version}</version>
-                                </path>
-                            </annotationProcessorPaths>
-                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>compile-java-8</id>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <source>1.8</source>
+                                    <target>1.8</target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>compile-java-19</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <release>${maven.compiler.target}</release>
+                                    <compilerArgs>--enable-preview</compilerArgs>
+                                    <annotationProcessorPaths>
+                                        <path>
+                                            <groupId>org.projectlombok</groupId>
+                                            <artifactId>lombok</artifactId>
+                                            <version>${lombok.version}</version>
+                                        </path>
+                                    </annotationProcessorPaths>
+                                    <compileSourceRoots>
+                                        <compileSourceRoot>${project.basedir}/src/main/java19</compileSourceRoot>
+                                    </compileSourceRoots>
+                                    <multiReleaseOutput>true</multiReleaseOutput>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
@@ -701,18 +758,40 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
                         <version>${maven-compiler-plugin.version}</version>
-                        <configuration>
-                            <release>${maven.compiler.target}</release>
-                            <compilerArgs>--enable-preview</compilerArgs>
-                            <skip>true</skip>
-                            <annotationProcessorPaths>
-                                <path>
-                                    <groupId>org.projectlombok</groupId>
-                                    <artifactId>lombok</artifactId>
-                                    <version>${lombok.version}</version>
-                                </path>
-                            </annotationProcessorPaths>
-                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>compile-java-8</id>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <source>1.8</source>
+                                    <target>1.8</target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>compile-java-19</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <release>${maven.compiler.target}</release>
+                                    <compilerArgs>--enable-preview</compilerArgs>
+                                    <annotationProcessorPaths>
+                                        <path>
+                                            <groupId>org.projectlombok</groupId>
+                                            <artifactId>lombok</artifactId>
+                                            <version>${lombok.version}</version>
+                                        </path>
+                                    </annotationProcessorPaths>
+                                    <compileSourceRoots>
+                                        <compileSourceRoot>${project.basedir}/src/main/java19</compileSourceRoot>
+                                    </compileSourceRoots>
+                                    <multiReleaseOutput>true</multiReleaseOutput>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
