@@ -5,7 +5,7 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.devlibx.easy</groupId>
-        <version>0.0.137.java19-SNAPSHOT</version>
+        <version>0.0.137.java19.loom-SNAPSHOT</version>
     </parent>
     <artifactId>dropwizard-app</artifactId>
     <name>dropwizard-app</name>
@@ -45,6 +45,10 @@
         <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.ws.rs</groupId>
+            <artifactId>jakarta.ws.rs-api</artifactId>
         </dependency>
 
         <!-- Prometheus Integration -->
