@@ -46,7 +46,7 @@ public class LoggingHelper {
     private static void setupLoggingLogbackClassic() {
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
         loggerContext.getLogger(Logger.ROOT_LOGGER_NAME).setLevel(Level.INFO);
-        // loggerContext.getLogger("com.github.dockerjava.core.command").setLevel(Level.OFF);
+        loggerContext.getLogger("com.github.dockerjava.core.command").setLevel(Level.OFF);
     }
 
     public static Logger getLogger(Class<?> clazz) {

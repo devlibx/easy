@@ -1,7 +1,7 @@
 package io.github.devlibx.easy.app.dropwizard.healthcheck;
 
 import com.codahale.metrics.health.HealthCheck;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.setup.Environment;
 import io.gitbub.devlibx.easy.helper.healthcheck.IHealthCheckProvider;
 import io.gitbub.devlibx.easy.helper.string.StringHelper;
 import lombok.Builder;

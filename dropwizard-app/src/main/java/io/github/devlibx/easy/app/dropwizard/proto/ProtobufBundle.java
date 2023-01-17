@@ -1,11 +1,12 @@
 package io.github.devlibx.easy.app.dropwizard.proto;
 
-import io.dropwizard.Configuration;
-import io.dropwizard.ConfiguredBundle;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.core.ConfiguredBundle;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.dropwizard.jersey.protobuf.InvalidProtocolBufferExceptionMapper;
 import io.dropwizard.jersey.protobuf.ProtocolBufferMessageBodyProvider;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+
 
 public class ProtobufBundle<C extends Configuration> implements ConfiguredBundle<C> {
     static boolean preservingProtoFieldNames;

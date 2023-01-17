@@ -2,12 +2,12 @@ package io.github.devlibx.easy.app.dropwizard;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.PropertyNamingStrategy;
-import io.dropwizard.Application;
-import io.dropwizard.Configuration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.Configuration;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
 import io.gitbub.devlibx.easy.helper.ApplicationContext;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics.InvalidRegistryTypeFoundException;
@@ -15,9 +15,9 @@ import io.github.devlibx.easy.app.dropwizard.proto.ProtobufBundle;
 import io.github.devlibx.easy.metrics.prometheus.PrometheusMetrics;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.dropwizard.DropwizardExports;
-import io.prometheus.client.exporter.MetricsServlet;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
 
 @Slf4j
 @Data
@@ -38,6 +38,7 @@ public class BaseApplication<T extends Configuration> extends Application<T> {
         if (enableProtobufSupport()) {
             bootstrap.addBundle(new ProtobufBundle<>());
         }
+
     }
 
     @Override
@@ -64,7 +65,7 @@ public class BaseApplication<T extends Configuration> extends Application<T> {
             try {
                 CollectorRegistry collectorRegistry = metrics.getRegistry(CollectorRegistry.class);
                 collectorRegistry.register(new DropwizardExports(environment.metrics()));
-                environment.servlets().addServlet("prometheusMetrics", new MetricsServlet(collectorRegistry)).addMapping("/metrics");
+                // environment.servlets().addServlet("prometheusMetrics", new MetricsServlet(collectorRegistry)).addMapping("/metrics");
             } catch (InvalidRegistryTypeFoundException e) {
                 log.error("Failed to registered prometheus - registry type mus be CollectorRegistry");
             } catch (Exception e) {
