@@ -5,7 +5,7 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.devlibx.easy</groupId>
-        <version>0.0.139.java19.loom</version>
+        <version>0.0.140.java19.loom-SNAPSHOT</version>
     </parent>
     <artifactId>database-dynamo</artifactId>
     <name>database-dynamo</name>
