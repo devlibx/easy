@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -60,7 +61,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MessagingConfigs {
+public class MessagingConfigs implements Serializable {
     private Map<String, StringObjectMap> producers = new ConcurrentHashMap<>();
     private Map<String, StringObjectMap> consumers = new ConcurrentHashMap<>();
 }
