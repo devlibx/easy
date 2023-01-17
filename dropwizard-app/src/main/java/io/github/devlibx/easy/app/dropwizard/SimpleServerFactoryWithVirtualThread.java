@@ -13,13 +13,12 @@ import java.util.concurrent.BlockingQueue;
 public class SimpleServerFactoryWithVirtualThread extends SimpleServerFactory {
 
     protected ThreadPool createThreadPool(MetricRegistry metricRegistry) {
-        int minThreads = 10;
-        int maxThreads = 20;
+        int minThreads = 3;
+        int maxThreads = 3;
         int maxQueuedRequests = 1000;
-        final BlockingQueue<Runnable> queue = new BlockingArrayQueue<>(minThreads, maxThreads, maxQueuedRequests);
+        // final BlockingQueue<Runnable> queue = new BlockingArrayQueue<>(minThreads, maxThreads, maxQueuedRequests);
         final InstrumentedQueuedThreadPool threadPool =
-                new InstrumentedQueuedThreadPool(metricRegistry, maxThreads, minThreads,
-                        (int) 10000, queue);
+                new InstrumentedQueuedThreadPool(metricRegistry, maxThreads, minThreads);
         threadPool.setName("dw");
         threadPool.setUseVirtualThreads(true);
         return threadPool;
