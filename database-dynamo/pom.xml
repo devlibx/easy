@@ -5,10 +5,10 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.devlibx.easy</groupId>
-        <version>0.0.137.java19-SNAPSHOT</version>
+        <version>0.0.137.java19</version>
     </parent>
     <artifactId>database-dynamo</artifactId>
-    <version>0.0.137.java19-SNAPSHOT</version>
+    <version>0.0.137.java19</version>
     <name>database-dynamo</name>
 
     <dependencies>
