@@ -1,7 +1,7 @@
 name: Java CI with Maven
 on:
   push:
-    branches: [ java19 ]
+    branches: [ master ]
 jobs:
   build:
     runs-on: ubuntu-latest
