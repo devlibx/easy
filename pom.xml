@@ -37,8 +37,9 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>15</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>19</maven.compiler.source>
+        <maven.compiler.target>19</maven.compiler.target>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
         <grpc.version>1.13.1</grpc.version>
         <protobuf.version>3.5.1</protobuf.version>
         <mysql.connector.version>8.0.23</mysql.connector.version>
@@ -368,6 +369,7 @@
                 <version>${jackson.version}</version>
             </dependency>
 
+
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
@@ -452,12 +454,6 @@
                 <groupId>org.kie</groupId>
                 <artifactId>kie-ci</artifactId>
                 <version>${drools.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.google.inject</groupId>
-                        <artifactId>guice</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -467,22 +463,60 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <version>${maven-compiler-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile-java-8</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <source>1.8</source>
+                            <target>1.8</target>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>compile-java-19</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <configuration>
+                            <release>${maven.compiler.target}</release>
+                            <compilerArgs>--enable-preview</compilerArgs>
+                            <annotationProcessorPaths>
+                                <path>
+                                    <groupId>org.projectlombok</groupId>
+                                    <artifactId>lombok</artifactId>
+                                    <version>${lombok.version}</version>
+                                </path>
+                            </annotationProcessorPaths>
+                            <compileSourceRoots>
+                                <compileSourceRoot>${project.basedir}/src/main/java19</compileSourceRoot>
+                            </compileSourceRoots>
+                            <multiReleaseOutput>true</multiReleaseOutput>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
+                    <archive>
+                        <manifestEntries>
+                            <Multi-Release>true</Multi-Release>
+                        </manifestEntries>
+                    </archive>
                 </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.2</version>
+                <configuration>
+                    <argLine>--enable-preview</argLine>
+                </configuration>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -504,7 +538,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>${maven-compiler-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
@@ -548,24 +582,46 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.8.1</version>
-                        <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
-                            <skip>true</skip>
-                            <annotationProcessorPaths>
-                                <path>
-                                    <groupId>org.projectlombok</groupId>
-                                    <artifactId>lombok</artifactId>
-                                    <version>${lombok.version}</version>
-                                </path>
-                            </annotationProcessorPaths>
-                        </configuration>
+                        <version>${maven-compiler-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>compile-java-8</id>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <source>1.8</source>
+                                    <target>1.8</target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>compile-java-19</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <release>${maven.compiler.target}</release>
+                                    <compilerArgs>--enable-preview</compilerArgs>
+                                    <annotationProcessorPaths>
+                                        <path>
+                                            <groupId>org.projectlombok</groupId>
+                                            <artifactId>lombok</artifactId>
+                                            <version>${lombok.version}</version>
+                                        </path>
+                                    </annotationProcessorPaths>
+                                    <compileSourceRoots>
+                                        <compileSourceRoot>${project.basedir}/src/main/java19</compileSourceRoot>
+                                    </compileSourceRoots>
+                                    <multiReleaseOutput>true</multiReleaseOutput>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.7</version>
+                        <version>1.6.13</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
@@ -576,7 +632,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
+                        <version>3.2.1</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -589,7 +645,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
+                        <version>3.4.1</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -597,9 +653,12 @@
                                     <goal>jar</goal>
                                 </goals>
                                 <configuration>
-                                    <source>8</source>
+                                    <source>${maven.compiler.target}</source>
                                     <additionalparam>-Xdoclint:none</additionalparam>
                                     <detectJavaApiLink>false</detectJavaApiLink>
+                                    <additionalOptions>
+                                        <additionalOption>-Xdoclint:none</additionalOption>
+                                    </additionalOptions>
                                 </configuration>
                             </execution>
                         </executions>
@@ -626,9 +685,17 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-release-plugin</artifactId>
-                        <version>3.0.0-M1</version>
+                        <version>3.0.0-M6</version>
                         <configuration>
                             <tagNameFormat>v@{project.version}</tagNameFormat>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <argLine>--enable-preview</argLine>
+                            <skipTests>true</skipTests>
                         </configuration>
                     </plugin>
                 </plugins>
@@ -647,7 +714,7 @@
                         </plugin>
                         <plugin>
                             <artifactId>maven-compiler-plugin</artifactId>
-                            <version>3.8.1</version>
+                            <version>${maven-compiler-plugin.version}</version>
                         </plugin>
                         <plugin>
                             <artifactId>maven-surefire-plugin</artifactId>
@@ -691,19 +758,41 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.8.1</version>
-                        <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
-                            <skip>true</skip>
-                            <annotationProcessorPaths>
-                                <path>
-                                    <groupId>org.projectlombok</groupId>
-                                    <artifactId>lombok</artifactId>
-                                    <version>${lombok.version}</version>
-                                </path>
-                            </annotationProcessorPaths>
-                        </configuration>
+                        <version>${maven-compiler-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>compile-java-8</id>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <source>1.8</source>
+                                    <target>1.8</target>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>compile-java-19</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>compile</goal>
+                                </goals>
+                                <configuration>
+                                    <release>${maven.compiler.target}</release>
+                                    <compilerArgs>--enable-preview</compilerArgs>
+                                    <annotationProcessorPaths>
+                                        <path>
+                                            <groupId>org.projectlombok</groupId>
+                                            <artifactId>lombok</artifactId>
+                                            <version>${lombok.version}</version>
+                                        </path>
+                                    </annotationProcessorPaths>
+                                    <compileSourceRoots>
+                                        <compileSourceRoot>${project.basedir}/src/main/java19</compileSourceRoot>
+                                    </compileSourceRoots>
+                                    <multiReleaseOutput>true</multiReleaseOutput>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -740,11 +829,14 @@
                         </plugin>
                         <plugin>
                             <artifactId>maven-compiler-plugin</artifactId>
-                            <version>3.8.1</version>
+                            <version>${maven-compiler-plugin.version}</version>
                         </plugin>
                         <plugin>
                             <artifactId>maven-surefire-plugin</artifactId>
                             <version>2.22.1</version>
+                            <configuration>
+                                <argLine>--enable-preview</argLine>
+                            </configuration>
                         </plugin>
                         <plugin>
                             <artifactId>maven-jar-plugin</artifactId>

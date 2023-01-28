@@ -22,4 +22,14 @@ public class YamlUtilsTest {
         @JsonProperty("metricsConfig")
         private MetricsConfig metricsConfig;
     }
+
+    /*@Test
+    public void testJava19() {
+        Thread.ofVirtual().start(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Java 19 working");
+            }
+        });
+    }*/
 }
