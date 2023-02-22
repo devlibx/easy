@@ -101,7 +101,6 @@ public class AsyncRequestProcessor implements IRequestProcessor {
             }
 
             case "PUT": {
-                System.out.println("Putting data " + new String(requestObject.getBody()));
                 webClient
                         .put()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
