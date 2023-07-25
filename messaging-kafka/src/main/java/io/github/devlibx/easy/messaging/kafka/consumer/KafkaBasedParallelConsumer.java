@@ -27,6 +27,7 @@ public class KafkaBasedParallelConsumer extends KafkaBasedConsumer {
 
     protected Runnable consumerRunnable(Consumer<String, Object> consumer, IMessageConsumer messageConsumer) {
         final int pollTime;
+        final long parallelMsgProcessTimeout = config.getLong("parallelMsgProcessTimeout");
         if (config.containsKey("poll.time")) {
             pollTime = config.getInt("poll.time", 100);
         } else if (config.containsKey("poll-time")) {
@@ -61,7 +62,7 @@ public class KafkaBasedParallelConsumer extends KafkaBasedConsumer {
                     }
 
                     // Wait for all events to get process (for faery we will wait for max of 5 sec for each message)
-                    boolean result = processingLatch.await(recordCount * 5L, TimeUnit.SECONDS);
+                    boolean result = processingLatch.await(recordCount * parallelMsgProcessTimeout, TimeUnit.SECONDS);
                     if (!result) {
                         log.error("Processing messages in parallel but messages did not finish on time : topic={}, noOfMessagesToProcess={}", topic, recordCount);
                     }
