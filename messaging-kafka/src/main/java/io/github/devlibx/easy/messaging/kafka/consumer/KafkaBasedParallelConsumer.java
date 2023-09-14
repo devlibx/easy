@@ -27,7 +27,8 @@ public class KafkaBasedParallelConsumer extends KafkaBasedConsumer {
 
     protected Runnable consumerRunnable(Consumer<String, Object> consumer, IMessageConsumer messageConsumer) {
         final int pollTime;
-        final long parallelMsgProcessTimeout = config.getLong("parallelMsgProcessTimeout");
+        // parallelMsgProcessTimeout is in seconds and default is 5 sec
+        final long parallelMsgProcessTimeout = config.getInt("parallelMsgProcessTimeout", 5);
         if (config.containsKey("poll.time")) {
             pollTime = config.getInt("poll.time", 100);
         } else if (config.containsKey("poll-time")) {
