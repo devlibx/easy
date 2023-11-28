@@ -10,7 +10,7 @@ jobs:
       - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          java-version: 19
+          java-version: 21
           distribution: 'adopt'
       - name: Import GPG Key
         uses: crazy-max/ghaction-import-gpg@v1
@@ -20,7 +20,7 @@ jobs:
       - name: Set up Java for publishing to Maven Central Repository
         uses: actions/setup-java@v3
         with:
-          java-version: 19
+          java-version: 21
           distribution: 'adopt'
           server-id: ossrh
           server-username: MAVEN_USERNAME
