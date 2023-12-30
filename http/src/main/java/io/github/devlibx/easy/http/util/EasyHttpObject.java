@@ -82,6 +82,10 @@ class EasyHttpObject implements IEasyHttpImplementation {
             metrics = new IMetrics.NoOpMetrics();
         }
 
+        if (metrics == null) {
+            metrics = new IMetrics.NoOpMetrics();
+        }
+
         // Make server registry
         ServerRegistry serverRegistry = ApplicationContext.getInstance(ServerRegistry.class);
         serverRegistry.configure(config);

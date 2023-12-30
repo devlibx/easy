@@ -67,7 +67,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                 webClient
                         .get()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
-                        .headers(consumerHeaders(requestObject, api.getHeaders()))
+                        .headers(consumerHeaders(requestObject, api.getHeaders(), server.getHeaders()))
                         .retrieve()
                         .bodyToMono(byte[].class)
                         .doOnError(onErrorConsumer(server, api, observableEmitter, startTime))
@@ -79,7 +79,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                 webClient
                         .delete()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
-                        .headers(consumerHeaders(requestObject, api.getHeaders()))
+                        .headers(consumerHeaders(requestObject, api.getHeaders(), server.getHeaders()))
                         .retrieve()
                         .bodyToMono(byte[].class)
                         .doOnError(onErrorConsumer(server, api, observableEmitter, startTime))
@@ -91,7 +91,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                 webClient
                         .post()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
-                        .headers(consumerHeaders(requestObject, api.getHeaders()))
+                        .headers(consumerHeaders(requestObject, api.getHeaders(), server.getHeaders()))
                         .bodyValue(requestObject.getBody())
                         .retrieve()
                         .bodyToMono(byte[].class)
@@ -104,7 +104,7 @@ public class AsyncRequestProcessor implements IRequestProcessor {
                 webClient
                         .put()
                         .uri(api.getUrlForRequestObject(requestObject, stringHelper))
-                        .headers(consumerHeaders(requestObject, api.getHeaders()))
+                        .headers(consumerHeaders(requestObject, api.getHeaders(), server.getHeaders()))
                         .bodyValue(requestObject.getBody())
                         .retrieve()
                         .bodyToMono(byte[].class)
@@ -143,8 +143,13 @@ public class AsyncRequestProcessor implements IRequestProcessor {
         };
     }
 
-    private Consumer<HttpHeaders> consumerHeaders(RequestObject requestObject, StringObjectMap apiHeaders) {
+    private Consumer<HttpHeaders> consumerHeaders(RequestObject requestObject, StringObjectMap apiHeaders, StringObjectMap serverHeaders) {
         return httpHeaders -> {
+            if (serverHeaders != null) {
+                serverHeaders.forEach((key, value) -> {
+                    httpHeaders.add(key, stringHelper.stringify(value));
+                });
+            }
             requestObject.preProcessHeaders(apiHeaders);
             requestObject.getHeaders().forEach((key, value) -> {
                 httpHeaders.add(key, stringHelper.stringify(value));

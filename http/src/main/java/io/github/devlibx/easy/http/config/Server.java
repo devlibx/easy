@@ -1,12 +1,14 @@
 package io.github.devlibx.easy.http.config;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -59,6 +61,8 @@ public class Server implements Serializable {
      * Why we get this type of timeout -> when we connect to server, it may be busy or server may be down.
      */
     private int connectTimeout = 100;
+
+    private StringObjectMap headers;
 
     public String getUrl() {
         StringBuilder sb = new StringBuilder();

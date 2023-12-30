@@ -168,6 +168,13 @@ public class SyncRequestProcessor implements IRequestProcessor {
         HttpRequestBase requestBase = func.apply(uri);
         requestBase.setConfig(buildRequestConfig(server, api, requestObject));
 
+        // Take headers from server
+        if (server.getHeaders() != null) {
+            server.getHeaders().forEach((key, value) -> {
+                requestBase.addHeader(key, stringHelper.stringify(value));
+            });
+        }
+
         // Add headers to the request
         requestObject.preProcessHeaders(api.getHeaders());
         requestObject.getHeaders().forEach((key, value) -> {
@@ -210,29 +217,14 @@ public class SyncRequestProcessor implements IRequestProcessor {
         if (api.getTimeoutDeltaFactor() > 0) {
             socketTimeoutToBeUsed = (int) (socketTimeoutToBeUsed + (api.getTimeoutDeltaFactor() * socketTimeoutToBeUsed));
         }
-        return RequestConfig.custom()
-                .setConnectTimeout(server.getConnectTimeout())
-                .setConnectionRequestTimeout(server.getConnectionRequestTimeout())
-                .setSocketTimeout(socketTimeoutToBeUsed)
-                .build();
+        return RequestConfig.custom().setConnectTimeout(server.getConnectTimeout()).setConnectionRequestTimeout(server.getConnectionRequestTimeout()).setSocketTimeout(socketTimeoutToBeUsed).build();
     }
 
     private URI generateURI(Server server, Api api, RequestObject request) throws URISyntaxException {
         if (server.getPort() == -1) {
-            return new URIBuilder()
-                    .setScheme(server.isHttps() ? "https" : "http")
-                    .setHost(server.getHost())
-                    .setPath(resolvePath(server, api, request))
-                    .setParameters(getQueryParams(server, api, request))
-                    .build();
+            return new URIBuilder().setScheme(server.isHttps() ? "https" : "http").setHost(server.getHost()).setPath(resolvePath(server, api, request)).setParameters(getQueryParams(server, api, request)).build();
         }
-        return new URIBuilder()
-                .setScheme(server.isHttps() ? "https" : "http")
-                .setHost(server.getHost())
-                .setPort(server.getPort())
-                .setPath(resolvePath(server, api, request))
-                .setParameters(getQueryParams(server, api, request))
-                .build();
+        return new URIBuilder().setScheme(server.isHttps() ? "https" : "http").setHost(server.getHost()).setPort(server.getPort()).setPath(resolvePath(server, api, request)).setParameters(getQueryParams(server, api, request)).build();
     }
 
     @SuppressWarnings("deprecation")
@@ -250,9 +242,7 @@ public class SyncRequestProcessor implements IRequestProcessor {
     private List<NameValuePair> getQueryParams(Server server, Api api, RequestObject request) {
         final List<NameValuePair> queryParams = new ArrayList<>();
         if (null != request.getQueryParam()) {
-            request.getQueryParam()
-                    .forEach((key, values) -> values
-                            .forEach(value -> queryParams.add(new BasicNameValuePair(key, stringHelper.stringify(value)))));
+            request.getQueryParam().forEach((key, values) -> values.forEach(value -> queryParams.add(new BasicNameValuePair(key, stringHelper.stringify(value)))));
         }
         return queryParams;
     }
