@@ -14,6 +14,7 @@ import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
@@ -27,6 +28,7 @@ import java.util.function.BiConsumer;
 import static io.github.devlibx.easy.resilience.exception.ExceptionUtil.unwrapResilience4jException;
 import static io.github.devlibx.easy.resilience.exception.ExceptionUtil.unwrapResilience4jExecutionException;
 
+@Slf4j
 public class ResilienceProcessor implements IResilienceProcessor {
     @Getter
     private CircuitBreaker circuitBreaker;
@@ -35,6 +37,10 @@ public class ResilienceProcessor implements IResilienceProcessor {
     private TimeLimiter timeLimiter;
     private SemaphoreBulkhead semaphoreBulkhead;
     private ResilienceCallConfig config;
+
+    static {
+        log.info("Using virtual thread in ResilienceProcessor");
+    }
 
     @Override
     public void initialized(ResilienceCallConfig config) {
