@@ -3,7 +3,7 @@ package io.github.devlibx.easy.database.mysql.lock;
 import ch.qos.logback.classic.Level;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.multibindings.OptionalBinder;

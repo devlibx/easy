@@ -1,6 +1,6 @@
 package io.github.devlibx.easy.http.async;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import io.gitbub.devlibx.easy.helper.ApplicationContext;
 import io.gitbub.devlibx.easy.helper.map.StringObjectMap;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;

@@ -1,6 +1,6 @@
 package io.github.devlibx.easy.http.registry;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 import io.gitbub.devlibx.easy.helper.Safe;
 import io.github.devlibx.easy.http.config.Api;
 import io.github.devlibx.easy.http.config.Config;
