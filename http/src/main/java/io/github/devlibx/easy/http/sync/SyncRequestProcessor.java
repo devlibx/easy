@@ -44,6 +44,7 @@ public class SyncRequestProcessor implements IRequestProcessor {
     private final IHttpResponseProcessor httpResponseProcessor;
     private final IMetrics metrics;
 
+    @com.google.inject.Inject
     @Inject
     public SyncRequestProcessor(ServerRegistry serverRegistry, ApiRegistry apiRegistry, IHttpResponseProcessor httpResponseProcessor, IMetrics metrics) {
         this.serverRegistry = serverRegistry;
