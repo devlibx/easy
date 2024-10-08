@@ -5,7 +5,7 @@
     <groupId>io.github.devlibx.easy</groupId>
     <artifactId>easy</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.144-SNAPSHOT</version>
+    <version>0.0.144-java21-SNAPSHOT</version>
     <modules>
         <module>helper</module>
         <module>database</module>
@@ -46,6 +46,7 @@
         <mysql.connector.version>8.0.23</mysql.connector.version>
         <scylla.connector.version>3.5.0</scylla.connector.version>
         <guice.version>5.1.0</guice.version>
+        <jakarta.inject.version>2.0.1</jakarta.inject.version>
         <lombok.version>1.18.30</lombok.version>
         <jackson.version>2.13.3</jackson.version>
         <kafka.client.version>1.1.0</kafka.client.version>
@@ -142,6 +143,11 @@
                 <groupId>com.google.inject</groupId>
                 <artifactId>guice</artifactId>
                 <version>${guice.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.inject</groupId>
+                <artifactId>jakarta.inject-api</artifactId>
+                <version>${jakarta.inject.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>

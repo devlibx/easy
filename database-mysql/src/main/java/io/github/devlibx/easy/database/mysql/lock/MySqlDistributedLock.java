@@ -8,7 +8,7 @@ import io.github.devlibx.easy.lock.config.LockConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.inject.Named;
 import javax.sql.DataSource;
 import java.sql.Connection;

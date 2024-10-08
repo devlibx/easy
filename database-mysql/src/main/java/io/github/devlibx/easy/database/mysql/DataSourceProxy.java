@@ -1,6 +1,6 @@
 package io.github.devlibx.easy.database.mysql;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.Connection;

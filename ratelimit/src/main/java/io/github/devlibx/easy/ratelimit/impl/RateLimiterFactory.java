@@ -10,7 +10,7 @@ import io.github.devlibx.easy.ratelimit.redis.RedisBasedRateLimiter;
 import io.github.devlibx.easy.ratelimit.redis.RedisBasedRateLimiterV2;
 import io.github.devlibx.easy.ratelimit.redis.RedisBasedRateLimiterV3;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

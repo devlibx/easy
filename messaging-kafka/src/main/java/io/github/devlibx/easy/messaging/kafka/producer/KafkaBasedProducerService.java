@@ -8,7 +8,7 @@ import io.gitbub.devlibx.easy.helper.string.StringHelper;
 import io.github.devlibx.easy.messaging.producer.IProducer;
 import io.github.devlibx.easy.messaging.producer.IProducerService;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;

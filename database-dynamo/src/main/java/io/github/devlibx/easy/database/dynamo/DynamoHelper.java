@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import io.github.devlibx.easy.database.dynamo.operation.Get;
 import io.github.devlibx.easy.database.dynamo.operation.Put;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

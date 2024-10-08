@@ -6,7 +6,7 @@ import io.github.devlibx.easy.database.exception.DatabaseExceptions.FindExceptio
 import io.github.devlibx.easy.database.exception.DatabaseExceptions.PersistException;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

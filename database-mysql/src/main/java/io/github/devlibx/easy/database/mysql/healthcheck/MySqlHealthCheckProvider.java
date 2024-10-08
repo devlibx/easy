@@ -6,7 +6,7 @@ import io.github.devlibx.easy.database.mysql.DataSourceFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;

@@ -4,7 +4,7 @@ import io.github.devlibx.easy.database.IDatabaseService;
 import io.github.devlibx.easy.database.mysql.config.MySqlConfigs;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 
 @Slf4j
 public class DatabaseService implements IDatabaseService {

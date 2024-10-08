@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RRateLimiter;
 import org.redisson.api.RedissonClient;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 

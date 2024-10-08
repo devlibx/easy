@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.datasource.TransactionAwareDataSourceProxy;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import javax.inject.Named;
 import javax.sql.DataSource;
 import java.util.HashMap;

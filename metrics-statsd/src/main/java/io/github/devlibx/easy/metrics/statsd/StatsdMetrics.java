@@ -5,7 +5,7 @@ import com.timgroup.statsd.StatsDClient;
 import io.gitbub.devlibx.easy.helper.metrics.IMetrics;
 import io.gitbub.devlibx.easy.helper.metrics.MetricsConfig;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;

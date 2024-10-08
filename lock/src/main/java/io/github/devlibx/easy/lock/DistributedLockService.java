@@ -3,7 +3,7 @@ package io.github.devlibx.easy.lock;
 import io.gitbub.devlibx.easy.helper.Safe;
 import io.github.devlibx.easy.lock.config.LockConfigs;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

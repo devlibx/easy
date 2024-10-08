@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.gitbub.devlibx.easy.helper.json.JsonUtil;
 import org.joda.time.DateTime;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.util.UUID;
 
 /**
