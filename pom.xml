@@ -5,7 +5,7 @@
     <groupId>io.github.devlibx.easy</groupId>
     <artifactId>easy</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.144-java22-jakarta-SNAPSHOT</version>
+    <version>0.0.144-jakarta-SNAPSHOT</version>
     <modules>
         <module>helper</module>
         <module>database</module>
