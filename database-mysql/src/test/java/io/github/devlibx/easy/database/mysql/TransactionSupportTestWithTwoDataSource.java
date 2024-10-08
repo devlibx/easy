@@ -1,6 +1,6 @@
 package io.github.devlibx.easy.database.mysql;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import com.google.inject.Injector;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Propagation;

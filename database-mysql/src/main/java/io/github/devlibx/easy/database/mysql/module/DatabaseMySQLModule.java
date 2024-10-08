@@ -1,6 +1,6 @@
 package io.github.devlibx.easy.database.mysql.module;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;
