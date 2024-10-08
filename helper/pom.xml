@@ -3,7 +3,7 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.devlibx.easy</groupId>
-        <version>0.0.144-java21</version>
+        <version>0.0.144-java22-SNAPSHOT</version>
     </parent>
     <artifactId>helper</artifactId>
     <packaging>jar</packaging>
