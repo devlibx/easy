@@ -5,7 +5,7 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.devlibx.easy</groupId>
-        <version>0.0.144-jakarta-SNAPSHOT</version>
+        <version>0.0.144-jakarta</version>
     </parent>
     <artifactId>dropwizard-app</artifactId>
     <name>dropwizard-app</name>
