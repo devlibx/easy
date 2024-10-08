@@ -5,7 +5,7 @@
     <groupId>io.github.devlibx.easy</groupId>
     <artifactId>easy</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.144-java21-jakarta</version>
+    <version>0.0.144-java22-jakarta-SNAPSHOT</version>
     <modules>
         <module>helper</module>
         <module>database</module>
@@ -33,7 +33,7 @@
         <connection>scm:git:https://github.com/devlibx/easy.git</connection>
         <developerConnection>scm:git:https://github.com/devlibx/easy.git</developerConnection>
         <url>https://github.com/devlibx/easy/tree/master</url>
-        <tag>v0.0.144-java21-jakarta</tag>
+        <tag>0.0.45</tag>
     </scm>
 
     <properties>
