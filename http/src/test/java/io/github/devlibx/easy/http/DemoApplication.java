@@ -20,12 +20,18 @@ import io.github.devlibx.easy.http.util.Call;
 import io.github.devlibx.easy.http.util.EasyHttp;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+import org.checkerframework.checker.units.qual.A;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static ch.qos.logback.classic.Level.ERROR;
 import static ch.qos.logback.classic.Level.TRACE;
@@ -37,9 +43,9 @@ public class DemoApplication {
     @BeforeEach
     protected void setUp() throws Exception {
         LoggingHelper.setupLogging();
-        LoggingHelper.getLogger(SyncRequestProcessor.class).setLevel(TRACE);
-        LoggingHelper.getLogger(FileHelper.class).setLevel(TRACE);
-        LoggingHelper.getLogger(IMetrics.ConsoleOutputMetrics.class).setLevel(TRACE);
+        LoggingHelper.getLogger(SyncRequestProcessor.class).setLevel(ERROR);
+        LoggingHelper.getLogger(FileHelper.class).setLevel(ERROR);
+        LoggingHelper.getLogger(IMetrics.ConsoleOutputMetrics.class).setLevel(ERROR);
 
         // Setup injector (Onetime MUST setup before we call EasyHttp.setup())
         // Or if you do not any console logs
@@ -63,25 +69,105 @@ public class DemoApplication {
         EasyHttp.setup(config);
     }
 
-    public void testSyncApiCallGenerateHystricError() throws InterruptedException {
-        for (int i = 0 ; i < 10; i++) {
+    @Test
+    public void testSyncApiCallGenerateHystrixError_MustGetEasyNotFoundExceptionInEachCall() throws InterruptedException, IOException {
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.start(18080);
+
+
+        AtomicInteger notFoundException = new AtomicInteger();
+        AtomicInteger otherException = new AtomicInteger();
+        AtomicInteger counter = new AtomicInteger();
+        for (int i = 0; i < 10; i++) {
             new Thread(() -> {
                 while (true) {
+                    int count = counter.addAndGet(1);
                     try {
+                        if (count > 1000) {
+                            return;
+                        }
+                        mockWebServer.enqueue(new MockResponse()
+                                .setResponseCode(404)
+                                .setBody("404 - Not Found")
+                                .setBodyDelay(1, TimeUnit.MILLISECONDS));
+
                         Map result = EasyHttp.callSync(
                                 Call.builder(Map.class)
                                         .withServerAndApi("local", "getPostsLocal")
                                         .addPathParam("id", 1897)
                                         .build()
                         );
-                        log.info("Print Result as Json String {}", JsonUtils.asJson(result));
+                        log.info("Print Result as Json count={}, String={}", count, JsonUtils.asJson(result));
+                    } catch (EasyHttpExceptions.EasyNotFoundException e) {
+                        System.out.println("Count=" + count + " " + e.getMessage());
+                        notFoundException.addAndGet(1);
                     } catch (Exception e) {
-                        System.out.println(e.getMessage());
+                        otherException.addAndGet(1);
                     }
                 }
             }).start();
         }
-        Thread.sleep(60 * 60 * 1000);
+
+        while (counter.get() <= 1000) {
+            Thread.sleep(100);
+        }
+        Assertions.assertTrue(notFoundException.get() > 900);
+        Assertions.assertTrue(otherException.get() == 0);
+        mockWebServer.close();
+        Thread.sleep(100);
+    }
+
+    @Test
+    public void testSyncApiCallGenerateHystrixError_MustGetCircuitOpen() throws InterruptedException, IOException {
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.start(18080);
+
+        AtomicInteger notFoundException = new AtomicInteger();
+        AtomicInteger otherException = new AtomicInteger();
+        AtomicInteger circuitOpenException = new AtomicInteger();
+        AtomicInteger counter = new AtomicInteger();
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                while (true) {
+                    int count = counter.addAndGet(1);
+                    try {
+                        if (count > 1000) {
+                            return;
+                        }
+                        mockWebServer.enqueue(new MockResponse()
+                                .setResponseCode(404)
+                                .setBody("404 - Not Found")
+                                .setBodyDelay(1, TimeUnit.MILLISECONDS));
+
+                        Map result = EasyHttp.callSync(
+                                Call.builder(Map.class)
+                                        .withServerAndApi("local", "getPostsLocalWith404AsBadError")
+                                        .addPathParam("id", 1897)
+                                        .build()
+                        );
+                        log.info("Print Result as Json count={}, String={}", count, JsonUtils.asJson(result));
+                    } catch (EasyHttpExceptions.EasyNotFoundException e) {
+                        log.info("[+] Expected not found exception");
+                        notFoundException.addAndGet(1);
+                    } catch (EasyHttpExceptions.EasyResilienceCircuitOpenException e) {
+                        log.info("[+] Expected circuit open exception");
+                        circuitOpenException.addAndGet(1);
+                    } catch (Exception e) {
+                        log.error("[-] Unexpected random exception");
+                        otherException.addAndGet(1);
+                    }
+                }
+            }).start();
+        }
+
+        while (counter.get() <= 1000) {
+            Thread.sleep(100);
+        }
+        Assertions.assertTrue(notFoundException.get() > 100);
+        Assertions.assertTrue(circuitOpenException.get() > 100);
+        Assertions.assertTrue(otherException.get() == 0);
+        mockWebServer.close();
+        Thread.sleep(100);
     }
 
     @Test

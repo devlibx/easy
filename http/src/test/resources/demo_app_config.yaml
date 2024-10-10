@@ -29,4 +29,10 @@ apis:
     path: /posts/${id}
     server: local
     timeout: 10000
-    acceptableCodes: [ 200,404 ]
+    acceptableCodes: [ 200, 404 ]
+  getPostsLocalWith404AsBadError:
+    method: GET
+    path: /posts/${id}
+    server: local
+    timeout: 10000
+    acceptableCodes: [ 200 ]
