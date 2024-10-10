@@ -25,6 +25,9 @@ public class ResponseObject {
     @JsonIgnore
     private Throwable exception;
 
+    @JsonIgnore
+    private boolean errorWithAcceptableErrorCode;
+
     public Map<String, Object> convertAsMap() {
         if (body == null) return null;
         return JsonUtils.convertAsMap(new String(body));

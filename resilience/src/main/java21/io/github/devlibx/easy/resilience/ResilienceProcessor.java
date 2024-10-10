@@ -50,6 +50,12 @@ public class ResilienceProcessor implements IResilienceProcessor {
         CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
                 .enableAutomaticTransitionFromOpenToHalfOpen()
                 .waitDurationInOpenState(Duration.ofMillis(config.getWaitDurationInOpenState() <= 0 ? 10000 : config.getWaitDurationInOpenState()))
+                .ignoreException(throwable -> {
+                    if (throwable instanceof IgnorableException ie) {
+                        return ie.canIgnoreException();
+                    }
+                    return false;
+                })
                 .build();
         circuitBreaker = CircuitBreaker.of(config.getId(), circuitBreakerConfig);
 

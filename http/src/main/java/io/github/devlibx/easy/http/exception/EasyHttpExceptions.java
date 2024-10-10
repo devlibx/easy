@@ -2,6 +2,7 @@ package io.github.devlibx.easy.http.exception;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.devlibx.easy.http.ResponseObject;
+import io.github.devlibx.easy.resilience.IgnorableException;
 import io.github.devlibx.easy.resilience.exception.CircuitOpenException;
 import io.github.devlibx.easy.resilience.exception.OverflowException;
 import io.github.devlibx.easy.resilience.exception.RequestTimeoutException;
@@ -22,7 +23,7 @@ public class EasyHttpExceptions {
     @Getter
     @AllArgsConstructor
     @Builder
-    public static class EasyHttpRequestException extends RuntimeException {
+    public static class EasyHttpRequestException extends RuntimeException implements IgnorableException {
         private final int statusCode;
         private final byte[] body;
         private final ResponseObject response;
@@ -53,6 +54,11 @@ public class EasyHttpExceptions {
         @JsonIgnore
         public Map<String, Object> getResponseAsMap() {
             return response != null ? response.convertAsMap() : null;
+        }
+
+        @Override
+        public boolean canIgnoreException() {
+            return response != null && response.isErrorWithAcceptableErrorCode();
         }
     }
 

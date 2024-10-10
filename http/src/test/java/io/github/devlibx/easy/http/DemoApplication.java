@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import static ch.qos.logback.classic.Level.ERROR;
 import static ch.qos.logback.classic.Level.TRACE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -60,6 +61,27 @@ public class DemoApplication {
         // Read config and setup EasyHttp
         Config config = YamlUtils.readYamlCamelCase("demo_app_config.yaml", Config.class);
         EasyHttp.setup(config);
+    }
+
+    public void testSyncApiCallGenerateHystricError() throws InterruptedException {
+        for (int i = 0 ; i < 10; i++) {
+            new Thread(() -> {
+                while (true) {
+                    try {
+                        Map result = EasyHttp.callSync(
+                                Call.builder(Map.class)
+                                        .withServerAndApi("local", "getPostsLocal")
+                                        .addPathParam("id", 1897)
+                                        .build()
+                        );
+                        log.info("Print Result as Json String {}", JsonUtils.asJson(result));
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }).start();
+        }
+        Thread.sleep(60 * 60 * 1000);
     }
 
     @Test

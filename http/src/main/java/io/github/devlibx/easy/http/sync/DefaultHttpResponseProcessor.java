@@ -11,6 +11,8 @@ import org.apache.http.util.EntityUtils;
 import static io.github.devlibx.easy.http.config.Api.DEFAULT_ACCEPTABLE_CODES;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
+import javax.ws.rs.core.Response;
+
 @Slf4j
 public class DefaultHttpResponseProcessor implements IHttpResponseProcessor {
 
@@ -36,7 +38,9 @@ public class DefaultHttpResponseProcessor implements IHttpResponseProcessor {
                 body = response.getEntity() != null ? EntityUtils.toByteArray(response.getEntity()) : null;
             } catch (Exception ignored) {
             }
-            return ResponseObject.builder().success(true).body(body).statusCode(statusCode).build();
+            return ResponseObject.builder().success(true).body(body).statusCode(statusCode)
+                    .errorWithAcceptableErrorCode(notHttp2xxStatusCode(statusCode))
+                    .build();
         } else {
             try {
                 body = response.getEntity() != null ? EntityUtils.toByteArray(response.getEntity()) : null;
@@ -47,6 +51,14 @@ public class DefaultHttpResponseProcessor implements IHttpResponseProcessor {
         }
     }
 
+    private boolean notHttp2xxStatusCode(int statusCode) {
+        return !isHttp2xxStatusCode(statusCode);
+    }
+
+    private boolean isHttp2xxStatusCode(int statusCode) {
+        return statusCode >= Response.Status.OK.getStatusCode() && statusCode < Response.Status.MOVED_PERMANENTLY.getStatusCode();
+    }
+
     @Override
     public ResponseObject processException(Server server, Api api, Throwable e) {
         return ResponseObject.builder().exception(e).statusCode(INTERNAL_SERVER_ERROR.getStatusCode()).build();
@@ -54,7 +66,7 @@ public class DefaultHttpResponseProcessor implements IHttpResponseProcessor {
 
     @Override
     public void processResponseForException(ResponseObject response) {
-        if (response.isSuccess()) return;
+        if (response.isSuccess() && !response.isErrorWithAcceptableErrorCode()) return;
         throw EasyHttpExceptions.convert(response.getStatusCode(), response.getException(), response);
     }
 }
