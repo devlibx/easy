@@ -17,12 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -149,6 +144,11 @@ public class SyncRequestProcessor implements IRequestProcessor {
                     HttpDelete delete = new HttpDelete(uri);
                     return delete;
                 }, HttpDelete.class);
+            case "PATCH":
+                return internalProcess(server, api, requestObject, uri -> {
+                    HttpPatch delete = new HttpPatch(uri);
+                    return delete;
+                }, HttpPatch.class);
         }
         return null;
     }
