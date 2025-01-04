@@ -175,6 +175,18 @@ public class LocalHttpServer {
                     }
                     data.putAll(qp);
                     response = new StringHelper().stringify(data);
+                } else if ("PATCH".equals(t.getRequestMethod())) {
+                    Map<String, Object> data = new HashMap<>();
+                    data.put("method", "delete");
+                    data.put("data", "some data");
+                    if (!Strings.isNullOrEmpty(requestBody)) {
+                        data.put("request_body", requestBody);
+                    }
+                    if (!Strings.isNullOrEmpty(headerString)) {
+                        data.put("headers", headerString);
+                    }
+                    data.putAll(qp);
+                    response = new StringHelper().stringify(data);
                 }
 
                 if (qp.containsKey("status")) {
