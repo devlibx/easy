@@ -266,4 +266,58 @@ public class DemoApplication {
         @JsonProperty("completed")
         private boolean completed;
     }
+
+
+    @Test
+    public void testSyncWithRetrySupport() throws InterruptedException, IOException {
+        MockWebServer mockWebServer = new MockWebServer();
+        mockWebServer.start(18080);
+
+
+        AtomicInteger notFoundException = new AtomicInteger();
+        AtomicInteger otherException = new AtomicInteger();
+        AtomicInteger counter = new AtomicInteger();
+        for (int i = 0; i < 10; i++) {
+            new Thread(() -> {
+                while (true) {
+                    int count = counter.addAndGet(1);
+                    try {
+                        if (count > 200) {
+                            return;
+                        }
+                        for (int j = 0; j < 10; j++) {
+                            mockWebServer.enqueue(new MockResponse()
+                                    .setResponseCode(404)
+                                    .setBody("404 - Not Found")
+                                    .setBodyDelay(1, TimeUnit.MILLISECONDS));
+                        }
+
+                        Map result = EasyHttp.callSync(
+                                Call.builder(Map.class)
+                                        .withServerAndApi("local", "getPostsLocalWith404AsBadError")
+                                        .addPathParam("id", 1897)
+                                        .build()
+                        );
+                        log.info("Print Result as Json count={}, String={}", count, JsonUtils.asJson(result));
+                    } catch (EasyHttpExceptions.EasyNotFoundException e) {
+                        System.out.println("Count=" + count + " " + e.getMessage());
+                        notFoundException.addAndGet(1);
+                    } catch (Exception e) {
+                        otherException.addAndGet(1);
+                    }
+                }
+            }).start();
+        }
+
+        while (counter.get() <= 200) {
+            Thread.sleep(100);
+        }
+        System.out.println("-> not found count=" + notFoundException.get() + " other count=" + otherException.get()); ;
+        Assertions.assertTrue(notFoundException.get() > 170);
+        Assertions.assertTrue(otherException.get() == 0);
+        Assertions.assertTrue(mockWebServer.getRequestCount() > 170 * 5); // we should have got 5 retries for each request
+        mockWebServer.close();
+        Thread.sleep(100);
+
+    }
 }

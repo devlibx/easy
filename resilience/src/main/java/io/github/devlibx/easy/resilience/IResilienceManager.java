@@ -26,6 +26,9 @@ public interface IResilienceManager {
         private int queueSize = 100;
         private boolean useSemaphore = false;
         private int waitDurationInOpenState = 10000;
+        private int retryCount = 0;
+        private int retryWaitDurationMs = 1000;
+        private int retryRequestThreadPoolCount = 3;
 
         public static ResilienceCallConfigBuilder withDefaults() {
             return ResilienceCallConfig.builder()
@@ -33,6 +36,9 @@ public interface IResilienceManager {
                     .timeout(1000)
                     .concurrency(10)
                     .waitDurationInOpenState(10000)
+                    .retryCount(0)
+                    .waitRetryWaitDurationMs(1000)
+                    .retryRequestThreadPoolCount(3)
                     .useSemaphore(false);
         }
 
@@ -42,6 +48,9 @@ public interface IResilienceManager {
             private int timeout;
             private int queueSize;
             private boolean useSemaphore;
+            private int retryCount = 0;
+            private int retryWaitDurationMs = 1000;
+            private int retryRequestThreadPoolCount = 3;
 
             ResilienceCallConfigBuilder() {
             }
@@ -71,13 +80,23 @@ public interface IResilienceManager {
                 return this;
             }
 
-            public ResilienceCallConfig.ResilienceCallConfigBuilder waitDurationInOpenState(int waitDurationInOpenState) {
-                this.waitDurationInOpenState = waitDurationInOpenState;
+            public ResilienceCallConfig.ResilienceCallConfigBuilder retryCount(int retryCount) {
+                this.retryCount = retryCount;
+                return this;
+            }
+
+            public ResilienceCallConfig.ResilienceCallConfigBuilder waitRetryWaitDurationMs(int retryWaitDurationMs) {
+                this.retryWaitDurationMs = retryWaitDurationMs;
+                return this;
+            }
+
+            public ResilienceCallConfig.ResilienceCallConfigBuilder retryRequestThreadPoolCount(int retryRequestThreadPoolCount) {
+                this.retryRequestThreadPoolCount = retryRequestThreadPoolCount;
                 return this;
             }
 
             public ResilienceCallConfig build() {
-                return new ResilienceCallConfig(this.id, this.concurrency, this.timeout, this.queueSize, this.useSemaphore, this.waitDurationInOpenState);
+                return new ResilienceCallConfig(this.id, this.concurrency, this.timeout, this.queueSize, this.useSemaphore, this.waitDurationInOpenState, this.retryCount, this.retryWaitDurationMs, this.retryRequestThreadPoolCount);
             }
 
             public String toString() {

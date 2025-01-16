@@ -35,4 +35,6 @@ apis:
     path: /posts/${id}
     server: local
     timeout: 10000
-    acceptableCodes: [ 200 ]
+    acceptableCodes: [ 200, 404 ]
+    retryCount: 5
+    retryWaitDurationMs: 100

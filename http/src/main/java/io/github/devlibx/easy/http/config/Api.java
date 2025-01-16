@@ -58,6 +58,25 @@ public class Api  implements Serializable {
      */
     private boolean noWarmUp;
 
+
+    /**
+     * Number of retry attempts for this API call.
+     * Default is 0, meaning no retries.
+     */
+    private int retryCount = 0;
+
+    /**
+     * The duration to wait between retry attempts, in milliseconds.
+     * Default is 100 milliseconds.
+     */
+    private int retryWaitDurationMs = 100;
+
+    /**
+     * The number of threads in the retry request thread pool.
+     * Default is 3.
+     */
+    private int retryRequestThreadPoolCount = 3;
+
     /**
      * Name of the server to be used for this request
      */

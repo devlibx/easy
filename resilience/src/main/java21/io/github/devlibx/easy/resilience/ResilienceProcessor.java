@@ -37,6 +37,8 @@ public class ResilienceProcessor implements IResilienceProcessor {
     private TimeLimiter timeLimiter;
     private SemaphoreBulkhead semaphoreBulkhead;
     private ResilienceCallConfig config;
+    private ScheduledExecutorService retryScheduler;
+    private Retry retry;
 
     static {
         log.info("Using virtual thread in ResilienceProcessor");
@@ -85,18 +87,46 @@ public class ResilienceProcessor implements IResilienceProcessor {
             scheduler = Executors.newScheduledThreadPool(config.getConcurrency(), Thread.ofVirtual().factory());
             timeLimiter = TimeLimiter.of(Duration.ofMillis(config.getTimeout()));
         }
+
+        // Build retry
+        if (config.getRetryCount() > 0) {
+            if (config.getRetryWaitDurationMs() <= 0) {
+                config.setRetryWaitDurationMs(1000);
+            }
+            if (config.getRetryRequestThreadPoolCount() <= 0) {
+                config.setRetryRequestThreadPoolCount(3);
+            }
+            RetryConfig retryConfig = RetryConfig.custom()
+                    .maxAttempts(config.getRetryCount())
+                    .waitDuration(Duration.ofMillis(config.getRetryWaitDurationMs()))
+                    .build();
+            retryScheduler = Executors.newScheduledThreadPool(Thread.ofVirtual().factory());
+            retry = Retry.of(config.getId(), retryConfig);
+        }
     }
 
     @Override
     public <T> T execute(String id, Callable<T> callable, Class<T> cls) throws ResilienceException {
         try {
-            CompletableFuture<T> future = Decorators
-                    .ofCallable(callable)
-                    .withThreadPoolBulkhead(threadPoolBulkhead)
-                    .withTimeLimiter(timeLimiter, scheduler)
-                    .withCircuitBreaker(circuitBreaker)
-                    .get()
-                    .toCompletableFuture();
+            CompletableFuture<T> future;
+            if (retry != null) {
+                future = Decorators
+                        .ofCallable(callable)
+                        .withThreadPoolBulkhead(threadPoolBulkhead)
+                        .withTimeLimiter(timeLimiter, scheduler)
+                        .withCircuitBreaker(circuitBreaker)
+                        .get()
+                        .toCompletableFuture();
+            } else {
+                future = Decorators
+                        .ofCallable(callable)
+                        .withThreadPoolBulkhead(threadPoolBulkhead)
+                        .withTimeLimiter(timeLimiter, scheduler)
+                        .withCircuitBreaker(circuitBreaker)
+                        .withRetry(retry, retryScheduler)
+                        .get()
+                        .toCompletableFuture();
+            }
             return future.get();
         } catch (ExecutionException e) {
             throw unwrapResilience4jExecutionException(e);
@@ -138,13 +168,24 @@ public class ResilienceProcessor implements IResilienceProcessor {
                     whenComplete(observableEmitter).accept(null, e);
                 }
             } else {
-                Decorators.ofSupplier(observable::blockingFirst)
-                        .withCircuitBreaker(circuitBreaker)
-                        .withThreadPoolBulkhead(threadPoolBulkhead)
-                        .withTimeLimiter(timeLimiter, scheduler)
-                        .decorate()
-                        .get()
-                        .whenCompleteAsync(whenComplete(observableEmitter));
+                if (retry != null) {
+                    Decorators.ofSupplier(observable::blockingFirst)
+                            .withCircuitBreaker(circuitBreaker)
+                            .withThreadPoolBulkhead(threadPoolBulkhead)
+                            .withTimeLimiter(timeLimiter, scheduler)
+                            .withRetry(retry, retryScheduler)
+                            .decorate()
+                            .get()
+                            .whenCompleteAsync(whenComplete(observableEmitter));
+                } else {
+                    Decorators.ofSupplier(observable::blockingFirst)
+                            .withCircuitBreaker(circuitBreaker)
+                            .withThreadPoolBulkhead(threadPoolBulkhead)
+                            .withTimeLimiter(timeLimiter, scheduler)
+                            .decorate()
+                            .get()
+                            .whenCompleteAsync(whenComplete(observableEmitter));
+                }
             }
         });
     }

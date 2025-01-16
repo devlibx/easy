@@ -10,6 +10,8 @@ import io.github.resilience4j.bulkhead.internal.SemaphoreBulkhead;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.decorators.Decorators;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.reactivex.rxjava3.core.Observable;
 import io.reactivex.rxjava3.core.ObservableEmitter;
@@ -32,9 +34,11 @@ public class ResilienceProcessor implements IResilienceProcessor {
     private CircuitBreaker circuitBreaker;
     private ThreadPoolBulkhead threadPoolBulkhead;
     private ScheduledExecutorService scheduler;
+    private ScheduledExecutorService retryScheduler;
     private TimeLimiter timeLimiter;
     private SemaphoreBulkhead semaphoreBulkhead;
     private ResilienceCallConfig config;
+    private Retry retry;
 
     @Override
     public void initialized(ResilienceCallConfig config) {
@@ -73,19 +77,48 @@ public class ResilienceProcessor implements IResilienceProcessor {
             // A scheduler and time limiter to handle timeouts
             scheduler = Executors.newScheduledThreadPool(config.getConcurrency());
             timeLimiter = TimeLimiter.of(Duration.ofMillis(config.getTimeout()));
+
+
+            // Build retry
+            if (config.getRetryCount() > 0) {
+                if (config.getRetryWaitDurationMs() <= 0) {
+                    config.setRetryWaitDurationMs(100);
+                }
+                if (config.getRetryRequestThreadPoolCount() <= 0) {
+                    config.setRetryRequestThreadPoolCount(3);
+                }
+                RetryConfig retryConfig = RetryConfig.custom()
+                        .maxAttempts(config.getRetryCount())
+                        .waitDuration(Duration.ofMillis(config.getRetryWaitDurationMs()))
+                        .build();
+                retryScheduler = Executors.newScheduledThreadPool(config.getRetryRequestThreadPoolCount());
+                retry = Retry.of(config.getId(), retryConfig);
+            }
         }
     }
 
     @Override
     public <T> T execute(String id, Callable<T> callable, Class<T> cls) throws ResilienceException {
         try {
-            CompletableFuture<T> future = Decorators
-                    .ofCallable(callable)
-                    .withThreadPoolBulkhead(threadPoolBulkhead)
-                    .withTimeLimiter(timeLimiter, scheduler)
-                    .withCircuitBreaker(circuitBreaker)
-                    .get()
-                    .toCompletableFuture();
+            CompletableFuture<T> future;
+            if (retry != null) {
+                future = Decorators
+                        .ofCallable(callable)
+                        .withThreadPoolBulkhead(threadPoolBulkhead)
+                        .withTimeLimiter(timeLimiter, scheduler)
+                        .withCircuitBreaker(circuitBreaker)
+                        .withRetry(retry, retryScheduler)
+                        .get()
+                        .toCompletableFuture();
+            } else {
+                future = Decorators
+                        .ofCallable(callable)
+                        .withThreadPoolBulkhead(threadPoolBulkhead)
+                        .withTimeLimiter(timeLimiter, scheduler)
+                        .withCircuitBreaker(circuitBreaker)
+                        .get()
+                        .toCompletableFuture();
+            }
             return future.get();
         } catch (ExecutionException e) {
             throw unwrapResilience4jExecutionException(e);
@@ -127,13 +160,24 @@ public class ResilienceProcessor implements IResilienceProcessor {
                     whenComplete(observableEmitter).accept(null, e);
                 }
             } else {
-                Decorators.ofSupplier(observable::blockingFirst)
-                        .withCircuitBreaker(circuitBreaker)
-                        .withThreadPoolBulkhead(threadPoolBulkhead)
-                        .withTimeLimiter(timeLimiter, scheduler)
-                        .decorate()
-                        .get()
-                        .whenCompleteAsync(whenComplete(observableEmitter));
+                if (retry != null) {
+                    Decorators.ofSupplier(observable::blockingFirst)
+                            .withCircuitBreaker(circuitBreaker)
+                            .withThreadPoolBulkhead(threadPoolBulkhead)
+                            .withTimeLimiter(timeLimiter, scheduler)
+                            .withRetry(retry, retryScheduler)
+                            .decorate()
+                            .get()
+                            .whenCompleteAsync(whenComplete(observableEmitter));
+                } else {
+                    Decorators.ofSupplier(observable::blockingFirst)
+                            .withCircuitBreaker(circuitBreaker)
+                            .withThreadPoolBulkhead(threadPoolBulkhead)
+                            .withTimeLimiter(timeLimiter, scheduler)
+                            .decorate()
+                            .get()
+                            .whenCompleteAsync(whenComplete(observableEmitter));
+                }
             }
         });
     }
