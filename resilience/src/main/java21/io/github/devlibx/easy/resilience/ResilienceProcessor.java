@@ -103,7 +103,7 @@ public class ResilienceProcessor implements IResilienceProcessor {
                     .maxAttempts(config.getRetryCount())
                     .waitDuration(Duration.ofMillis(config.getRetryWaitDurationMs()))
                     .build();
-            retryScheduler = Executors.newScheduledThreadPool(Thread.ofVirtual().factory());
+            retryScheduler = Executors.newScheduledThreadPool(config.getConcurrency(), Thread.ofVirtual().factory());
             retry = Retry.of(config.getId(), retryConfig);
         }
     }
