@@ -4,7 +4,7 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.devlibx.easy</groupId>
-        <version>0.0.150</version>
+        <version>0.0.151-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>database-mysql</artifactId>
