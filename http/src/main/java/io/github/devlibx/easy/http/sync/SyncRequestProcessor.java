@@ -146,8 +146,11 @@ public class SyncRequestProcessor implements IRequestProcessor {
                 }, HttpDelete.class);
             case "PATCH":
                 return internalProcess(server, api, requestObject, uri -> {
-                    HttpPatch delete = new HttpPatch(uri);
-                    return delete;
+                    HttpPatch patch = new HttpPatch(uri);
+                    if (requestObject.getBody() != null) {
+                        patch.setEntity(new ByteArrayEntity(requestObject.getBody()));
+                    }
+                    return patch;
                 }, HttpPatch.class);
         }
         return null;
