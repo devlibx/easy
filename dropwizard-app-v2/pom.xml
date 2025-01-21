@@ -3,7 +3,7 @@
     <parent>
         <groupId>io.github.devlibx.easy</groupId>
         <artifactId>easy</artifactId>
-        <version>0.0.151-SNAPSHOT</version>
+        <version>0.0.151</version>
     </parent>
     <artifactId>dropwizard-app-v2</artifactId>
     <packaging>jar</packaging>
