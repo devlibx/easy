@@ -5,10 +5,10 @@
     <parent>
         <artifactId>easy</artifactId>
         <groupId>io.github.devlibx.easy</groupId>
-        <version>0.0.153</version>
+        <version>0.0.154-SNAPSHOT</version>
     </parent>
     <artifactId>dynamic</artifactId>
-    <version>0.0.153</version>
+    <version>0.0.154-SNAPSHOT</version>
     <name>dynamic</name>
 
 
