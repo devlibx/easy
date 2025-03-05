@@ -13,6 +13,80 @@ A useful lib to work with Map with string key andy any objecy
 
 ```
 
+### EncryptionUtils
+
+A secure encryption utility that provides AES-256-GCM encryption/decryption functionality. This utility ensures:
+- Strong encryption using AES-256 in GCM (Galois/Counter Mode)
+- Authenticated encryption (data integrity)
+- Secure IV (Initialization Vector) handling
+- Thread-safe operation
+
+#### Basic Usage
+
+```java
+// Create an instance with your secure key
+EncryptionUtils utils = new EncryptionUtils(yourSecureKey);
+
+// Encrypt data
+String encrypted = utils.encrypt("sensitive data");
+
+// Decrypt data
+String decrypted = utils.decrypt(encrypted);
+```
+
+#### Key Generation
+IMPORTANT: Generate the key only ONCE and store it securely. Never generate a new key for each encryption operation.
+
+```java
+// Generate a secure key (do this only ONCE)
+String secureKey = EncryptionUtils.generateSecureKey();
+// Store this key securely (e.g., in a secure configuration system)
+
+// In your application code, always use the stored key
+EncryptionUtils utils = new EncryptionUtils(storedKey);
+```
+
+#### Best Practices
+1. Key Management:
+   - Generate the key only once
+   - Store the key securely (e.g., HSM, encrypted config, secure key store)
+   - Never hardcode the key in source code
+   - Use environment variables or secure configuration management
+
+2. Instance Management:
+   - Create one instance per key
+   - Instances are thread-safe
+   - Multiple instances with the same key can decrypt each other's data
+
+3. Error Handling:
+   - Always handle exceptions for encryption/decryption operations
+   - Invalid keys will throw IllegalArgumentException
+   - Failed decryption will throw Exception
+
+#### Example with Error Handling
+
+```java
+try {
+    EncryptionUtils utils = new EncryptionUtils(secureKey);
+    
+    // Encryption
+    String sensitive = "sensitive data";
+    String encrypted = utils.encrypt(sensitive);
+    
+    // Decryption
+    String decrypted = utils.decrypt(encrypted);
+    
+} catch (IllegalArgumentException e) {
+    // Handle invalid key
+    logger.error("Invalid encryption key", e);
+} catch (Exception e) {
+    // Handle encryption/decryption errors
+    logger.error("Encryption/decryption failed", e);
+}
+```
+
+<hr>
+
 #### Path finding
 
 This map allows a way to find the data in sub-path. It is like finding path using json path "$.body.id". However, we
