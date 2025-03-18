@@ -104,6 +104,12 @@ public class EasyHttpExceptions {
         }
     }
 
+    public static class EasyStatusLookDetectedException extends Easy5xxException {
+        public EasyStatusLookDetectedException(ResponseObject response) {
+            super(response);
+        }
+    }
+
     public static class EasyTooManyRequestsException extends Easy4xxException {
         public EasyTooManyRequestsException(ResponseObject response) {
             super(response);
@@ -241,6 +247,8 @@ public class EasyHttpExceptions {
             exception = new EasyNotImplementedException(responseObject);
         } else if (statusCode == Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()) {
             exception = new EasyInternalServerErrorException(responseObject);
+        } else if (statusCode == 508) {
+            exception = new EasyStatusLookDetectedException(responseObject);
         } else if (statusCode == 429 /* TooManyRequests */) {
             exception = new EasyTooManyRequestsException(responseObject);
         } else if (statusCode == 422 /* TooManyRequests */) {
