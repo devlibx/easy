@@ -1,0 +1,28 @@
+servers:
+  test-server:
+    host: localhost
+    port: 9123  # This will be overridden in the test with MockServer port
+
+apis:
+  test-api:
+    path: /test
+    server: test-server
+    timeout: 100
+    concurrency: 1
+    waitBeforeClosingCircuitAfterError: 1000
+    failureThreshold: 3
+    acceptableCodes: [200, 201]
+    resilience:
+      enabled: true
+      circuitBreaker:
+        enabled: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 3
+        waitDurationInOpenState: 1000
+
+  test-api-noop:
+    path: /test
+    server: test-server
+    timeout: 100
+    concurrency: 1
+    bypassResilience: true

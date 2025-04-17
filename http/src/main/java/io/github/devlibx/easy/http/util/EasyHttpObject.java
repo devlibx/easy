@@ -20,6 +20,7 @@ import io.github.devlibx.easy.http.registry.ServerRegistry;
 import io.github.devlibx.easy.resilience.IResilienceManager;
 import io.github.devlibx.easy.resilience.IResilienceManager.ResilienceCallConfig;
 import io.github.devlibx.easy.resilience.IResilienceProcessor;
+import io.github.devlibx.easy.resilience.NoOpResilienceProcessor;
 import io.github.devlibx.easy.resilience.ResilienceManager;
 import io.reactivex.rxjava3.core.Observable;
 import lombok.extern.slf4j.Slf4j;
@@ -133,9 +134,14 @@ class EasyHttpObject implements IEasyHttpImplementation {
                         .waitRetryWaitDurationMs(api.getRetryWaitDurationMs())
                         .retryRequestThreadPoolCount(api.getRetryRequestThreadPoolCount())
                         .build();
-                IResilienceProcessor resilienceProcessor = resilienceManager.getOrCreate(callConfig);
-                resilienceProcessors.put(key, resilienceProcessor);
 
+                if (!api.isBypassResilience()) {
+                    IResilienceProcessor resilienceProcessor = resilienceManager.getOrCreate(callConfig);
+                    resilienceProcessors.put(key, resilienceProcessor);
+                } else {
+                    IResilienceProcessor resilienceProcessor = new NoOpResilienceProcessor();
+                    resilienceProcessors.put(key, resilienceProcessor);
+                }
             });
         });
 

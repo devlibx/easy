@@ -26,7 +26,7 @@ import java.util.Map;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Slf4j
-public class Api  implements Serializable {
+public class Api implements Serializable {
 
     /**
      * Default set of acceptable codes
@@ -76,6 +76,13 @@ public class Api  implements Serializable {
      * Default is 3.
      */
     private int retryRequestThreadPoolCount = 3;
+
+    /**
+     * If true, the API will bypass all resilience features (circuit breaker, rate limiter, etc.).
+     * Use this when you want to opt out from resilience protection for specific APIs.
+     * Default is false (resilience features are enabled).
+     */
+    private boolean bypassResilience = false;
 
     /**
      * Name of the server to be used for this request
@@ -158,11 +165,7 @@ public class Api  implements Serializable {
         return getUrlWithPathParamAndQueryParam(requestObject.getPathParam(), requestObject.getQueryParam(), stringHelper);
     }
 
-    public String getUrlWithPathParamAndQueryParam(
-            Map<String, Object> pathParam,
-            MultivaluedMap<String, Object> queryParam,
-            StringHelper stringHelper
-    ) {
+    public String getUrlWithPathParamAndQueryParam(Map<String, Object> pathParam, MultivaluedMap<String, Object> queryParam, StringHelper stringHelper) {
 
         // Build URI
         String uri = getPath();
