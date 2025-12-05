@@ -11,8 +11,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <dropwizard.version>4.0.7</dropwizard.version>
-        <logback-classic.version>1.5.6</logback-classic.version>
+        <dropwizard.version>4.0.12</dropwizard.version>
+        <logback-classic.version>1.5.16</logback-classic.version>
     </properties>
 
     <dependencyManagement>
