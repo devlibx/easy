@@ -494,6 +494,4 @@ Create following databases in MySQL
 create database users;
 create database test_me;
 
-
-
 ```
