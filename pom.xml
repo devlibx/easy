@@ -38,15 +38,15 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <grpc.version>1.13.1</grpc.version>
         <protobuf.version>3.5.1</protobuf.version>
         <mysql.connector.version>8.0.23</mysql.connector.version>
         <scylla.connector.version>3.5.0</scylla.connector.version>
         <guice.version>5.1.0</guice.version>
-        <lombok.version>1.18.30</lombok.version>
+        <lombok.version>1.18.48</lombok.version>
         <jackson.version>2.13.3</jackson.version>
         <kafka.client.version>1.1.0</kafka.client.version>
         <dropwizard.version>2.1.1</dropwizard.version>
@@ -249,7 +249,7 @@
             <dependency>
                 <groupId>io.opentracing.contrib</groupId>
                 <artifactId>opentracing-apache-httpclient</artifactId>
-                <version>0.0.2</version>
+                <version>0.3.3</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -551,6 +551,16 @@
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <!-- JDK 23+ no longer discovers annotation processors on the classpath; declare Lombok explicitly -->
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>

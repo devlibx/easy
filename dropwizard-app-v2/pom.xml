@@ -73,10 +73,6 @@
             <artifactId>metrics-healthchecks</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.dropwizard.modules</groupId>
-            <artifactId>dropwizard-protobuf</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
         </dependency>
